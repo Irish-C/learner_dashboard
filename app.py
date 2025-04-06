@@ -7,7 +7,8 @@ from components import header, sidebar, content
 app = dash.Dash(
     __name__,
     external_stylesheets=[dbc.themes.BOOTSTRAP, 'assets/style.css'],
-    meta_tags=[{'name': 'viewport', 'content': 'width=device-width, initial-scale=1.0'}]
+    meta_tags=[{'name': 'viewport', 'content': 'width=device-width, initial-scale=1.0'}],
+    title="Learner Information System"
 )
 
 app.index_string = """<!DOCTYPE html>
@@ -28,8 +29,6 @@ app.index_string = """<!DOCTYPE html>
         </footer>
     </body>
 </html>"""
-
-app.title = "Learner Information System"
 
 app.layout = html.Div(children=[
     dcc.Store(id='current-page', data='dashboard'),

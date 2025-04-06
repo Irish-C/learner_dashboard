@@ -14,7 +14,7 @@ def get_content_style(is_collapsed):
 def create_content(page):
     if page == "dashboard":
         return html.Div(children=[
-            html.H1("Dashboard", className="chart-title"),
+            html.H1("Dashboard", className="page-title"),
             html.Div(style={"display": "grid", "gridTemplateColumns": "repeat(auto-fill, minmax(250px, 1fr))",
                              "gap": "20px", "marginTop": "20px"},
                      children=[
@@ -34,17 +34,17 @@ def create_content(page):
         ])
     elif page == "enrollment":
         return html.Div(children=[
-            html.H1("Enrollment Page", className="chart-title", style={"marginTop": "20px"}),
+            html.H1("Enrollment Page", className="page-title"), # Removed inline style
             html.Div("Content for Enrollment Page goes here.", style={"fontSize": "1.2rem"})
         ])
     elif page == "help":
         return html.Div(children=[
-            html.H1("Help Page", className="chart-title", style={"marginTop": "20px"}),
+            html.H1("Help Page", className="page-title"), # Removed inline style
             html.Div("Content for Help Page goes here.", style={"fontSize": "1.2rem"})
         ])
     elif page == "settings":
         return html.Div(children=[
-            html.H1("Settings Page", className="chart-title", style={"marginTop": "20px"}),
+            html.H1("Settings Page", className="page-title"), # Removed inline style
             html.Div("Content for Settings Page goes here.", style={"fontSize": "1.2rem"})
         ])
     return html.Div("Page not found")

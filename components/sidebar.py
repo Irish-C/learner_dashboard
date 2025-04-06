@@ -25,22 +25,22 @@ def create_sidebar(is_collapsed=False):
 
     menu_items = html.Div([
         html.Button(
-            [html.I(className="fas fa-home", style={"marginRight": "8px"}), html.Span("Dashboard", className="navitem-text")],
+            [html.I(className="fas fa-columns"), html.Span("Dashboard", className="navitem-text")],
             id='btn-dashboard',
             className="navitem"
         ),
         html.Button(
-            [html.I(className="fas fa-user-plus", style={"marginRight": "8px"}), html.Span("Enrollment", className="navitem-text")],
+            [html.I(className="fas fa-user-plus"), html.Span("Analytics", className="navitem-text")],
             id='btn-enrollment',
             className="navitem"
         ),
         html.Button(
-            [html.I(className="fas fa-question-circle", style={"marginRight": "8px"}), html.Span("Help", className="navitem-text")],
+            [html.I(className="fas fa-question-circle"), html.Span("Help", className="navitem-text")],
             id='btn-help',
             className="navitem"
         ),
         html.Button(
-            [html.I(className="fas fa-cog", style={"marginRight": "8px"}), html.Span("Settings", className="navitem-text")],
+            [html.I(className="fas fa-cog"), html.Span("Settings", className="navitem-text")],
             id='btn-settings',
             className="navitem"
         ),

@@ -18,7 +18,7 @@ def create_header():
                             className="d-flex align-items-center",
                         ),
                         dbc.Col(
-                            dbc.NavbarBrand("Learners Information System", className="header-brand", style={"marginLeft": "10px"}),
+                            dbc.NavbarBrand("Learners Information System", className="header-brand", style={"marginLeft": "15px"}),
                             width="auto",
                             className="d-flex align-items-center",
                         ),
