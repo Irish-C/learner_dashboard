@@ -15,7 +15,7 @@ def create_sidebar(is_collapsed=False):
         "textAlign": "left" if not is_collapsed else "center",
     }
 
-    toggle_icon = html.Span("\u2630", style={"marginTop": "0px", "marginBottom": "10px"}) if is_collapsed else html.Span("\u00AB", style={"marginTop": "50px"})
+    toggle_icon = html.Span("\u2630", style={"marginTop": "0px", "marginBottom": "50px"}) if is_collapsed else html.Span("\u00AB", style={"marginTop": "50px"})
 
     toggle_button = html.Button(
         html.Span(toggle_icon, style={"fontSize": "1.2rem"}),

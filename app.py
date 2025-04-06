@@ -72,12 +72,14 @@ def update_content(pathname, current_page):
     prevent_initial_call=True
 )
 def toggle_sidebar(n, is_collapsed):
+    print(f"Current Sidebar Collapsed: {is_collapsed}")
+    if n is None:
+        return is_collapsed
     return not is_collapsed
 
 @app.callback(
     Output('content', 'style'),
     Input('sidebar-collapsed', 'data'),
-    # Trigger this callback initially with the initial value of sidebar-collapsed
     prevent_initial_call=False
 )
 def adjust_content_margin(is_collapsed):

@@ -26,7 +26,7 @@
 .app-container {
   display: flex;
   flex-direction: row;
-  margin-top: 60px; /* Account for fixed header */
+  margin-top: 60px;
 }
 
 /* Header Styles */
@@ -116,7 +116,7 @@
 }
 
 .navitem {
-  padding: 8px 15px; /* Adjusted vertical padding for better visual balance */
+  padding: 8px 15px; /* vertical padding for better visual balance */
   margin-bottom: 5px;
   cursor: pointer;
   color: var(--primary-color);
@@ -183,6 +183,10 @@
   display: block;
   border-top: 1px solid var(--primary-color);
   margin: 10px 0;
+}
+
+.sidebar, .navitem {
+  transition: padding 0.3s ease, width 0.3s ease;
 }
 
 /* Hover state for nav items */
