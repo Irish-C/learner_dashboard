@@ -10,6 +10,7 @@ app = dash.Dash(
     external_stylesheets=[dbc.themes.BOOTSTRAP, 'assets/style.css'],
     meta_tags=[{'name': 'viewport', 'content': 'width=device-width, initial-scale=1.0'}],
     assets_folder='assets',
+    suppress_callback_exceptions=True,
     title="Learner Information System"
 )
 
@@ -137,4 +138,4 @@ def navigate(n_dashboard, n_enrollment, n_help, n_settings, current_path):
     return current_path
 
 if __name__ == "__main__":
-    app.run(debug=False)
+    app.run(debug=True)
