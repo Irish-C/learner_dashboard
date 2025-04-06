@@ -3,10 +3,10 @@ from dash import html
 def create_sidebar(is_collapsed=False):
     sidebar_style = {
         "position": "fixed",
-        "top": "60px",
+        "top": "50px",
         "left": "0",
         "bottom": "0",
-        "width": "220px" if not is_collapsed else "60px",
+        "width": "180px" if not is_collapsed else "60px",
         "padding": "10px",
         "backgroundColor": "white",
         "boxShadow": "0px 0px 4px rgba(0, 0, 0, 0.1)",
@@ -15,30 +15,32 @@ def create_sidebar(is_collapsed=False):
         "textAlign": "left" if not is_collapsed else "center",
     }
 
+    toggle_icon = "\u2630" if is_collapsed else "\u2B9C"  # Hamburger or Left Arrow
+
     toggle_button = html.Button(
-        html.Span("\u2630" if is_collapsed else "\u2B9C", style={"fontSize": "1.2rem"}),
+        html.Span(toggle_icon, style={"fontSize": "1.2rem"}),
         id='sidebar-toggle',
-        className="navitem"
+        className="sidebar-toggle-button"
     )
 
     menu_items = html.Div([
         html.Button(
-            "Dashboard" if not is_collapsed else html.I(className="fas fa-home"),
+            [html.I(className="fas fa-home", style={"marginRight": "8px"}), html.Span("Dashboard", className="navitem-text")],
             id='btn-dashboard',
             className="navitem"
         ),
         html.Button(
-            "Enrollment" if not is_collapsed else html.I(className="fas fa-user-plus"),
+            [html.I(className="fas fa-user-plus", style={"marginRight": "8px"}), html.Span("Enrollment", className="navitem-text")],
             id='btn-enrollment',
             className="navitem"
         ),
         html.Button(
-            "Help" if not is_collapsed else html.I(className="fas fa-question-circle"),
+            [html.I(className="fas fa-question-circle", style={"marginRight": "8px"}), html.Span("Help", className="navitem-text")],
             id='btn-help',
             className="navitem"
         ),
         html.Button(
-            "Settings" if not is_collapsed else html.I(className="fas fa-cog"),
+            [html.I(className="fas fa-cog", style={"marginRight": "8px"}), html.Span("Settings", className="navitem-text")],
             id='btn-settings',
             className="navitem"
         ),
@@ -50,7 +52,7 @@ def create_sidebar(is_collapsed=False):
         style=sidebar_style,
         children=[
             toggle_button,
-            html.H4("Menu", className="chart-title", style={"textAlign": "center", "marginBottom": "10px"} if is_collapsed else {"marginBottom": "10px"}),
+            html.H4("Menu", className="chart-title", style={"textAlign": "left", "marginLeft": "10px", "marginBottom": "10px"} if not is_collapsed else {"display": "none"}),
             html.Hr(style={"borderColor": "var(--primary-color)", "borderWidth": "0.5px"} if not is_collapsed else {"display": "none"}),
             menu_items
         ]

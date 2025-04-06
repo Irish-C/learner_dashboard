@@ -1,6 +1,5 @@
-import dash
-import dash_bootstrap_components as dbc
 from dash import html
+import dash_bootstrap_components as dbc
 
 DEPED_LOGO = "https://1000logos.net/wp-content/uploads/2019/03/DepED-Logo.png"
 PROFILE_PIC = "https://pbs.twimg.com/media/GX52I7TXUAAupJr.jpg"
@@ -11,26 +10,35 @@ def create_header():
         className="header",
         children=[
             dbc.Container(
-                dbc.Row([
-                    dbc.Col(html.Img(src=DEPED_LOGO, height="40px"), width="auto", className="pe-2"),
-                    dbc.Col(dbc.NavbarBrand("Learners Information System",
-                                            style={"fontFamily": "Helvetica",
-                                                   "fontWeight": 700,
-                                                   "fontSize": "1.25rem",
-                                                   "background": "linear-gradient(180deg, #DE082C 0%, #0a4485 100%)",
-                                                   "WebkitBackgroundClip": "text",
-                                                   "WebkitTextFillColor": "transparent"}), width="auto"),
-                    dbc.Col(width=True),
-                    dbc.Col(html.Div([
-                        html.Img(src=PROFILE_PIC, style={"borderRadius": "50%", "width": "40px", "height": "40px"}),
-                        html.Span(USERNAME, className="ms-2 text-white")
-                    ], className="d-inline-flex align-items-center"), width="auto")
-                ], align="center", justify="between", className="g-0")
+                dbc.Row(
+                    [
+                        dbc.Col(
+                            html.Img(src=DEPED_LOGO, height="40px"),
+                            width="auto",
+                            className="d-flex align-items-center",
+                        ),
+                        dbc.Col(
+                            dbc.NavbarBrand("Learners Information System", className="header-brand", style={"marginLeft": "10px"}),
+                            width="auto",
+                            className="d-flex align-items-center",
+                        ),
+                        dbc.Col(width=True),  # Pushes the profile to the right
+                        dbc.Col(
+                            html.Div(
+                                [
+                                    html.Img(src=PROFILE_PIC, className="profile-pic"),
+                                    html.Span(USERNAME, className="profile-name"),
+                                ],
+                                className="header-profile",
+                            ),
+                            width="auto",
+                            className="d-flex align-items-center justify-content-end",
+                        ),
+                    ],
+                    align="center",
+                    className="g-0",
+                ),
+                fluid=True,  # Allows container to span the full width
             )
         ]
     )
-
-if __name__ == '__main__':
-    app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP, '../assets/style.css'])
-    app.layout = create_header()
-    app.run(debug=True)
