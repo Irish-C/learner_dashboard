@@ -15,7 +15,7 @@ def create_sidebar(is_collapsed=False):
         "textAlign": "left" if not is_collapsed else "center",
     }
 
-    toggle_icon = "\u2630" if is_collapsed else "\u2B9C"  # Hamburger or Left Arrow
+    toggle_icon = html.Span("\u2630", style={"marginTop" : "0px", "marginBottom": "10px"}) if is_collapsed else html.Span("\u00AB", style={"marginTop" : "50px", "marginBottom": "10px"})  # Hamburger or Left Arrow
 
     toggle_button = html.Button(
         html.Span(toggle_icon, style={"fontSize": "1.2rem"}),

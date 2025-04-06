@@ -128,6 +128,7 @@
   border: none;
   text-align: left;
   width: 100%;
+  transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out; /* Smooth transition */
 }
 
 .navitem i.fas {
@@ -139,11 +140,11 @@
 
 .sidebar[style*="width: 60px;"] .navitem {
   justify-content: left;
-  padding: 15px 13px; 
+  padding: 15px 13px;
 }
 
 .sidebar[style*="width: 60px;"] .navitem i.fas {
-  margin-right: 0; /* Remove right margin */
+  margin-right: 0;
   margin-bottom: 0;
 }
 
@@ -184,18 +185,28 @@
   margin: 10px 0;
 }
 
+/* Hover state for nav items */
+.navitem:hover {
+  background-color: var(--accent-color);
+  color: var(--primary-color);
+  border-radius: 15px;
+}
+
+/* Active state for nav items (you'll need JavaScript/callback to manage this) */
+.navitem.active {
+  background-color: var(--primary-color);
+  color: white;
+  font-weight: bold;
+  border-radius: 15px;
+}
+
 /* Content Styles */
 #content {
-  margin-top: 30px;
-  padding: 20px;
-  min-height: calc(100vh - 50px - 30px); /* Adjust for header height (50px) */
+  margin-top: 5px;
+  padding: 15px;
   transition: margin-left 0.3s ease;
   flex-grow: 1;
   margin-left: 220px;
-}
-
-#content[style*="margin-left: 60px;"] {
-  margin-left: 60px;
 }
 
 /* Placeholder Card Styles */
@@ -249,54 +260,54 @@ h4.chart-title { /* For card title */
 /* Responsive Design */
 @media (max-width: 768px) {
   .app-container {
-    flex-direction: column;
-    margin-top: 50px; /* Adjust for smaller header */
+      flex-direction: column;
+      margin-top: 50px; /* Adjust for smaller header */
   }
   .header {
-    height: 50px;
+      height: 50px;
   }
   .sidebar {
-    position: static;
-    width: 100%;
-    top: auto;
-    left: auto;
-    bottom: auto;
-    box-shadow: none;
-    border-bottom: 1px solid #ddd;
-    padding-bottom: 10px;
-    margin-bottom: 10px;
-    overflow-x: auto;
-    white-space: nowrap;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
+      position: static;
+      width: 100%;
+      top: auto;
+      left: auto;
+      bottom: auto;
+      box-shadow: none;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 10px;
+      margin-bottom: 10px;
+      overflow-x: auto;
+      white-space: nowrap;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
   }
   .sidebar[style*="width: 60px;"] {
-    width: 100%;
+      width: 100%;
   }
   .sidebar-toggle-button {
-    display: none; /* Hide toggle on small screens */
+      display: none; /* Hide toggle on small screens */
   }
   .navitem {
-    flex-shrink: 0;
-    text-align: center;
-    padding: 8px 15px;
-    margin-bottom: 0;
-    border-radius: 5px;
+      flex-shrink: 0;
+      text-align: center;
+      padding: 8px 15px;
+      margin-bottom: 0;
+      border-radius: 5px;
   }
   .navitem i.fas {
-    margin-right: 0;
+      margin-right: 0;
   }
   .navitem .navitem-text {
-    display: inline;
-    margin-left: 5px;
+      display: inline;
+      margin-left: 5px;
   }
   #content {
-    margin-left: 0;
-    margin-top: 50px;
-    min-height: auto;
+      margin-left: 0;
+      margin-top: 50px;
+      min-height: auto;
   }
   .chart-title {
-    text-align: center;
+      text-align: center;
   }
 }
