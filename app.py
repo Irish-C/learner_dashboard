@@ -31,14 +31,14 @@ app.index_string = """<!DOCTYPE html>
 </html>"""
 
 app.layout = html.Div(children=[
-    dcc.Location(id='url', refresh=False),  # Add dcc.Location
+    dcc.Location(id='url', refresh=False, pathname='/dashboard'),
     dcc.Store(id='current-page', data='dashboard'),
     dcc.Store(id='sidebar-collapsed', data=False),
     html.Div(className="body-style", children=[
         header.create_header(),
         html.Div(className="app-container", children=[
             html.Div(id='sidebar-container'),
-            html.Div(id='content', children=content.create_content('dashboard')),
+            html.Div(id='content'),
         ])
     ])
 ])
@@ -53,14 +53,14 @@ def update_sidebar_view(is_collapsed):
 @app.callback(
     Output('content', 'children'),
     Output('current-page', 'data'),
-    Input('url', 'pathname'),  # Use pathname as input
+    Input('url', 'pathname'),
     State('current-page', 'data'),
 )
 def update_content(pathname, current_page):
     page = pathname.lstrip('/')
     if page in ['dashboard', 'enrollment', 'help', 'settings']:
         return content.create_content(page), page
-    return content.create_content(current_page), current_page # Default to current page if path not recognized
+    return content.create_content(current_page), current_page
 
 @app.callback(
     Output('sidebar-collapsed', 'data'),
@@ -73,7 +73,9 @@ def toggle_sidebar(n, is_collapsed):
 
 @app.callback(
     Output('content', 'style'),
-    Input('sidebar-collapsed', 'data')
+    Input('sidebar-collapsed', 'data'),
+    # Trigger this callback initially with the initial value of sidebar-collapsed
+    prevent_initial_call=False
 )
 def adjust_content_margin(is_collapsed):
     return content.get_content_style(is_collapsed)
@@ -104,7 +106,7 @@ def update_active_link(pathname, class_dashboard, class_enrollment, class_help, 
         return inactive_class, inactive_class, inactive_class, active_class
     return inactive_class, inactive_class, inactive_class, inactive_class
 
-# Modify the existing content update callback to use dcc.Location
+# Navigation callback
 @app.callback(
     Output('url', 'pathname'),
     Input('btn-dashboard', 'n_clicks'),

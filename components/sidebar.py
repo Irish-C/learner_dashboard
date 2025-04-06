@@ -15,7 +15,7 @@ def create_sidebar(is_collapsed=False):
         "textAlign": "left" if not is_collapsed else "center",
     }
 
-    toggle_icon = html.Span("\u2630", style={"marginTop" : "0px", "marginBottom": "10px"}) if is_collapsed else html.Span("\u00AB", style={"marginTop" : "50px", "marginBottom": "10px"})  # Hamburger or Left Arrow
+    toggle_icon = html.Span("\u2630", style={"marginTop": "0px", "marginBottom": "10px"}) if is_collapsed else html.Span("\u00AB", style={"marginTop": "50px"})
 
     toggle_button = html.Button(
         html.Span(toggle_icon, style={"fontSize": "1.2rem"}),
@@ -27,22 +27,22 @@ def create_sidebar(is_collapsed=False):
         html.Button(
             [html.I(className="fas fa-columns"), html.Span("Dashboard", className="navitem-text")],
             id='btn-dashboard',
-            className="navitem"
+            className="navitem",
         ),
         html.Button(
             [html.I(className="fas fa-user-plus"), html.Span("Analytics", className="navitem-text")],
             id='btn-enrollment',
-            className="navitem"
+            className="navitem",
         ),
         html.Button(
             [html.I(className="fas fa-question-circle"), html.Span("Help", className="navitem-text")],
             id='btn-help',
-            className="navitem"
+            className="navitem",
         ),
         html.Button(
             [html.I(className="fas fa-cog"), html.Span("Settings", className="navitem-text")],
             id='btn-settings',
-            className="navitem"
+            className="navitem",
         ),
     ])
 
