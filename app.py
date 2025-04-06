@@ -9,6 +9,7 @@ app = dash.Dash(
     __name__,
     external_stylesheets=[dbc.themes.BOOTSTRAP, 'assets/style.css'],
     meta_tags=[{'name': 'viewport', 'content': 'width=device-width, initial-scale=1.0'}],
+    assets_folder='assets',
     title="Learner Information System"
 )
 
@@ -44,51 +45,96 @@ app.layout = html.Div(children=[
     ])
 ])
 
-@app.callback(Output('sidebar-container', 'children'), Input('sidebar-collapsed', 'data'))
+@app.callback(
+    Output('sidebar-container', 'children'),
+    Input('sidebar-collapsed', 'data'),
+)
 def update_sidebar_view(is_collapsed):
     return sidebar.create_sidebar(is_collapsed)
 
-@app.callback(Output('content', 'children'), Output('current-page', 'data'), Input('url', 'pathname'), State('current-page', 'data'))
+@app.callback(
+    Output('content', 'children'),
+    Output('current-page', 'data'),
+    Input('url', 'pathname'),
+    State('current-page', 'data'),
+)
 def update_content(pathname, current_page):
     page = pathname.lstrip('/')
     if page in ['dashboard', 'enrollment', 'help', 'settings']:
         return content.create_content(page), page
     return content.create_content(current_page), current_page
 
-@app.callback(Output('sidebar-collapsed', 'data'), Input('sidebar-toggle', 'n_clicks'), State('sidebar-collapsed', 'data'), prevent_initial_call=True)
+@app.callback(
+    Output('sidebar-collapsed', 'data'),
+    Input('sidebar-toggle', 'n_clicks'),
+    State('sidebar-collapsed', 'data'),
+    prevent_initial_call=True
+)
 def toggle_sidebar(n, is_collapsed):
     return not is_collapsed
 
-@app.callback(Output('content', 'style'), Input('sidebar-collapsed', 'data'), prevent_initial_call=False)
+@app.callback(
+    Output('content', 'style'),
+    Input('sidebar-collapsed', 'data'),
+    # Trigger this callback initially with the initial value of sidebar-collapsed
+    prevent_initial_call=False
+)
 def adjust_content_margin(is_collapsed):
     return content.get_content_style(is_collapsed)
 
-# Callback to update active link in the sidebar (more dynamic)
+# Callback to update active link in the sidebar
 @app.callback(
-    [Output(f'btn-{i}', 'className') for i in ['dashboard', 'enrollment', 'help', 'settings']],
+    Output('btn-dashboard', 'className'),
+    Output('btn-enrollment', 'className'),
+    Output('btn-help', 'className'),
+    Output('btn-settings', 'className'),
     Input('url', 'pathname'),
-    [State(f'btn-{i}', 'className') for i in ['dashboard', 'enrollment', 'help', 'settings']]
+    [State('btn-dashboard', 'className'),
+     State('btn-enrollment', 'className'),
+     State('btn-help', 'className'),
+     State('btn-settings', 'className')]
 )
-def update_active_link(pathname, *current_classes):
+def update_active_link(pathname, class_dashboard, class_enrollment, class_help, class_settings):
     active_class = "navitem active"
     inactive_class = "navitem"
-    links = {'/': 'dashboard', '/dashboard': 'dashboard', '/enrollment': 'enrollment', '/help': 'help', '/settings': 'settings'}
-    active_button = links.get(pathname, 'dashboard')
 
-    updated_classes = []
-    for i, class_name in enumerate(['dashboard', 'enrollment', 'help', 'settings']):
-        updated_classes.append(active_class if class_name == active_button else inactive_class)
-    return updated_classes
 
-# Navigation callback (more concise)
-@app.callback(Output('url', 'pathname'),
-              [Input(f'btn-{i}', 'n_clicks') for i in ['dashboard', 'enrollment', 'help', 'settings']],
-              State('url', 'pathname'), prevent_initial_call=True)
-def navigate(*args):
+
+    if pathname == '/' or pathname == '/dashboard':
+        return active_class, inactive_class, inactive_class, inactive_class
+    elif pathname == '/enrollment':
+        return inactive_class, active_class, inactive_class, inactive_class
+    elif pathname == '/help':
+        return inactive_class, inactive_class, active_class, inactive_class
+    elif pathname == '/settings':
+        return inactive_class, inactive_class, inactive_class, active_class
+    return inactive_class, inactive_class, inactive_class, inactive_class
+
+# Navigation callback
+@app.callback(
+    Output('url', 'pathname'),
+    Input('btn-dashboard', 'n_clicks'),
+    Input('btn-enrollment', 'n_clicks'),
+    Input('btn-help', 'n_clicks'),
+    Input('btn-settings', 'n_clicks'),
+    State('url', 'pathname'),
+    prevent_initial_call=True
+)
+def navigate(n_dashboard, n_enrollment, n_help, n_settings, current_path):
     ctx = callback_context
-    if ctx.triggered:
-        return f"/{ctx.triggered[0]['prop_id'].split('-')[1]}"
-    return dash.no_update
+    if not ctx.triggered:
+        return current_path
+    else:
+        button_id = ctx.triggered[0]['prop_id'].split('.')[0]
+        if button_id == 'btn-dashboard':
+            return '/dashboard'
+        elif button_id == 'btn-enrollment':
+            return '/enrollment'
+        elif button_id == 'btn-help':
+            return '/help'
+        elif button_id == 'btn-settings':
+            return '/settings'
+    return current_path
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=False)
