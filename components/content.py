@@ -50,3 +50,4 @@ def create_content(page):
             html.Div("Content for Settings Page goes here.", style={"fontSize": "1.2rem"})
         ])
     return html.Div("Page not found")
+    
