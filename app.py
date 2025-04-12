@@ -5,12 +5,15 @@ from dash.dependencies import Input, Output, State
 
 from components import header, sidebar, content
 
-# Constants for page names
-DASHBOARD = 'dashboard'
-ENROLLMENT = 'enrollment'
-HELP = 'help'
-SETTINGS = 'settings'
+# Mapping of numeric values to page names
+PAGE_CONSTANTS = {
+    1: 'dashboard',
+    2: 'enrollment',
+    3: 'help',
+    4: 'settings'
+}
 
+# Dash App
 app = dash.Dash(
     __name__,
     external_stylesheets=[dbc.themes.BOOTSTRAP, 'assets/style.css'],
@@ -24,9 +27,10 @@ app = dash.Dash(
 with open('assets/index_template.html', 'r') as file:
     app.index_string = file.read()
 
-app.layout = html.Div(children=[
-    dcc.Location(id='url', refresh=False, pathname='/dashboard'),
-    dcc.Store(id='current-page', data=DASHBOARD),
+# Layout with numeric constant for the default page (1 = 'dashboard')
+app.layout = html.Div(children=[ 
+    dcc.Location(id='url', refresh=False, pathname='/1'),  # Default page is '1' for Dashboard
+    dcc.Store(id='current-page', data=1),  # Default page is '1' for Dashboard
     dcc.Store(id='sidebar-collapsed', data=False),
     html.Div(className="body-style", children=[
         header.create_header(),
@@ -51,10 +55,12 @@ def update_sidebar_view(is_collapsed):
     State('current-page', 'data'),
 )
 def update_content(pathname, current_page):
-    page = pathname.lstrip('/')
-    if page in [DASHBOARD, ENROLLMENT, HELP, SETTINGS]:
-        return content.create_content(page), page
-    return content.create_content(current_page), current_page
+    page_num = int(pathname.lstrip('/'))  # Convert pathname to integer (e.g., '1' becomes 1)
+    
+    # Retrieve the page name from the numeric value
+    page = PAGE_CONSTANTS.get(page_num, 'dashboard')  # Default to 'dashboard' if invalid page
+    
+    return content.create_content(page), page_num
 
 @app.callback(
     Output('sidebar-collapsed', 'data'),
@@ -90,15 +96,20 @@ def adjust_content_margin(is_collapsed):
 def update_active_link(pathname, class_dashboard, class_enrollment, class_help, class_settings):
     active_class = "navitem active"
     inactive_class = "navitem"
-
-    if pathname == '/' or pathname == f'/{DASHBOARD}':
+    
+    # Get page number from pathname
+    page_num = int(pathname.lstrip('/'))
+    
+    # Map numeric page value to actual page name
+    if page_num == 1:
         return active_class, inactive_class, inactive_class, inactive_class
-    elif pathname == f'/{ENROLLMENT}':
+    elif page_num == 2:
         return inactive_class, active_class, inactive_class, inactive_class
-    elif pathname == f'/{HELP}':
+    elif page_num == 3:
         return inactive_class, inactive_class, active_class, inactive_class
-    elif pathname == f'/{SETTINGS}':
+    elif page_num == 4:
         return inactive_class, inactive_class, inactive_class, active_class
+    
     return inactive_class, inactive_class, inactive_class, inactive_class
 
 # Navigation callback
@@ -118,13 +129,13 @@ def navigate(n_dashboard, n_enrollment, n_help, n_settings, current_path):
     else:
         button_id = ctx.triggered[0]['prop_id'].split('.')[0]
         if button_id == 'btn-dashboard':
-            return f'/{DASHBOARD}'
+            return f'/1'  # Redirect to '1' (Dashboard)
         elif button_id == 'btn-enrollment':
-            return f'/{ENROLLMENT}'
+            return f'/2'  # Redirect to '2' (Enrollment)
         elif button_id == 'btn-help':
-            return f'/{HELP}'
+            return f'/3'  # Redirect to '3' (Help)
         elif button_id == 'btn-settings':
-            return f'/{SETTINGS}'
+            return f'/4'  # Redirect to '4' (Settings)
     return current_path
 
 if __name__ == "__main__":
