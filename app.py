@@ -2,8 +2,7 @@ import dash
 import dash_bootstrap_components as dbc
 from dash import dcc, html, callback_context
 from dash.dependencies import Input, Output, State
-
-from layout import header, sidebar, content
+from layout import header, page_router, sidebar
 
 # Mapping of numeric values to page names
 PAGE_CONSTANTS = {
@@ -60,7 +59,7 @@ def update_content(pathname, current_page):
     # Retrieve the page name from the numeric value
     page = PAGE_CONSTANTS.get(page_num, 'dashboard')  # Default to 'dashboard' if invalid page
     
-    return content.create_content(page), page_num
+    return page_router.create_content(page), page_num
 
 @app.callback(
     Output('sidebar-collapsed', 'data'),
@@ -79,7 +78,7 @@ def toggle_sidebar(n, is_collapsed):
     prevent_initial_call=False
 )
 def adjust_content_margin(is_collapsed):
-    return content.get_content_style(is_collapsed)
+    return page_router.get_content_style(is_collapsed)
 
 # Callback to update active link in the sidebar (using numeric constants)
 @app.callback(

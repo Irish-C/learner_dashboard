@@ -1,6 +1,6 @@
 from dash import html
 import dash_bootstrap_components as dbc
-from . import temp_constants  # Import directly from the current package
+from layout import temp_constants  # Import directly from the current package
 
 def create_header():
     return html.Div(
