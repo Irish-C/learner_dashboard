@@ -16,33 +16,35 @@ def create_sidebar(is_collapsed=False, current_page=None):
         "textAlign": "left" if not is_collapsed else "center",
     }
 
-    toggle_icon = html.Span("\u2630", style={"marginTop": "0px", "marginBottom": "50px"}) if is_collapsed else html.Span("\u00AB", style={"marginTop": "50px"})
+    toggle_icon = DashIconify(
+        icon="mdi:menu-open" if is_collapsed else "mdi:menu-close",
+        width=24,
+        style={"margin": "10px 0", "marginLeft": "5px"}
+    )
 
     toggle_button = html.Button(
-        html.Span(toggle_icon, style={"fontSize": "1.2rem"}),
+        toggle_icon,
         id='sidebar-toggle',
         className="sidebar-toggle-button"
     )
 
-    # Define menu items with active state
+
     menu_items = html.Div([
         html.Button(
             [
-                DashIconify(icon="mdi:view-dashboard", width=24),
+                DashIconify(icon="mdi:view-dashboard", width=24),  # Rounded dashboard icon
                 html.Span("Dashboard", className="navitem-text")
             ],
             id='btn-1',
-            className="navitem" + (" active" if current_page == 1 else ""),  # Active class for current page
+            className="navitem" + (" active" if current_page == 1 else ""),
         ),
         html.Button(
             [
-                DashIconify(icon="tabler:chart-bar", width=24),
+                DashIconify(icon="mdi:chart-areaspline", width=24),
                 html.Span("Analytics", className="navitem-text")
             ],
-            
-
             id='btn-2',
-            className="navitem" + (" active" if current_page == 2 else ""),  # Active class for current page
+            className="navitem" + (" active" if current_page == 2 else ""),
         ),
         html.Button(
             [
@@ -50,15 +52,15 @@ def create_sidebar(is_collapsed=False, current_page=None):
                 html.Span("Help", className="navitem-text")
             ],
             id='btn-3',
-            className="navitem" + (" active" if current_page == 3 else ""),  # Active class for current page
+            className="navitem" + (" active" if current_page == 3 else ""),
         ),
         html.Button(
             [
-                DashIconify(icon="mdi:cog-outline", width=24),
+                DashIconify(icon="mdi:cogs", width=24),
                 html.Span("Settings", className="navitem-text")
             ],
             id='btn-4',
-            className="navitem" + (" active" if current_page == 4 else ""),  # Active class for current page
+            className="navitem" + (" active" if current_page == 4 else ""),
         ),
     ])
 
