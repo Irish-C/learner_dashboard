@@ -1,5 +1,27 @@
 # Learner Information System Dashboard
 
+## Project Structure
+```plaintext
+learner_dashboard/
+├── app.py                   # Main Dash app
+├── assets/
+│   ├── index_tempalte.html  # Custom index.html file for Dash
+│   └── style.css            # Custom CSS file
+├── layout/
+│   ├── sidebar.py           # Sidebar layout and menu items
+│   ├── page_router.py       # Handles page routing
+│   ├── cards.py             # Card component for displaying information
+│   ├── header.py            # Header component
+│   ├── temp_constants.py    # Temporary constants like logos and username
+│   └── pages/
+│       ├── dashboard.py
+│       ├── enrollment.py
+│       ├── help.py
+│       └── settings.py
+├── data/                    # Data files (CSV, JSON, etc.)
+└── requirements.txt         # Dependencies like Dash, Plotly, etc.
+```
+
 This is a web-based dashboard application built using Python and the Dash framework. It provides a user-friendly interface for managing and visualizing learner information.
 
 ## Features
@@ -94,25 +116,3 @@ Future enhancements could include:
 * Implementing user authentication and authorization.
 * Connecting to a real database to fetch and manage learner information.
 * Improving the responsiveness and overall UI/UX.
-
-## Project Structure
-```plaintext
-learner_dashboard/
-├── app.py                   # Main Dash app
-├── assets/
-│   ├── index_tempalte.html  # Custom index.html file for Dash
-│   └── style.css            # Custom CSS file
-├── layout/
-│   ├── sidebar.py           # Sidebar layout and menu items
-│   ├── page_router.py       # Handles page routing
-│   ├── cards.py             # Card component for displaying information
-│   ├── header.py            # Header component
-│   ├── temp_constants.py    # Temporary constants like logos and username
-│   └── pages/
-│       ├── dashboard.py
-│       ├── enrollment.py
-│       ├── help.py
-│       └── settings.py
-├── data/                    # Data files (CSV, JSON, etc.)
-└── requirements.txt         # Dependencies like Dash, Plotly, etc.
-```

@@ -1,4 +1,5 @@
 from dash import html
+from dash_iconify import DashIconify
 
 def create_sidebar(is_collapsed=False):
     sidebar_style = {
@@ -25,22 +26,34 @@ def create_sidebar(is_collapsed=False):
 
     menu_items = html.Div([
         html.Button(
-            [html.I(className="fas fa-columns"), html.Span("Dashboard", className="navitem-text")],
+            [
+                DashIconify(icon="mdi:view-dashboard", width=24),
+                html.Span("Dashboard", className="navitem-text")
+            ],
             id='btn-1',
             className="navitem",
         ),
         html.Button(
-            [html.I(className="fas fa-user-plus"), html.Span("Analytics", className="navitem-text")],
+            [
+                DashIconify(icon="tabler:chart-bar", width=24),
+                html.Span("Analytics", className="navitem-text")
+            ],
             id='btn-2',
             className="navitem",
         ),
         html.Button(
-            [html.I(className="fas fa-question-circle"), html.Span("Help", className="navitem-text")],
+            [
+                DashIconify(icon="mdi:help-circle-outline", width=24),
+                html.Span("Help", className="navitem-text")
+            ],
             id='btn-3',
             className="navitem",
         ),
         html.Button(
-            [html.I(className="fas fa-cog"), html.Span("Settings", className="navitem-text")],
+            [
+                DashIconify(icon="mdi:cog-outline", width=24),
+                html.Span("Settings", className="navitem-text")
+            ],
             id='btn-4',
             className="navitem",
         ),
