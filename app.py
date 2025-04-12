@@ -32,10 +32,10 @@ app.layout = html.Div(children=[
     dcc.Location(id='url', refresh=False, pathname='/1'),  # Default page is '1' for Dashboard
     dcc.Store(id='current-page', data=1),  # Default page is '1' for Dashboard
     dcc.Store(id='sidebar-collapsed', data=False),
-    html.Div(className="body-style", children=[
+    html.Div(className="body-style", children=[ 
         header.create_header(),
-        html.Div(className="app-container", children=[
-            html.Div(id='sidebar-container'),
+        html.Div(className="app-container", children=[ 
+            html.Div(id='sidebar-container'), 
             html.Div(id='content'),
         ])
     ])
@@ -81,17 +81,17 @@ def toggle_sidebar(n, is_collapsed):
 def adjust_content_margin(is_collapsed):
     return content.get_content_style(is_collapsed)
 
-# Callback to update active link in the sidebar
+# Callback to update active link in the sidebar (using numeric constants)
 @app.callback(
-    Output('btn-dashboard', 'className'),
-    Output('btn-enrollment', 'className'),
-    Output('btn-help', 'className'),
-    Output('btn-settings', 'className'),
+    Output('btn-1', 'className'),  # Updated IDs to numeric constants
+    Output('btn-2', 'className'),
+    Output('btn-3', 'className'),
+    Output('btn-4', 'className'),
     Input('url', 'pathname'),
-    [State('btn-dashboard', 'className'),
-     State('btn-enrollment', 'className'),
-     State('btn-help', 'className'),
-     State('btn-settings', 'className')]
+    [State('btn-1', 'className'),
+     State('btn-2', 'className'),
+     State('btn-3', 'className'),
+     State('btn-4', 'className')]
 )
 def update_active_link(pathname, class_dashboard, class_enrollment, class_help, class_settings):
     active_class = "navitem active"
@@ -112,13 +112,13 @@ def update_active_link(pathname, class_dashboard, class_enrollment, class_help, 
     
     return inactive_class, inactive_class, inactive_class, inactive_class
 
-# Navigation callback
+# Navigation callback using numeric constants
 @app.callback(
     Output('url', 'pathname'),
-    Input('btn-dashboard', 'n_clicks'),
-    Input('btn-enrollment', 'n_clicks'),
-    Input('btn-help', 'n_clicks'),
-    Input('btn-settings', 'n_clicks'),
+    Input('btn-1', 'n_clicks'),  # Updated button IDs
+    Input('btn-2', 'n_clicks'),
+    Input('btn-3', 'n_clicks'),
+    Input('btn-4', 'n_clicks'),
     State('url', 'pathname'),
     prevent_initial_call=True
 )
@@ -128,14 +128,14 @@ def navigate(n_dashboard, n_enrollment, n_help, n_settings, current_path):
         return current_path
     else:
         button_id = ctx.triggered[0]['prop_id'].split('.')[0]
-        if button_id == 'btn-dashboard':
-            return f'/1'  # Redirect to '1' (Dashboard)
-        elif button_id == 'btn-enrollment':
-            return f'/2'  # Redirect to '2' (Enrollment)
-        elif button_id == 'btn-help':
-            return f'/3'  # Redirect to '3' (Help)
-        elif button_id == 'btn-settings':
-            return f'/4'  # Redirect to '4' (Settings)
+        if button_id == 'btn-1':  # Redirect to '1' (Dashboard)
+            return f'/1'
+        elif button_id == 'btn-2':  # Redirect to '2' (Enrollment)
+            return f'/2'
+        elif button_id == 'btn-3':  # Redirect to '3' (Help)
+            return f'/3'
+        elif button_id == 'btn-4':  # Redirect to '4' (Settings)
+            return f'/4'
     return current_path
 
 if __name__ == "__main__":
