@@ -5,6 +5,12 @@ from dash.dependencies import Input, Output, State
 
 from components import header, sidebar, content
 
+# Constants for page names
+DASHBOARD = 'dashboard'
+ENROLLMENT = 'enrollment'
+HELP = 'help'
+SETTINGS = 'settings'
+
 app = dash.Dash(
     __name__,
     external_stylesheets=[dbc.themes.BOOTSTRAP, 'assets/style.css'],
@@ -18,10 +24,9 @@ app = dash.Dash(
 with open('assets/index_template.html', 'r') as file:
     app.index_string = file.read()
 
-
 app.layout = html.Div(children=[
     dcc.Location(id='url', refresh=False, pathname='/dashboard'),
-    dcc.Store(id='current-page', data='dashboard'),
+    dcc.Store(id='current-page', data=DASHBOARD),
     dcc.Store(id='sidebar-collapsed', data=False),
     html.Div(className="body-style", children=[
         header.create_header(),
@@ -47,7 +52,7 @@ def update_sidebar_view(is_collapsed):
 )
 def update_content(pathname, current_page):
     page = pathname.lstrip('/')
-    if page in ['dashboard', 'enrollment', 'help', 'settings']:
+    if page in [DASHBOARD, ENROLLMENT, HELP, SETTINGS]:
         return content.create_content(page), page
     return content.create_content(current_page), current_page
 
@@ -58,7 +63,6 @@ def update_content(pathname, current_page):
     prevent_initial_call=True
 )
 def toggle_sidebar(n, is_collapsed):
-    print(f"Current Sidebar Collapsed: {is_collapsed}")
     if n is None:
         return is_collapsed
     return not is_collapsed
@@ -87,15 +91,13 @@ def update_active_link(pathname, class_dashboard, class_enrollment, class_help, 
     active_class = "navitem active"
     inactive_class = "navitem"
 
-
-
-    if pathname == '/' or pathname == '/dashboard':
+    if pathname == '/' or pathname == f'/{DASHBOARD}':
         return active_class, inactive_class, inactive_class, inactive_class
-    elif pathname == '/enrollment':
+    elif pathname == f'/{ENROLLMENT}':
         return inactive_class, active_class, inactive_class, inactive_class
-    elif pathname == '/help':
+    elif pathname == f'/{HELP}':
         return inactive_class, inactive_class, active_class, inactive_class
-    elif pathname == '/settings':
+    elif pathname == f'/{SETTINGS}':
         return inactive_class, inactive_class, inactive_class, active_class
     return inactive_class, inactive_class, inactive_class, inactive_class
 
@@ -116,13 +118,13 @@ def navigate(n_dashboard, n_enrollment, n_help, n_settings, current_path):
     else:
         button_id = ctx.triggered[0]['prop_id'].split('.')[0]
         if button_id == 'btn-dashboard':
-            return '/dashboard'
+            return f'/{DASHBOARD}'
         elif button_id == 'btn-enrollment':
-            return '/enrollment'
+            return f'/{ENROLLMENT}'
         elif button_id == 'btn-help':
-            return '/help'
+            return f'/{HELP}'
         elif button_id == 'btn-settings':
-            return '/settings'
+            return f'/{SETTINGS}'
     return current_path
 
 if __name__ == "__main__":

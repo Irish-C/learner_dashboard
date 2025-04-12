@@ -1,6 +1,6 @@
 from dash import html
 from .cards import create_placeholder_card
-from . import temp_constants  # Import directly from the current package
+from . import temp_constants
 
 def get_content_style(is_collapsed):
     print(f"Sidebar collapsed: {is_collapsed}")  # Debugging line
