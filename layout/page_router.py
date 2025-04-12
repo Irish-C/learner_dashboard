@@ -7,7 +7,7 @@ from layout.pages import (
 )
 
 def get_content_style(is_collapsed):
-    print(f"Sidebar collapsed: {is_collapsed}")
+    print(f"SIDEBAR COLLAPSED: {is_collapsed}")
     margin_left = "180px" if not is_collapsed else "60px"
     return {
         "marginLeft": margin_left,

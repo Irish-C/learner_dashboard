@@ -1,3 +1,6 @@
+# import sys
+# import os
+# sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 from dash import html
 from ..cards import create_placeholder_card
 from .. import temp_constants
@@ -24,3 +27,5 @@ def dashboard_content():
             html.Div("No recent activities to display", className="card", style={"minHeight": "200px"}),
         ])
     ])
+
+print("dashboard_content loaded")

@@ -99,7 +99,7 @@ Future enhancements could include:
 ```plaintext
 learner_dashboard/
 ├── app.py                   # Main Dash app
-├── assets/                  # CSS, JS files, images
+├── assets/
 │   ├── index_tempalte.html  # Custom index.html file for Dash
 │   └── style.css            # Custom CSS file
 ├── layout/
@@ -107,12 +107,12 @@ learner_dashboard/
 │   ├── page_router.py       # Handles page routing
 │   ├── cards.py             # Card component for displaying information
 │   ├── header.py            # Header component
-│   ├── temp_constants.py        # Temporary constants like logos and username
+│   ├── temp_constants.py    # Temporary constants like logos and username
 │   └── pages/
-│       ├── dashboard.py  ← Imports and uses the card functions from cards.py
+│       ├── dashboard.py
 │       ├── enrollment.py
 │       ├── help.py
 │       └── settings.py
 ├── data/                    # Data files (CSV, JSON, etc.)
-└── requirements.txt      # Dependencies like Dash, Plotly, etc.
+└── requirements.txt         # Dependencies like Dash, Plotly, etc.
 ```
