@@ -98,14 +98,21 @@ Future enhancements could include:
 ## Project Structure
 ```plaintext
 learner_dashboard/
-├── app.py                # Main Dash app
-├── assets/               # CSS, JS files, images
-│   └── style.css         # Custom CSS file
-├── data/                 # CSV files or other data files
-├── components/           # Python components for layout or callbacks
-│   ├── header.py         # Header component
-│   ├── sidebar.py        # Sidebar component
-│   ├── content.py        # Content component
-│   └── cards.py          # Card component
+├── app.py                   # Main Dash app
+├── assets/                  # CSS, JS files, images
+│   ├── index_tempalte.html  # Custom index.html file for Dash
+│   └── style.css            # Custom CSS file
+├── layout/
+│   ├── sidebar.py           # Sidebar layout and menu items
+│   ├── page_router.py       # Handles page routing
+│   ├── cards.py             # Card component for displaying information
+│   ├── header.py            # Header component
+│   ├── temp_constants.py        # Temporary constants like logos and username
+│   └── pages/
+│       ├── dashboard.py  ← Imports and uses the card functions from cards.py
+│       ├── enrollment.py
+│       ├── help.py
+│       └── settings.py
+├── data/                    # Data files (CSV, JSON, etc.)
 └── requirements.txt      # Dependencies like Dash, Plotly, etc.
 ```

@@ -1,10 +1,13 @@
-import html
-from layout.pages.dashboard import dashboard_content
-from layout.pages.enrollment import enrollment_content
-from layout.pages.help import help_content
-from layout.pages.settings import settings_content
+from dash import html
+from layout.pages import (
+    dashboard_content,
+    enrollment_content,
+    help_content,
+    settings_content,
+)
 
 def get_content_style(is_collapsed):
+    print(f"Sidebar collapsed: {is_collapsed}")
     margin_left = "180px" if not is_collapsed else "60px"
     return {
         "marginLeft": margin_left,
