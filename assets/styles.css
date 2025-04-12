@@ -131,10 +131,12 @@
   transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out; /* Smooth transition */
 }
 
-.navitem i.fas {
-  font-size: 0.9rem;
+/* Updated for DashIconify: */
+.navitem svg {  /* Target DashIconify rendered SVG */
+  width: 1.2rem;  /* Adjust the width to control icon size */
+  height: auto;  /* Maintain aspect ratio */
   margin-right: 20px; /* Space between icon and text when expanded */
-  vertical-align: middle;
+  vertical-align: middle;  /* Align vertically with the text */
   display: inline-block;
 }
 
@@ -143,7 +145,7 @@
   padding: 15px 13px;
 }
 
-.sidebar[style*="width: 60px;"] .navitem i.fas {
+.sidebar[style*="width: 60px;"] .navitem svg {
   margin-right: 0;
   margin-bottom: 0;
 }
@@ -316,7 +318,7 @@ h4.chart-title { /* For card title */
       margin-bottom: 0;
       border-radius: 5px;
   }
-  .navitem i.fas {
+  .navitem svg {
       margin-right: 0;
   }
   .navitem .navitem-text {

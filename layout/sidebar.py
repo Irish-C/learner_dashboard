@@ -1,7 +1,7 @@
 from dash import html
 from dash_iconify import DashIconify
 
-def create_sidebar(is_collapsed=False):
+def create_sidebar(is_collapsed=False, current_page=None):
     sidebar_style = {
         "position": "fixed",
         "top": "50px",
@@ -24,6 +24,7 @@ def create_sidebar(is_collapsed=False):
         className="sidebar-toggle-button"
     )
 
+    # Define menu items with active state
     menu_items = html.Div([
         html.Button(
             [
@@ -31,15 +32,17 @@ def create_sidebar(is_collapsed=False):
                 html.Span("Dashboard", className="navitem-text")
             ],
             id='btn-1',
-            className="navitem",
+            className="navitem" + (" active" if current_page == 1 else ""),  # Active class for current page
         ),
         html.Button(
             [
                 DashIconify(icon="tabler:chart-bar", width=24),
                 html.Span("Analytics", className="navitem-text")
             ],
+            
+
             id='btn-2',
-            className="navitem",
+            className="navitem" + (" active" if current_page == 2 else ""),  # Active class for current page
         ),
         html.Button(
             [
@@ -47,7 +50,7 @@ def create_sidebar(is_collapsed=False):
                 html.Span("Help", className="navitem-text")
             ],
             id='btn-3',
-            className="navitem",
+            className="navitem" + (" active" if current_page == 3 else ""),  # Active class for current page
         ),
         html.Button(
             [
@@ -55,7 +58,7 @@ def create_sidebar(is_collapsed=False):
                 html.Span("Settings", className="navitem-text")
             ],
             id='btn-4',
-            className="navitem",
+            className="navitem" + (" active" if current_page == 4 else ""),  # Active class for current page
         ),
     ])
 

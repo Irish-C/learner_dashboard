@@ -43,9 +43,11 @@ app.layout = html.Div(children=[
 @app.callback(
     Output('sidebar-container', 'children'),
     Input('sidebar-collapsed', 'data'),
+    State('current-page', 'data')
 )
-def update_sidebar_view(is_collapsed):
-    return sidebar.create_sidebar(is_collapsed)
+def update_sidebar_view(is_collapsed, current_page):
+    return sidebar.create_sidebar(is_collapsed, current_page)
+
 
 @app.callback(
     Output('content', 'children'),
