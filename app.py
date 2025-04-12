@@ -2,7 +2,6 @@ import dash
 import dash_bootstrap_components as dbc
 from dash import dcc, html, callback_context
 from dash.dependencies import Input, Output, State
-
 from layout import header, sidebar, content
 
 # Mapping of numeric values to page names
