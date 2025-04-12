@@ -3,7 +3,7 @@ import dash_bootstrap_components as dbc
 from dash import dcc, html, callback_context
 from dash.dependencies import Input, Output, State
 
-from components import header, sidebar, content
+from layout import header, sidebar, content
 
 # Mapping of numeric values to page names
 PAGE_CONSTANTS = {
