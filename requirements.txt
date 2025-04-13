@@ -3,5 +3,6 @@ dash-bootstrap-components==1.6.0
 pandas==2.1.4
 plotly==5.18.0
 numpy==1.26.2
+dash_iconify==0.1.2
 
 
