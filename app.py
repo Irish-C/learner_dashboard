@@ -34,11 +34,6 @@ app = dash.Dash(
     title="Learner Information System"
 )
 
-# Define your colors and styles
-card_background_color = "white"  # Light background
-title_color = "#5A5A5A"  # Darker gray for titles
-value_color = "#007BFF"  # Blue color for the values
-
 # Load index template from the HTML file
 with open('assets/index_template.html', 'r') as file:
     app.index_string = file.read()
@@ -257,8 +252,8 @@ def update_charts(selected_regions, selected_grades, selected_gender):
                 dbc.CardBody([
                     html.Div([
                         html.I(className="fas fa-user-graduate", style={"fontSize": "30px", "color": "#007BFF", "marginRight": "10px"}),
-                        html.H5("Total Learners", style={"color": title_color}),
-                        html.H2(f"{total_students:,}", style={"color": value_color})
+                        html.H5("Total Learners", style={"color": "var(--gray-color)"}),
+                        html.H2(f"{total_students:,}", style={"color": "var(--blue-color"}),
                     ])
                 ]),
                 color="light",  # Light background for the card
@@ -272,8 +267,8 @@ def update_charts(selected_regions, selected_grades, selected_gender):
                 dbc.CardBody([
                     html.Div([
                         html.I(className="fas fa-school", style={"fontSize": "30px", "color": "#007BFF", "marginRight": "10px"}),
-                        html.H5("Total Schools", style={"color": title_color}),
-                        html.H2(f"{total_schools:,}", style={"color": value_color})
+                        html.H5("Total Schools", style={"color": "var(--gray-color)"}),
+                        html.H2(f"{total_schools:,}", style={"color": "var(--blue-color"}),
                     ])
                 ]),
                 color="light",
@@ -287,8 +282,8 @@ def update_charts(selected_regions, selected_grades, selected_gender):
                 dbc.CardBody([
                     html.Div([
                         html.I(className="fas fa-users-cog", style={"fontSize": "30px", "color": "#007BFF", "marginRight": "10px"}),
-                        html.H5("Most Enrolled Division", style={"color": title_color}),
-                        html.H2(f"{most_enrolled_division}", style={"color": value_color})
+                        html.H5("Most Enrolled Division", style={"color": "var(--gray-color)"}),
+                        html.H2(f"{most_enrolled_division}", style={"color": "var(--blue-color"}),
                     ])
                 ]),
                 color="light",

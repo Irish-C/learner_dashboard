@@ -2,15 +2,19 @@
   --primary-color: #0a4485; /* Blue */
   --secondary-color: #DE082C; /* Red */
   --accent-color: #BFDBFE; /* Light Blue */
+  --blush-color: #ffe7ef; /* Light Red */
+  
   --background-color: #f8f9fa; /* Light Gray */
-  --blush-color: #ffe7ef; /* Dark Gray */
-  --text-color: #333333; /* Dark Gray */
+  --text-color: #333333; /* Dark Charcoal */
+
   --success-color: #28a745; /* Green */
   --danger-color: #dc3545; /* Red */
   --warning-color: #ffc107; /* Yellow */
-  --info-color: #17a2b8; /* Cyan */
-}
 
+  --gray-color: #5A5A5A; /* Gray */
+  --white-color: #FFFFFF; /* White */
+  --blue-color: #007BFF;  /* Blue */
+}
 /* Global Styles */
 .body-style {
   font-family: 'Segoe UI', Tahoma, sans-serif;
