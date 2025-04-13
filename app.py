@@ -34,6 +34,11 @@ app = dash.Dash(
     title="Learner Information System"
 )
 
+# Define your colors and styles
+card_background_color = "white"  # Light background
+title_color = "#5A5A5A"  # Darker gray for titles
+value_color = "#007BFF"  # Blue color for the values
+
 # Load index template from the HTML file
 with open('assets/index_template.html', 'r') as file:
     app.index_string = file.read()
@@ -245,12 +250,54 @@ def update_charts(selected_regions, selected_grades, selected_gender):
     total_schools = filtered_data['BEIS School ID'].nunique()
     most_enrolled_division = filtered_data.groupby('Division')['Selected Grades Total'].sum().idxmax()
 
+    # KPI Cards Layout with icons and styling improvements
     kpi_cards = dbc.Row([
-        dbc.Col(dbc.Card(dbc.CardBody([html.H5("Total Students"), html.H2(f"{total_students:,}")]), color="light"), width=4),
-        dbc.Col(dbc.Card(dbc.CardBody([html.H5("Total Schools"), html.H2(f"{total_schools:,}")]), color="light"), width=4),
-        dbc.Col(dbc.Card(dbc.CardBody([html.H5("Most Enrolled Division"), html.H2(most_enrolled_division)]), color="light"), width=4),
-    ])
-
+        dbc.Col(
+            dbc.Card(
+                dbc.CardBody([
+                    html.Div([
+                        html.I(className="fas fa-user-graduate", style={"fontSize": "30px", "color": "#007BFF", "marginRight": "10px"}),
+                        html.H5("Total Learners", style={"color": title_color}),
+                        html.H2(f"{total_students:,}", style={"color": value_color})
+                    ])
+                ]),
+                color="light",  # Light background for the card
+                style={"borderRadius": "10px", "boxShadow": "0px 4px 6px rgba(0, 0, 0, 0.1)"}
+            ),
+            width=4,
+            style={"marginBottom": "15px"}
+        ),
+        dbc.Col(
+            dbc.Card(
+                dbc.CardBody([
+                    html.Div([
+                        html.I(className="fas fa-school", style={"fontSize": "30px", "color": "#007BFF", "marginRight": "10px"}),
+                        html.H5("Total Schools", style={"color": title_color}),
+                        html.H2(f"{total_schools:,}", style={"color": value_color})
+                    ])
+                ]),
+                color="light",
+                style={"borderRadius": "10px", "boxShadow": "0px 4px 6px rgba(0, 0, 0, 0.1)"}
+            ),
+            width=4,
+            style={"marginBottom": "15px"}
+        ),
+        dbc.Col(
+            dbc.Card(
+                dbc.CardBody([
+                    html.Div([
+                        html.I(className="fas fa-users-cog", style={"fontSize": "30px", "color": "#007BFF", "marginRight": "10px"}),
+                        html.H5("Most Enrolled Division", style={"color": title_color}),
+                        html.H2(f"{most_enrolled_division}", style={"color": value_color})
+                    ])
+                ]),
+                color="light",
+                style={"borderRadius": "10px", "boxShadow": "0px 4px 6px rgba(0, 0, 0, 0.1)"}
+            ),
+            width=4,
+            style={"marginBottom": "15px"}
+        ),
+    ], justify="center", align="start")
     return bar_chart, pie_chart, shs_chart, fig_combo, kpi_cards
 @app.callback(
     Output('school_modal', 'is_open'),
