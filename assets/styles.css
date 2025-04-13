@@ -1,10 +1,9 @@
-/* assets/style.css */
-
 :root {
   --primary-color: #0a4485; /* Blue */
   --secondary-color: #DE082C; /* Red */
   --accent-color: #BFDBFE; /* Light Blue */
   --background-color: #f8f9fa; /* Light Gray */
+  --blush-color: #ffe7ef; /* Dark Gray */
   --text-color: #333333; /* Dark Gray */
   --success-color: #28a745; /* Green */
   --danger-color: #dc3545; /* Red */
@@ -133,8 +132,8 @@
 
 /* Updated for DashIconify: */
 .navitem svg {  /* Target DashIconify rendered SVG */
-  width: 1.2rem;  /* Adjust the width to control icon size */
-  height: auto;  /* Maintain aspect ratio */
+  width: 1.2rem; 
+  height: auto; 
   margin-right: 20px; /* Space between icon and text when expanded */
   vertical-align: middle;  /* Align vertically with the text */
   display: inline-block;
@@ -193,28 +192,48 @@
 
 /* Hover state for nav items */
 .navitem:hover {
-  background-color: var(--accent-color);
-  color: var(--primary-color);
-  border-radius: 15px;
+  background-color: var(--blush-color);
+  color: var(--secondary-color);
+  border-radius: 5px;
 }
 
 /* Active state for nav items (you'll need JavaScript/callback to manage this) */
 .navitem.active {
-  background-color: var(--primary-color);
-  color: white;
+  position: relative;
+  background-color: var(--accent-color);
+  color: var(--primary-color);
   font-weight: bold;
-  border-radius: 15px;
+  border-radius: 5px;
+  padding-left: 1.2rem;
 }
+
+.navitem.active::before {
+  content: '';
+  position: absolute;
+  top: 0.5px;
+  bottom: 0;
+  left: 0;
+  width: 5px;
+  border-radius: 0;
+  background: var(--primary-color);
+}
+
 
 /* Content Styles */
 #content {
   margin-top: 5px;
   padding: 15px;
-  transition: margin-left 0.3s ease;
+  transition: margin-left 0.4s ease;
   flex-grow: 1;
   margin-left: 220px;
 }
+#content.collapsed {
+  margin-left: 60px;
+}
 
+#content.expanded {
+  margin-left: 220px;
+}
 /* Placeholder Card Styles */
 .card {
   background: #ffffff;
