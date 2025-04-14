@@ -127,18 +127,7 @@ def dashboard_content(data, grade_options, region_options, school_dropdown_optio
 
                         dcc.Tab(label='🧑‍🏫 SHS Track Analysis', children=[
                         # SHS Track Total Enrollment Horizontal Bar Chart
-                        dbc.Card([dbc.CardBody([dcc.Graph(
-                            id='shs_track_bar_chart',
-                            figure=px.bar(
-                                combined_shs_track_df,
-                                x='Total Enrollment',
-                                y='Track',
-                                color='Grade Level',
-                                orientation='h',
-                                title='SHS Track Total Enrollment',
-                                text='Total Enrollment'
-                            ).update_layout(xaxis_title='Total Enrollment', yaxis_title='Track')
-                        )])], className="mb-4"),
+                        dbc.Card([dbc.CardBody([dcc.Graph(id='shs_track_bar_chart')])], className="mb-4"),
 
                         ]),
                         dcc.Tab(label='🗺️ Regional & Division Insights', children=[

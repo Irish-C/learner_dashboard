@@ -31,25 +31,31 @@ school_dropdown_options = [{'label': f"{row['BEIS School ID']} - {row['School Na
 # Grade Columns for filtering
 grade_columns = [col for col in data.columns if re.match(r'^(K|G\d{1,2}|Elem NG|JHS NG)', col)]
 
-# SHS Track Enrollment
-def prepare_shs_totals(level_prefix):
-    return {
-        'ABM': data[[f"{level_prefix} ACAD - ABM Male", f"{level_prefix} ACAD - ABM Female"]].sum().sum(),
-        'HUMSS': data[[f"{level_prefix} ACAD - HUMSS Male", f"{level_prefix} ACAD - HUMSS Female"]].sum().sum(),
-        'STEM': data[[f"{level_prefix} ACAD STEM Male", f"{level_prefix} ACAD STEM Female"]].sum().sum(),
-        'GAS': data[[f"{level_prefix} ACAD GAS Male", f"{level_prefix} ACAD GAS Female"]].sum().sum(),
-        'PBM': data[[f"{level_prefix} ACAD PBM Male", f"{level_prefix} ACAD PBM Female"]].sum().sum(),
-        'TVL': data[[f"{level_prefix} TVL Male", f"{level_prefix} TVL Female"]].sum().sum(),
-        'SPORTS': data[[f"{level_prefix} SPORTS Male", f"{level_prefix} SPORTS Female"]].sum().sum(),
-        'ARTS & DESIGN': data[[f"{level_prefix} ARTS Male", f"{level_prefix} ARTS Female"]].sum().sum()
-    }
+# Build optimized combined SHS dataframe with Region, Grade, Gender, Track, and School Year
+shs_track_records = []
 
-import pandas as pd
+strands = ['ABM', 'HUMSS', 'STEM', 'GAS', 'PBM', 'TVL', 'SPORTS', 'ARTS & DESIGN']
+grades = ['G11', 'G12']
+genders = ['Male', 'Female']
 
-shs_track_df_g11 = pd.DataFrame(list(prepare_shs_totals("G11").items()), columns=['Track', 'Total Enrollment'])
-shs_track_df_g11['Grade Level'] = 'G11'
+for _, row in data.iterrows():
+    for grade in grades:
+        for strand in strands:
+            for gender in genders:
+                if strand in ['TVL', 'SPORTS', 'ARTS & DESIGN']:
+                    col_name = f"{grade} {strand.split()[0]} {gender}"
+                else:
+                    col_name = f"{grade} ACAD - {strand} {gender}"
+                if col_name in data.columns:
+                    value = row[col_name]
+                    if pd.notna(value) and value > 0:
+                        shs_track_records.append({
+                            'Region': row['Region'],
+                            'School Year': row['School Year'],
+                            'Gender': gender,
+                            'Grade Level': grade,
+                            'Track': strand,
+                            'Total Enrollment': value
+                        })
 
-shs_track_df_g12 = pd.DataFrame(list(prepare_shs_totals("G12").items()), columns=['Track', 'Total Enrollment'])
-shs_track_df_g12['Grade Level'] = 'G12'
-
-combined_shs_track_df = pd.concat([shs_track_df_g11, shs_track_df_g12])
+combined_shs_track_df = pd.DataFrame(shs_track_records)

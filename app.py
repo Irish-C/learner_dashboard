@@ -195,7 +195,7 @@ def update_charts(selected_regions, selected_grades, selected_gender):
 
     agg_data = filtered_data.groupby('Region')['Selected Grades Total'].sum().reset_index()
 
-# bar chart
+# Bar chart
     region_order_to_use = correct_region_order if agg_data['Region'].nunique() > 10 else None
     bar_chart = px.bar(
         agg_data,
@@ -209,6 +209,7 @@ def update_charts(selected_regions, selected_grades, selected_gender):
 
     bar_chart.update_layout(xaxis_title='Region', yaxis_title='Total Enrollment')
 
+    # Pie Chart
     if selected_grades:
         selected_cols_male = [col for col in data.columns if any(g in col for g in selected_grades) and 'Male' in col]
         selected_cols_female = [col for col in data.columns if any(g in col for g in selected_grades) and 'Female' in col]
@@ -323,58 +324,6 @@ def toggle_modal(school_id, close_click, is_open):
     
     return is_open, "", ""
 
-if __name__ == "__main__":
-    app.run(debug=True)
-
-from dash.dependencies import Input, Output
-from dashboard import prepare_strand_gender_chart
-
-@app.callback(
-    Output('kpi_card_row', 'children'),
-    Input('school_year_filter', 'value')
-)
-def update_kpis(selected_year):
-    filtered_data = data[data['School Year'] == selected_year]
-    total_enrollment = filtered_data[[col for col in filtered_data.columns if 'Male' in col or 'Female' in col]].sum().sum()
-    return dbc.Row([
-        dbc.Col(dbc.Card([
-            dbc.CardBody([
-                html.H4("Total Enrollment", className="card-title"),
-                html.P(f"{int(total_enrollment):,}", className="card-text")
-            ])
-        ]), width=4)
-    ])
-
-@app.callback(
-    Output('enrollment_bar_chart', 'figure'),
-    Input('school_year_filter', 'value')
-)
-def update_region_chart(selected_year):
-    filtered_data = data[data['School Year'] == selected_year]
-    df_grouped = filtered_data.groupby('Region').agg({'Total Male': 'sum', 'Total Female': 'sum'}).assign(
-        Total=lambda df: df['Total Male'] + df['Total Female']
-    ).reindex(correct_region_order).reset_index()
-    fig = px.bar(df_grouped, x='Region', y='Total', title='Total Enrollment by Region', text='Total', color='Region')
-    fig.update_layout(xaxis_title='Region', yaxis_title='Total Enrollment')
-    return fig
-
-@app.callback(
-    Output('gender_pie_chart', 'figure'),
-    Input('school_year_filter', 'value')
-)
-def update_gender_pie(selected_year):
-    filtered_data = data[data['School Year'] == selected_year]
-    total_male = filtered_data[[col for col in filtered_data.columns if 'Male' in col]].sum().sum()
-    total_female = filtered_data[[col for col in filtered_data.columns if 'Female' in col]].sum().sum()
-    fig = px.pie(
-        names=['Male', 'Female'],
-        values=[total_male, total_female],
-        title='Total Learners by Gender',
-        hole=0.6,
-        color_discrete_sequence=['#3498db', '#e74c3c']
-    ).update_traces(textinfo='percent+label')
-    return fig
-
 @app.callback(
     Output('enrollment_table', 'data'),
     Input('school_year_filter', 'value')
@@ -392,7 +341,6 @@ def update_table(selected_year):
 )
 def update_shs_track_chart(selected_year, selected_regions, selected_gender):
     df_filtered = combined_shs_track_df.copy()
-
     if selected_year:
         df_filtered = df_filtered[df_filtered['School Year'] == selected_year]
     if selected_regions:
@@ -416,3 +364,6 @@ def update_shs_track_chart(selected_year, selected_regions, selected_gender):
     )
     fig.update_layout(xaxis_title='Total Enrollment', yaxis_title='Track')
     return fig
+
+if __name__ == "__main__":
+    app.run(debug=True)
