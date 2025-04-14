@@ -157,6 +157,8 @@ def navigate(n_dashboard, n_enrollment, n_help, n_settings, current_path):
     return current_path
 
 
+
+# Dashboard Page
 @app.callback(
     [Output('enrollment_bar_chart', 'figure'),
      Output('gender_pie_chart', 'figure'),
@@ -294,6 +296,8 @@ def update_charts(selected_regions, selected_grades, selected_gender):
         ),
     ], justify="center", align="start")
     return bar_chart, pie_chart, shs_chart, fig_combo, kpi_cards
+
+# Dashboard Page
 @app.callback(
     Output('school_modal', 'is_open'),
     Output('modal_school_name', 'children'),
@@ -327,3 +331,76 @@ def toggle_modal(school_id, close_click, is_open):
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+from dash.dependencies import Input, Output
+from dashboard import prepare_strand_gender_chart
+
+@app.callback(
+    Output('kpi_card_row', 'children'),
+    Input('school_year_filter', 'value')
+)
+def update_kpis(selected_year):
+    filtered_data = data[data['School Year'] == selected_year]
+    total_enrollment = filtered_data[[col for col in filtered_data.columns if 'Male' in col or 'Female' in col]].sum().sum()
+    return dbc.Row([
+        dbc.Col(dbc.Card([
+            dbc.CardBody([
+                html.H4("Total Enrollment", className="card-title"),
+                html.P(f"{int(total_enrollment):,}", className="card-text")
+            ])
+        ]), width=4)
+    ])
+
+@app.callback(
+    Output('enrollment_bar_chart', 'figure'),
+    Input('school_year_filter', 'value')
+)
+def update_region_chart(selected_year):
+    filtered_data = data[data['School Year'] == selected_year]
+    df_grouped = filtered_data.groupby('Region').agg({'Total Male': 'sum', 'Total Female': 'sum'}).assign(
+        Total=lambda df: df['Total Male'] + df['Total Female']
+    ).reindex(correct_region_order).reset_index()
+    fig = px.bar(df_grouped, x='Region', y='Total', title='Total Enrollment by Region', text='Total', color='Region')
+    fig.update_layout(xaxis_title='Region', yaxis_title='Total Enrollment')
+    return fig
+
+@app.callback(
+    Output('gender_pie_chart', 'figure'),
+    Input('school_year_filter', 'value')
+)
+def update_gender_pie(selected_year):
+    filtered_data = data[data['School Year'] == selected_year]
+    total_male = filtered_data[[col for col in filtered_data.columns if 'Male' in col]].sum().sum()
+    total_female = filtered_data[[col for col in filtered_data.columns if 'Female' in col]].sum().sum()
+    fig = px.pie(
+        names=['Male', 'Female'],
+        values=[total_male, total_female],
+        title='Total Learners by Gender',
+        hole=0.6,
+        color_discrete_sequence=['#3498db', '#e74c3c']
+    ).update_traces(textinfo='percent+label')
+    return fig
+
+@app.callback(
+    Output('g11_strand_chart', 'figure'),
+    Input('school_year_filter', 'value')
+)
+def update_g11_chart(selected_year):
+    filtered_data = data[data['School Year'] == selected_year]
+    return prepare_strand_gender_chart(filtered_data, 'G11')
+
+@app.callback(
+    Output('g12_strand_chart', 'figure'),
+    Input('school_year_filter', 'value')
+)
+def update_g12_chart(selected_year):
+    filtered_data = data[data['School Year'] == selected_year]
+    return prepare_strand_gender_chart(filtered_data, 'G12')
+
+@app.callback(
+    Output('enrollment_table', 'data'),
+    Input('school_year_filter', 'value')
+)
+def update_table(selected_year):
+    filtered_data = data[data['School Year'] == selected_year]
+    return filtered_data[['Region', 'Division', 'Total Male', 'Total Female', 'Total Enrollment']].to_dict('records')

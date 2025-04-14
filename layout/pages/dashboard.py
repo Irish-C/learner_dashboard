@@ -156,11 +156,11 @@ def dashboard_content(data, grade_options, region_options, school_dropdown_optio
                         )])], className="mb-4"),                        
                         # G11 Strand by Gender
                         dbc.Card([dbc.CardBody([dcc.Graph(
-                            figure=prepare_strand_gender_chart(data, 'G11')
+                            id='g11_strand_chart'
                         )])], className="mb-4"),
                         # G12 Strand by Gender
                         dbc.Card([dbc.CardBody([dcc.Graph(
-                            figure=prepare_strand_gender_chart(data, 'G12')
+                            id='g12_strand_chart'
                         )])], className="mb-4"),
                     ]),
 
