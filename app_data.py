@@ -8,7 +8,6 @@ grade_columns = [col for col in data.columns if re.match(r'^(K|G\d{1,2}|Elem NG|
 data['Total Male'] = data[[col for col in grade_columns if 'Male' in col]].sum(axis=1)
 data['Total Female'] = data[[col for col in grade_columns if 'Female' in col]].sum(axis=1)
 data['Total Enrollment'] = data['Total Male'] + data['Total Female']
-data['School Year'] = '2024-2025'
 
 # Dropdown prep
 grade_keys = sorted(set(re.match(r'^(K|G\d{1,2}|Elem NG|JHS NG)', col).group(1) for col in grade_columns))
