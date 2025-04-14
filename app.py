@@ -168,7 +168,7 @@ def navigate(n_dashboard, n_enrollment, n_help, n_settings, current_path):
      Input('gender_filter', 'value')]
 )
 def update_charts(selected_regions, selected_grades, selected_gender):
-    print("✅ update_charts triggered")
+    print("update_charts triggered")
     filtered_data = data.copy()
 
     if selected_regions:
