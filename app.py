@@ -162,7 +162,6 @@ def navigate(n_dashboard, n_enrollment, n_help, n_settings, current_path):
 @app.callback(
     [Output('enrollment_bar_chart', 'figure'),
      Output('gender_pie_chart', 'figure'),
-     Output('shs_track_bar_chart', 'figure'),
      Output('enrollment_vs_schools_chart', 'figure'),
      Output('kpi_card_row', 'children')],
     [Input('region_filter', 'value'),
@@ -227,11 +226,6 @@ def update_charts(selected_regions, selected_grades, selected_gender):
         color_discrete_sequence=['#b0cfff', '#f9c9e2']
     )
 
-
-    shs_chart = px.bar(combined_shs_track_df, x='Total Enrollment', y='Track', orientation='h', color='Grade Level',
-                       text='Total Enrollment', barmode='group',
-                       title='Enrollment Distribution by SHS Track (G11 and G12)')
-
     filtered_data['Total Enrollment'] = filtered_data[[col for col in filtered_data.columns if 'Male' in col or 'Female' in col]].apply(pd.to_numeric, errors='coerce').fillna(0).sum(axis=1)
     agg_division = filtered_data.groupby(['Division', 'Region']).agg({
         'BEIS School ID': 'count',
@@ -295,7 +289,7 @@ def update_charts(selected_regions, selected_grades, selected_gender):
             style={"marginBottom": "15px"}
         ),
     ], justify="center", align="start")
-    return bar_chart, pie_chart, shs_chart, fig_combo, kpi_cards
+    return bar_chart, pie_chart, fig_combo, kpi_cards
 
 # Dashboard Page
 @app.callback(
@@ -388,3 +382,37 @@ def update_gender_pie(selected_year):
 def update_table(selected_year):
     filtered_data = data[data['School Year'] == selected_year]
     return filtered_data[['Region', 'Division', 'Total Male', 'Total Female', 'Total Enrollment']].to_dict('records')
+
+
+@app.callback(
+    Output('shs_track_bar_chart', 'figure'),
+    Input('school_year_filter', 'value'),
+    Input('region_filter', 'value'),
+    Input('gender_filter', 'value')
+)
+def update_shs_track_chart(selected_year, selected_regions, selected_gender):
+    df_filtered = combined_shs_track_df.copy()
+
+    if selected_year:
+        df_filtered = df_filtered[df_filtered['School Year'] == selected_year]
+    if selected_regions:
+        df_filtered = df_filtered[df_filtered['Region'].isin(selected_regions)]
+    if selected_gender != 'All':
+        df_filtered = df_filtered[df_filtered['Gender'] == selected_gender]
+
+    if df_filtered.empty:
+        return px.bar(title="No data available for the selected filters")
+
+    grouped = df_filtered.groupby(['Track', 'Grade Level'], as_index=False)['Total Enrollment'].sum()
+
+    fig = px.bar(
+        grouped,
+        x='Total Enrollment',
+        y='Track',
+        color='Grade Level',
+        orientation='h',
+        text='Total Enrollment',
+        title='Enrollment Distribution by SHS Track (G11 and G12)'
+    )
+    fig.update_layout(xaxis_title='Total Enrollment', yaxis_title='Track')
+    return fig
