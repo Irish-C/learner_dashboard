@@ -13,38 +13,6 @@ correct_region_order = [
     'Region IX', 'Region X', 'Region XI', 'Region XII', 'CARAGA', 'BARMM'
 ]
 
-def prepare_strand_gender_chart(data, grade):
-    strands = ['ABM', 'HUMSS', 'STEM', 'GAS', 'PBM', 'TVL', 'SPORTS', 'ARTS']
-    reshaped_data = []
-
-    for strand in strands:
-        if strand in ['TVL', 'SPORTS', 'ARTS']:
-            male_col = f'{grade} {strand} Male'
-            female_col = f'{grade} {strand} Female'
-        else:
-            male_col = f'{grade} ACAD - {strand} Male'
-            female_col = f'{grade} ACAD - {strand} Female'
-
-        if male_col in data.columns and female_col in data.columns:
-            reshaped_data.extend([
-                {'Strand': strand, 'Gender': 'Male', 'Enrollment': data[male_col].sum()},
-                {'Strand': strand, 'Gender': 'Female', 'Enrollment': data[female_col].sum()}
-            ])
-
-    df_strand_gender = pd.DataFrame(reshaped_data)
-
-    fig = px.bar(
-        df_strand_gender,
-        x='Strand',
-        y='Enrollment',
-        color='Gender',
-        barmode='group',
-        title=f'Enrollment by SHS Strand and Gender ({grade})',
-        labels={'Enrollment': 'Total Enrollment'}
-    )
-    return fig
-
-
 def dashboard_content(data, grade_options, region_options, school_dropdown_options, combined_shs_track_df):
     return dbc.Container(
 
@@ -123,6 +91,7 @@ def dashboard_content(data, grade_options, region_options, school_dropdown_optio
                     width=3
                 ),
                 # 📊 Tabs with Charts
+                
                 dbc.Col([
                     dcc.Tabs([
                     dcc.Tab(label='📊 Overview', children=[
@@ -154,14 +123,6 @@ def dashboard_content(data, grade_options, region_options, school_dropdown_optio
                                 color_discrete_sequence=['#3498db', '#e74c3c']
                             ).update_traces(textinfo='percent+label')
                         )])], className="mb-4"),                        
-                        # G11 Strand by Gender
-                        dbc.Card([dbc.CardBody([dcc.Graph(
-                            id='g11_strand_chart'
-                        )])], className="mb-4"),
-                        # G12 Strand by Gender
-                        dbc.Card([dbc.CardBody([dcc.Graph(
-                            id='g12_strand_chart'
-                        )])], className="mb-4"),
                     ]),
 
                         dcc.Tab(label='🧑‍🏫 SHS Track Analysis', children=[

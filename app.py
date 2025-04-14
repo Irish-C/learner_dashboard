@@ -382,22 +382,6 @@ def update_gender_pie(selected_year):
     return fig
 
 @app.callback(
-    Output('g11_strand_chart', 'figure'),
-    Input('school_year_filter', 'value')
-)
-def update_g11_chart(selected_year):
-    filtered_data = data[data['School Year'] == selected_year]
-    return prepare_strand_gender_chart(filtered_data, 'G11')
-
-@app.callback(
-    Output('g12_strand_chart', 'figure'),
-    Input('school_year_filter', 'value')
-)
-def update_g12_chart(selected_year):
-    filtered_data = data[data['School Year'] == selected_year]
-    return prepare_strand_gender_chart(filtered_data, 'G12')
-
-@app.callback(
     Output('enrollment_table', 'data'),
     Input('school_year_filter', 'value')
 )
