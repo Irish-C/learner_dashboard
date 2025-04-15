@@ -303,6 +303,19 @@ h4.chart-title { /* For card title */
   text-align: left;
 }
 
+.no-hover {
+  transition: none !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.no-hover:hover {
+  box-shadow: none !important;
+  transform: none !important;
+  cursor: default !important;
+}
+
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .app-container {

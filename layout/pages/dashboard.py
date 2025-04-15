@@ -13,7 +13,7 @@ correct_region_order = [
     'Region IX', 'Region X', 'Region XI', 'Region XII', 'CARAGA', 'BARMM'
 ]
 
-def dashboard_content(data, grade_options, region_options, school_dropdown_options, combined_shs_track_df):
+def dashboard_content(data, grade_options, region_options, combined_shs_track_df):
     return dbc.Container(
         fluid=True,
         children=[
@@ -84,7 +84,7 @@ def dashboard_content(data, grade_options, region_options, school_dropdown_optio
                         html.Label("Search School:"),
                         dcc.Dropdown(
                             id='school_search',
-                            options=school_dropdown_options,
+                            options=[],
                             placeholder='Search by School ID or Name',
                             searchable=True
                         ),
@@ -104,8 +104,8 @@ def dashboard_content(data, grade_options, region_options, school_dropdown_optio
                 ], className="g-3")
             )
         ],
-        className="mb-4 shadow-sm",
-        style={"padding": "10px", "borderRadius": "10px"}
+        className="mb-4 shadow-sm no-hover",
+        style={"padding": "10px", "borderRadius": "10px", "boxShadow": "none", "transition": "none"}
     ),
 
 

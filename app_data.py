@@ -26,7 +26,6 @@ correct_region_order = [
 ]
 
 region_options = [{'label': r, 'value': r} for r in correct_region_order if r in data['Region'].unique()]
-school_dropdown_options = [{'label': f"{row['BEIS School ID']} - {row['School Name']}", 'value': row['BEIS School ID']} for _, row in data.iterrows()]
 
 # Grade Columns for filtering
 grade_columns = [col for col in data.columns if re.match(r'^(K|G\d{1,2}|Elem NG|JHS NG)', col)]

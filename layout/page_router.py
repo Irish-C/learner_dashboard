@@ -16,9 +16,9 @@ def get_content_style(is_collapsed):
         "transition": "margin-left 0.3s ease",
     }
 
-def create_content(page, data, grade_options, region_options, school_dropdown_options, combined_shs_track_df):
+def create_content(page, data, grade_options, region_options, combined_shs_track_df):
     if page == "dashboard":
-        return dashboard_content(data, grade_options, region_options, school_dropdown_options, combined_shs_track_df)
+        return dashboard_content(data, grade_options, region_options, combined_shs_track_df)
     elif page == "enrollment":
         return enrollment_content()
     elif page == "help":

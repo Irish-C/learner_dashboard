@@ -12,7 +12,6 @@ import re
 from app_data import data, grade_columns, combined_shs_track_df, correct_region_order, grade_options
 
 region_options = [{'label': r, 'value': r} for r in correct_region_order]
-school_dropdown_options = [{'label': f"{row['BEIS School ID']} - {row['School Name']}", 'value': row['BEIS School ID']} for _, row in data.iterrows()]
 
 from layout import header, page_router, sidebar
 
@@ -73,12 +72,13 @@ def update_content(pathname, current_page):
     # Retrieve the page name from the numeric value
     page = PAGE_CONSTANTS.get(page_num, 'dashboard')  # Default to 'dashboard' if invalid page
     
-    return page_router.create_content(    page, 
+    return page_router.create_content(
+        page, 
         data, 
         grade_options, 
         region_options, 
-        school_dropdown_options, 
-        combined_shs_track_df), page_num
+        combined_shs_track_df
+        ), page_num
 
 @app.callback(
     Output('sidebar-collapsed', 'data'),
@@ -428,6 +428,25 @@ def update_shs_track_chart(selected_year, selected_regions, selected_gender):
     except Exception as e:
         print("SHS Chart Rendering Error:", e)
         return px.bar(title="Error rendering SHS Track chart")
+    
+@app.callback(
+    Output('school_search', 'options'),
+    Input('school_search', 'search_value')
+)
+def update_school_options(search_value):
+    if not search_value:
+        # Show first 5 schools when nothing is typed
+        sample = data[['BEIS School ID', 'School Name']].dropna().head(10)
+    else:
+        sample = data[
+            data['School Name'].str.contains(search_value, case=False, na=False) |
+            data['BEIS School ID'].astype(str).str.contains(search_value)
+        ].head(20)
+
+    return [
+        {'label': f"{row['BEIS School ID']} - {row['School Name']}", 'value': row['BEIS School ID']}
+        for _, row in sample.iterrows()
+    ]
 
 if __name__ == "__main__":
     app.run(debug=True)
