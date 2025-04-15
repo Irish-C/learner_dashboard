@@ -110,40 +110,66 @@ def dashboard_content(data, grade_options, region_options, school_dropdown_optio
 
 
             # ✅ Charts & Tabs
-            dbc.Row([
-                dbc.Col([
-                    dcc.Tabs([
-                        dcc.Tab(label='📊 Overview', children=[
-                            dbc.Card([dbc.CardBody([dcc.Graph(id='enrollment_bar_chart')])], className="mb-4"),
-                            dbc.Card([dbc.CardBody([dcc.Graph(id='gender_pie_chart')])], className="mb-4"),
-                        ]),
-                        dcc.Tab(label='🧑‍🏫 SHS Track Analysis', children=[
-                            dbc.Card([dbc.CardBody([dcc.Graph(id='shs_track_bar_chart')])], className="mb-4"),
-                        ]),
-                        dcc.Tab(label='🗺️ Regional & Division Insights', children=[
-                            dbc.Card([dbc.CardBody([dcc.Graph(id='enrollment_vs_schools_chart')])], className="mb-4")
-                        ]),
-                        dcc.Tab(label='📋 Table View', children=[
-                            html.H4("Enrollment Table"),
-                            dash_table.DataTable(
-                                id='enrollment_table',
-                                columns=[
-                                    {'name': 'Region', 'id': 'Region'},
-                                    {'name': 'Division', 'id': 'Division'},
-                                    {'name': 'Total Male', 'id': 'Total Male', 'type': 'numeric'},
-                                    {'name': 'Total Female', 'id': 'Total Female', 'type': 'numeric'},
-                                    {'name': 'Total Enrollment', 'id': 'Total Enrollment', 'type': 'numeric'}
-                                ],
-                                data=data[['Region', 'Division', 'Total Male', 'Total Female', 'Total Enrollment']].to_dict('records'),
-                                page_size=10,
-                                sort_action='native',
-                                filter_action='native',
-                                style_table={'overflowX': 'auto'}
-                            )
-                        ])
-                    ])
-                ], width=12)
-            ])
-        ]
-    )
+            dcc.Tabs([
+                dcc.Tab(label='📊 Overview', children=[
+                    dbc.Row([
+                        dbc.Col(
+                            dbc.Card([
+                                dbc.CardBody([
+                                    dcc.Loading(dcc.Graph(id='enrollment_bar_chart'))
+                                ])
+                            ]),
+                            width=6
+                        ),
+                        dbc.Col(
+                            dbc.Card([
+                                dbc.CardBody([
+                                    dcc.Loading(dcc.Graph(id='gender_pie_chart'))
+                                ])
+                            ]),
+                            width=6
+                        ),
+                    ], className="mb-4"),
+
+                    dbc.Row([
+                        dbc.Col(
+                            dbc.Card([
+                                dbc.CardBody([
+                                    dcc.Loading(dcc.Graph(id='enrollment_vs_schools_chart'))
+                                ])
+                            ]),
+                            width=6
+                        ),
+                        dbc.Col(
+                            dbc.Card([
+                                dbc.CardBody([
+                                    dcc.Loading(dcc.Graph(id='shs_track_bar_chart'))
+                                ])
+                            ]),
+                            width=6
+                        ),
+                    ], className="mb-4"),
+                ]),
+
+                dcc.Tab(label='📋 Table View', children=[
+                    html.H4("Enrollment Table"),
+                    dash_table.DataTable(
+                        id='enrollment_table',
+                        columns=[
+                            {'name': 'Region', 'id': 'Region'},
+                            {'name': 'Division', 'id': 'Division'},
+                            {'name': 'Total Male', 'id': 'Total Male', 'type': 'numeric'},
+                            {'name': 'Total Female', 'id': 'Total Female', 'type': 'numeric'},
+                            {'name': 'Total Enrollment', 'id': 'Total Enrollment', 'type': 'numeric'}
+                        ],
+                        data=data[['Region', 'Division', 'Total Male', 'Total Female', 'Total Enrollment']].to_dict('records'),
+                        page_size=10,
+                        sort_action='native',
+                        filter_action='native',
+                        style_table={'overflowX': 'auto'}
+                    )
+                ])
+            ])])
+
+
 

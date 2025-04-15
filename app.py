@@ -398,8 +398,12 @@ def update_shs_track_chart(selected_year, selected_regions, selected_gender):
         df_filtered = df_filtered[df_filtered['Gender'] == selected_gender]
 
     # ✅ Final protection: prevent plotly from erroring on empty or malformed data
-    if df_filtered.empty or 'Grade Level' not in df_filtered.columns:
-        return px.bar(title="No data available for the selected filters")
+    if df_filtered.empty:
+        return go.Figure().update_layout(
+            title="No data available for the selected filters",
+            xaxis_title='Total Enrollment',
+            yaxis_title='Track'
+        )
 
     # 🧾 Group the data
     grouped = df_filtered.groupby(['Track', 'Grade Level'], as_index=False)['Total Enrollment'].sum()
