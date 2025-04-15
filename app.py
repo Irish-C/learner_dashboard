@@ -216,7 +216,6 @@ def update_charts(selected_regions, selected_grades, selected_gender):
     else:
         selected_cols_male = [col for col in grade_columns if 'Male' in col]
         selected_cols_female = [col for col in grade_columns if 'Female' in col]
-
     total_male = filtered_data[selected_cols_male].sum().sum()
     total_female = filtered_data[selected_cols_female].sum().sum()
     pie_chart = px.pie(
@@ -227,22 +226,66 @@ def update_charts(selected_regions, selected_grades, selected_gender):
         color_discrete_sequence=['#b0cfff', '#f9c9e2']
     )
 
-    filtered_data['Total Enrollment'] = filtered_data[[col for col in filtered_data.columns if 'Male' in col or 'Female' in col]].apply(pd.to_numeric, errors='coerce').fillna(0).sum(axis=1)
+    # Filter by selected regions
+    if selected_regions:
+        filtered_data = filtered_data[filtered_data['Region'].isin(selected_regions)]
+
+    # Determine relevant columns based on selected grades and gender
+    selected_columns = []
+    if selected_grades:
+        for grade in selected_grades:
+            if selected_gender == 'Male':
+                selected_columns += [col for col in data.columns if grade in col and 'Male' in col]
+            elif selected_gender == 'Female':
+                selected_columns += [col for col in data.columns if grade in col and 'Female' in col]
+            else:
+                selected_columns += [col for col in data.columns if grade in col]
+    else:
+        if selected_gender == 'Male':
+            selected_columns = [col for col in grade_columns if 'Male' in col]
+        elif selected_gender == 'Female':
+            selected_columns = [col for col in grade_columns if 'Female' in col]
+        else:
+            selected_columns = grade_columns
+
+    # Calculate total enrollment based on selected columns
+    filtered_data['Selected Grades Total'] = filtered_data[selected_columns].sum(axis=1)
+
+    # Group by Division and Region
     agg_division = filtered_data.groupby(['Division', 'Region']).agg({
         'BEIS School ID': 'count',
-        'Total Enrollment': 'sum'
-    }).rename(columns={'BEIS School ID': 'Number of Schools'}).reset_index().sort_values(by='Total Enrollment', ascending=False).head(15)
+        'Selected Grades Total': 'sum'
+    }).rename(columns={'BEIS School ID': 'Number of Schools'}).reset_index()
 
+    # Sort and select top 15 divisions
+    agg_division = agg_division.sort_values(by='Selected Grades Total', ascending=False).head(15)
+
+    # Create the figure
     fig_combo = make_subplots(specs=[[{"secondary_y": True}]])
-    fig_combo.add_trace(go.Bar(x=agg_division['Division'], y=agg_division['Total Enrollment'], name='Total Enrollment'), secondary_y=False)
-    fig_combo.add_trace(go.Scatter(x=agg_division['Division'], y=agg_division['Number of Schools'], name='Number of Schools', mode='lines+markers'), secondary_y=True)
-    fig_combo.update_layout(title='Top 15 Divisions: Total Enrollment and Number of Schools', xaxis_title='Division', yaxis_title='Total Enrollment')
+    fig_combo.add_trace(go.Bar(
+        x=agg_division['Division'],
+        y=agg_division['Selected Grades Total'],
+        name='Total Enrollment'
+    ), secondary_y=False)
 
+    fig_combo.add_trace(go.Scatter(
+        x=agg_division['Division'],
+        y=agg_division['Number of Schools'],
+        name='Number of Schools',
+        mode='lines+markers'
+    ), secondary_y=True)
+
+    fig_combo.update_layout(
+        title='Top 15 Divisions: Total Enrollment and Number of Schools',
+        xaxis_title='Division',
+        yaxis_title='Total Enrollment'
+    )
+
+    # KPI Cards Layout with icons and styling improvements
     total_students = int(filtered_data['Selected Grades Total'].sum())
     total_schools = filtered_data['BEIS School ID'].nunique()
     most_enrolled_division = filtered_data.groupby('Division')['Selected Grades Total'].sum().idxmax()
 
-    # KPI Cards Layout with icons and styling improvements
     kpi_cards = dbc.Row([
         dbc.Col(
             dbc.Card(
