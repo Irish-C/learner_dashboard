@@ -201,7 +201,7 @@ def update_charts(selected_regions, selected_grades, selected_gender):
         agg_data,
         x='Region',
         y='Selected Grades Total',
-        title='Enrollment Distribution by Region',
+        title='Enrollment Distribution by Region (Choropleth)',
         color='Region',
         text='Selected Grades Total',
         category_orders={'Region': region_order_to_use} if region_order_to_use else {}
@@ -341,29 +341,46 @@ def update_table(selected_year):
 )
 def update_shs_track_chart(selected_year, selected_regions, selected_gender):
     df_filtered = combined_shs_track_df.copy()
+
+    # 🧠 Filter by school year
     if selected_year:
         df_filtered = df_filtered[df_filtered['School Year'] == selected_year]
+
+    # 🧠 Filter by region
     if selected_regions:
         df_filtered = df_filtered[df_filtered['Region'].isin(selected_regions)]
+
+    # 🧠 Filter by gender
     if selected_gender != 'All':
         df_filtered = df_filtered[df_filtered['Gender'] == selected_gender]
 
-    if df_filtered.empty:
+    # ✅ Final protection: prevent plotly from erroring on empty or malformed data
+    if df_filtered.empty or 'Grade Level' not in df_filtered.columns:
         return px.bar(title="No data available for the selected filters")
 
+    # 🧾 Group the data
     grouped = df_filtered.groupby(['Track', 'Grade Level'], as_index=False)['Total Enrollment'].sum()
 
-    fig = px.bar(
-        grouped,
-        x='Total Enrollment',
-        y='Track',
-        color='Grade Level',
-        orientation='h',
-        text='Total Enrollment',
-        title='Enrollment Distribution by SHS Track (G11 and G12)'
-    )
-    fig.update_layout(xaxis_title='Total Enrollment', yaxis_title='Track')
-    return fig
+    # 🔐 Defensive: check again if grouped is empty
+    if grouped.empty:
+        return px.bar(title="No data to display")
+
+    # 📊 Plot the chart safely
+    try:
+        fig = px.bar(
+            grouped,
+            x='Total Enrollment',
+            y='Track',
+            color='Grade Level',
+            orientation='h',
+            text='Total Enrollment',
+            title='Enrollment Distribution by SHS Track (G11 and G12)'
+        )
+        fig.update_layout(xaxis_title='Total Enrollment', yaxis_title='Track')
+        return fig
+    except Exception as e:
+        print("SHS Chart Rendering Error:", e)
+        return px.bar(title="Error rendering SHS Track chart")
 
 if __name__ == "__main__":
     app.run(debug=True)

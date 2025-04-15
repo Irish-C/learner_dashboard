@@ -15,120 +15,110 @@ correct_region_order = [
 
 def dashboard_content(data, grade_options, region_options, school_dropdown_options, combined_shs_track_df):
     return dbc.Container(
-
         fluid=True,
         children=[
             html.H1("Dashboard", className="page-title"),
-            html.P(f"Welcome Back, Teacher!", className="subtitle"),
+            html.P("Welcome Back, Teacher!", className="subtitle"),
             html.Br(),
-            # ✅ Always-present KPI row BEFORE the chart columns
+
+            # ✅ KPI Cards (dynamic via callback)
             html.Div(id='kpi_card_row', className='mb-4'),
 
+            # ✅ Row-based Filter Panel (new layout)
+            html.Div("Filter Control Panel", style={
+                "fontWeight": "600",
+                "fontSize": "18px",
+                "color": "#343a40",
+                "paddingLeft": "10px"
+            }),
+            dbc.Card(
+             [
+            dbc.CardBody(
+                dbc.Row([
+                    dbc.Col([
+                        html.Label("School Year:"),
+                        dcc.Dropdown(
+                            id='school_year_filter',
+                            options=[{'label': sy, 'value': sy} for sy in sorted(data['School Year'].unique(), reverse=True)],
+                            value=sorted(data['School Year'].unique(), reverse=True)[0],
+                            placeholder='Select School Year'
+                        )
+                    ], width=2),
+
+                    dbc.Col([
+                        html.Label("Region:"),
+                        dcc.Dropdown(
+                            id='region_filter',
+                            options=region_options,
+                            multi=True,
+                            placeholder='Select Region'
+                        )
+                    ], width=2),
+
+                    dbc.Col([
+                        html.Label("Grade Level:"),
+                        dcc.Dropdown(
+                            id='grade_filter',
+                            options=grade_options,
+                            multi=True,
+                            placeholder='Select Grade Level'
+                        )
+                    ], width=2),
+
+                    dbc.Col([
+                        html.Label("Gender:"),
+                        dcc.RadioItems(
+                            id='gender_filter',
+                            options=[
+                                {'label': 'Male', 'value': 'Male'},
+                                {'label': 'Female', 'value': 'Female'},
+                                {'label': 'All', 'value': 'All'}
+                            ],
+                            value='All',
+                            inline=True,
+                            labelStyle={'margin-right': '10px'}
+                        )
+                    ], width=2),
+
+                    dbc.Col([
+                        html.Label("Search School:"),
+                        dcc.Dropdown(
+                            id='school_search',
+                            options=school_dropdown_options,
+                            placeholder='Search by School ID or Name',
+                            searchable=True
+                        ),
+                        html.Br(),
+                        dbc.Modal(
+                            id='school_modal',
+                            is_open=False,
+                            children=[
+                                dbc.ModalHeader(dbc.ModalTitle(id='modal_school_name')),
+                                dbc.ModalBody(id='modal_school_body'),
+                                dbc.ModalFooter(
+                                    dbc.Button("Close", id="modal_close_btn", className="ms-auto", n_clicks=0)
+                                )
+                            ]
+                        )
+                    ], width=4),
+                ], className="g-3")
+            )
+        ],
+        className="mb-4 shadow-sm",
+        style={"padding": "10px", "borderRadius": "10px"}
+    ),
+
+
+            # ✅ Charts & Tabs
             dbc.Row([
-                # 🎛️ Filter Panel
-                dbc.Col(
-                    dbc.Card([
-                        dbc.CardHeader(html.H4("Filter Control Panel")),
-                        dbc.CardBody([
-                            html.Br(),
-                            html.Label("School Year:"),
-                            dcc.Dropdown(
-                                id='school_year_filter',
-                                options=[{'label': sy, 'value': sy} for sy in sorted(data['School Year'].unique(), reverse=True)],
-                                value=sorted(data['School Year'].unique(), reverse=True)[0],
-                                placeholder='Select School Year'
-                            ),
-                            html.Label("Region:"),
-                            dcc.Dropdown(
-                                id='region_filter',
-                                options=region_options,
-                                multi=True,
-                                placeholder='Select Region'
-                            ),
-                            html.Br(),
-                            html.Label("Grade Level:"),
-                            dcc.Dropdown(
-                                id='grade_filter',
-                                options=grade_options,
-                                multi=True,
-                                placeholder='Select Grade Level'
-                            ),
-                            html.Br(),
-                            html.Label("Gender:"),
-                            dcc.RadioItems(
-                                id='gender_filter',
-                                options=[
-                                    {'label': 'Male', 'value': 'Male'},
-                                    {'label': 'Female', 'value': 'Female'},
-                                    {'label': 'All', 'value': 'All'}
-                                ],
-                                value='All',
-                                inline=True,
-                                labelStyle={'margin-right': '15px'}
-                            ),
-                            html.Br(),
-                            html.Label("Search School:"),
-                            dcc.Dropdown(
-                                id='school_search',
-                                options=school_dropdown_options,
-                                placeholder='Search by School ID or Name',
-                                searchable=True
-                            ),
-                            html.Br(),
-                            dbc.Modal(
-                                id='school_modal',
-                                is_open=False,
-                                children=[
-                                    dbc.ModalHeader(dbc.ModalTitle(id='modal_school_name')),
-                                    dbc.ModalBody(id='modal_school_body'),
-                                    dbc.ModalFooter(
-                                        dbc.Button("Close", id="modal_close_btn", className="ms-auto", n_clicks=0)
-                                    )
-                                ]
-                            )
-                        ])
-                    ]),
-                    width=3
-                ),
-                # 📊 Tabs with Charts
-                
                 dbc.Col([
                     dcc.Tabs([
-                    dcc.Tab(label='📊 Overview', children=[
-                        # Region-wise Enrollment
-                        dbc.Card([dbc.CardBody([dcc.Graph(
-                            id='enrollment_bar_chart',
-                            figure=px.bar(
-                                data.groupby('Region').agg({'Total Male': 'sum', 'Total Female': 'sum'}).assign(
-                                    Total=lambda df: df['Total Male'] + df['Total Female']
-                                ).reindex(correct_region_order).reset_index(),
-                                x='Region',
-                                y='Total',
-                                title='Total Enrollment by Region',
-                                text='Total',
-                                color='Region'
-                            ).update_layout(xaxis_title='Region', yaxis_title='Total Enrollment')
-                        )])], className="mb-4"),
-                        # Gender Distribution Pie Chart
-                        dbc.Card([dbc.CardBody([dcc.Graph(
-                            id='gender_pie_chart',
-                            figure=px.pie(
-                                names=['Male', 'Female'],
-                                values=[
-                                    data[[col for col in data.columns if 'Male' in col]].sum().sum(),
-                                    data[[col for col in data.columns if 'Female' in col]].sum().sum()
-                                ],
-                                title='Total Learners by Gender',
-                                hole=0.6,
-                                color_discrete_sequence=['#3498db', '#e74c3c']
-                            ).update_traces(textinfo='percent+label')
-                        )])], className="mb-4"),                        
-                    ]),
-
+                        dcc.Tab(label='📊 Overview', children=[
+                            dbc.Card([dbc.CardBody([dcc.Graph(id='enrollment_bar_chart')])], className="mb-4"),
+                            dbc.Card([dbc.CardBody([dcc.Graph(id='gender_pie_chart')])], className="mb-4"),
+                        ]),
                         dcc.Tab(label='🧑‍🏫 SHS Track Analysis', children=[
-                        # SHS Track Total Enrollment Horizontal Bar Chart
-                        dbc.Card([dbc.CardBody([dcc.Graph(id='shs_track_bar_chart')])], className="mb-4"),
-
+                            dbc.Card([dbc.CardBody([dcc.Graph(id='shs_track_bar_chart')])], className="mb-4"),
                         ]),
                         dcc.Tab(label='🗺️ Regional & Division Insights', children=[
                             dbc.Card([dbc.CardBody([dcc.Graph(id='enrollment_vs_schools_chart')])], className="mb-4")
@@ -152,9 +142,8 @@ def dashboard_content(data, grade_options, region_options, school_dropdown_optio
                             )
                         ])
                     ])
-                ], width=9)
-            ]),
-
-            html.Hr()
+                ], width=12)
+            ])
         ]
     )
+
