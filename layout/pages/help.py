@@ -27,7 +27,7 @@ def help_content():
                             "Click Play to Watch the Tutorial",
                             style={
                                 "position": "absolute",
-                                "top": "15%",
+                                "top": "10%",
                                 "left": "50%",
                                 "transform": "translate(-50%, 0%)",
                                 "fontSize": "25px",
@@ -37,26 +37,60 @@ def help_content():
                                 "zIndex": "10",
                             }
                         ),
-                        # Footer overlay text (Contacts)
+
+                        # Bug report section (centered at the bottom, slightly above the contact info)
                         html.Div(
-                            "For More Information/Questions ---> Contact Us:  bdadashboarding@gmail.com",
+                            children=[
+                                html.A(
+                                    "Report a Problem",
+                                    href="mailto:bdadashboarding@gmail.com?subject=Bug Report&body=Please describe the bug or issue here...",
+                                    target="_blank",
+                                    style={
+                                        "display": "block",
+                                        "marginTop": "20px",
+                                        "fontSize": "20px",
+                                        "fontWeight": "bold",
+                                        "color": "#ffc107",
+                                        "padding": "5px 10px",
+                                        "borderRadius": "10px",
+                                        "whiteSpace": "nowrap",
+                                        "textShadow": "2px 2px 4px #333333",
+                                        "textAlign": "center",
+                                        "zIndex": "10",
+                                    }
+                                ),
+                            ],
                             style={
                                 "position": "absolute",
-                                "bottom": "10px",
-                                "left": "50%",
-                                "transform": "translateX(-50%)",
-                                "fontSize": "15px",
+                                "bottom": "60px",  # place it slightly above the Contact Us section
+                                "left": "50%",  # centered horizontally
+                                "transform": "translateX(-50%)",  # adjust to center
+                                "zIndex": "10",
+                                "textAlign": "center"
+                            }
+                        ),
+
+                        # Contact Info Footer (centered at the bottom)
+                        html.A(
+                            "Contact Us",
+                            href="mailto:bdadashboarding@gmail.com?subject=Dashboard Inquiry&body=Hi team, I have a question about...",
+                            target="_blank",
+                            style={
+                                "position": "absolute",
+                                "bottom": "10px",  # lower part of the screen
+                                "left": "50%",  # centered horizontally
+                                "transform": "translateX(-50%)",  # adjust to center
+                                "fontSize": "20px",
                                 "fontWeight": "bold",
-                                "color": "#fff",
-                                "textShadow": "1px 1px 3px #000",
-                                "backgroundColor": "rgba(0, 0, 0, 0.4)",
+                                "color": "#ffc107",
+                                "textShadow": "2px 2px 4px #333333",
                                 "padding": "5px 10px",
-                                "borderRadius": "5px",
-                                "whiteSpace": "nowrap",  # Ensures the text stays in one line
+                                "borderRadius": "10px",
+                                "whiteSpace": "nowrap",
                                 "zIndex": "10",
                             }
                         ),
-                        
+
                         html.Iframe(
                             src="https://www.youtube.com/embed/J04VwYS5GWk",
                             style={
@@ -67,7 +101,7 @@ def help_content():
                                 "width": "650px",
                                 "height": "400px",
                                 "border": "none",
-                                "boxShadow": "0 4px 10px rgba(0,0,0,0.5)"
+                                
                             },
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
                         )

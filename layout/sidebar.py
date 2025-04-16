@@ -41,7 +41,7 @@ def create_sidebar(is_collapsed=False, current_page=None):
         html.Button(
             [
                 DashIconify(icon="mdi:chart-areaspline", width=24),
-                html.Span("Analytics", className="navitem-text")
+                html.Span("Enrollment", className="navitem-text")
             ],
             id='btn-2',
             className="navitem" + (" active" if current_page == 2 else ""),
