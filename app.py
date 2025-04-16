@@ -448,5 +448,88 @@ def update_school_options(search_value):
         for _, row in sample.iterrows()
     ]
 
+
+@app.callback(
+    Output('top_schools_chart', 'figure'),
+    Input('region_filter', 'value'),
+    Input('grade_filter', 'value'),
+    Input('gender_filter', 'value')
+)
+def update_top_schools_chart(selected_regions, selected_grades, selected_gender):
+    filtered_data = data.copy()
+
+    if selected_regions:
+        filtered_data = filtered_data[filtered_data['Region'].isin(selected_regions)]
+
+    selected_cols = []
+    if selected_grades:
+        for grade in selected_grades:
+            if selected_gender == 'Male':
+                selected_cols += [col for col in grade_columns if grade in col and 'Male' in col]
+            elif selected_gender == 'Female':
+                selected_cols += [col for col in grade_columns if grade in col and 'Female' in col]
+            else:
+                selected_cols += [col for col in grade_columns if grade in col]
+    else:
+        selected_cols = [col for col in grade_columns if selected_gender in col] if selected_gender != 'All' else grade_columns
+
+    filtered_data['Filtered Enrollment'] = filtered_data[selected_cols].sum(axis=1)
+
+    # Top 5 schools by enrollment (regardless of sector)
+    top_schools_df = (
+        filtered_data.groupby(['School Name', 'Sector'], as_index=False)['Filtered Enrollment']
+        .sum()
+        .sort_values(by='Filtered Enrollment', ascending=False)
+        .head(5)
+    )
+
+    # Color scheme
+    colors = {
+        'Public': '#3498db',
+        'Private': '#e74c3c',
+        'SUCsLUCs': '#f1c40f'
+    }
+
+    # Create sector-based traces
+    fig = go.Figure()
+    for sector in ['Public', 'Private', 'SUCsLUCs']:
+        sector_data = top_schools_df[top_schools_df['Sector'] == sector]
+        if not sector_data.empty:
+            fig.add_trace(go.Bar(
+                y=sector_data['School Name'],
+                x=sector_data['Filtered Enrollment'],
+                name=sector,
+                orientation='h',
+                marker=dict(color=colors.get(sector, '#7f8c8d')),
+                text=sector_data['Filtered Enrollment'].map('{:,.0f}'.format),
+                textposition='inside',
+                hovertemplate='<b>%{y}</b><br>Enrollment: %{x:,}<extra></extra>'
+            ))
+
+    fig.update_layout(
+        title='Top 5 Schools by Enrollment',
+        barmode='stack',
+        showlegend=True,
+        legend_title_text='',
+        plot_bgcolor='white',
+        paper_bgcolor='white',
+        margin=dict(l=60, r=40, t=60, b=60),
+        xaxis=dict(title='Enrollment', gridcolor='rgba(0,0,0,0.05)'),
+        yaxis=dict(
+            categoryorder='array',
+            categoryarray=top_schools_df['School Name'].tolist()[::-1],
+            title='',
+            showgrid=False,
+            automargin=True,
+            ticklabelposition="outside left",
+            tickfont=dict(size=13, family="Arial"),
+            ticksuffix='  '
+        ),
+
+        font=dict(size=13),
+        legend=dict(orientation='h', y=-0.25, x=0.5, xanchor='center')
+    )
+    return fig
+
 if __name__ == "__main__":
     app.run(debug=True)

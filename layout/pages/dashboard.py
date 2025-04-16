@@ -149,6 +149,24 @@ def dashboard_content(data, grade_options, region_options, combined_shs_track_df
                             width=6
                         ),
                     ], className="mb-4"),
+                dbc.Row([
+                    dbc.Col(
+                        dbc.Card([
+                            dbc.CardBody([
+                                dcc.Loading(dcc.Graph(id='top_schools_chart'))
+                            ])
+                        ]),
+                        width=6
+                    ),
+                        dbc.Col(
+                            dbc.Card([
+                                dbc.CardBody([
+                                    dcc.Loading()
+                                ])
+                            ]),
+                            width=6
+                        ),
+                    ], className="mb-4"),
                 ]),
 
                 dcc.Tab(label='📋 Table View', children=[
