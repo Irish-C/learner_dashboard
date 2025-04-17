@@ -110,8 +110,6 @@ def dashboard_content(data, grade_options, region_options, combined_shs_track_df
 
 
             # ✅ Charts & Tabs
-            dcc.Tabs([
-                dcc.Tab(label='📊 Overview', children=[
                     dbc.Row([
                         dbc.Col(
                             dbc.Card([
@@ -148,46 +146,45 @@ def dashboard_content(data, grade_options, region_options, combined_shs_track_df
                             ]),
                             width=6
                         ),
+                            ], className="mb-4"),
+                        dbc.Row([
+                            dbc.Col(
+                                dbc.Card([
+                                    dbc.CardBody([
+                                        dcc.Loading(dcc.Graph(id='top_schools_chart'))
+                                    ])
+                                ]),
+                                width=6
+                            ),
+                                dbc.Col([
+                                    dbc.Card([
+                                        dbc.CardBody([
+                                            dcc.Loading(
+                                                dcc.Graph(id='sned_sector_chart'),
+                                                type="default"
+                                            )
+                                        ])
+                                    ], className="mb-4")
+                                ], width=6),
                     ], className="mb-4"),
                 dbc.Row([
-                    dbc.Col(
-                        dbc.Card([
-                            dbc.CardBody([
-                                dcc.Loading(dcc.Graph(id='top_schools_chart'))
-                            ])
-                        ]),
-                        width=6
-                    ),
-                        dbc.Col(
-                            dbc.Card([
-                                dbc.CardBody([
-                                    dcc.Loading()
-                                ])
-                            ]),
-                            width=6
-                        ),
-                    ], className="mb-4"),
-                ]),
-
-                dcc.Tab(label='📋 Table View', children=[
-                    html.H4("Enrollment Table"),
-                    dash_table.DataTable(
-                        id='enrollment_table',
-                        columns=[
-                            {'name': 'Region', 'id': 'Region'},
-                            {'name': 'Division', 'id': 'Division'},
-                            {'name': 'Total Male', 'id': 'Total Male', 'type': 'numeric'},
-                            {'name': 'Total Female', 'id': 'Total Female', 'type': 'numeric'},
-                            {'name': 'Total Enrollment', 'id': 'Total Enrollment', 'type': 'numeric'}
-                        ],
-                        data=data[['Region', 'Division', 'Total Male', 'Total Female', 'Total Enrollment']].to_dict('records'),
-                        page_size=10,
-                        sort_action='native',
-                        filter_action='native',
-                        style_table={'overflowX': 'auto'}
+                html.H4("Enrollment Table"),
+                dash_table.DataTable(
+                    id='enrollment_table',
+                    columns=[
+                        {'name': 'Region', 'id': 'Region'},
+                        {'name': 'Division', 'id': 'Division'},
+                        {'name': 'Total Male', 'id': 'Total Male', 'type': 'numeric'},
+                        {'name': 'Total Female', 'id': 'Total Female', 'type': 'numeric'},
+                        {'name': 'Total Enrollment', 'id': 'Total Enrollment', 'type': 'numeric'}
+                    ],
+                    data=data[['Region', 'Division', 'Total Male', 'Total Female', 'Total Enrollment']].to_dict('records'),
+                    page_size=10,
+                    sort_action='native',
+                    filter_action='native',
+                    style_table={'overflowX': 'auto'}
                     )
-                ])
-            ])])
+                ])])
 
 
 

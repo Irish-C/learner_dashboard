@@ -531,5 +531,65 @@ def update_top_schools_chart(selected_regions, selected_grades, selected_gender)
     )
     return fig
 
+@app.callback(
+    Output('sned_sector_chart', 'figure'),
+    Input('school_year_filter', 'value'),
+    Input('region_filter', 'value'),
+    Input('gender_filter', 'value')
+)
+def update_sned_sector_chart(selected_year, selected_regions, selected_gender):
+    filtered_df = data.copy()
+
+    if selected_year:
+        filtered_df = filtered_df[filtered_df['School Year'] == selected_year]
+    if selected_regions:
+        filtered_df = filtered_df[filtered_df['Region'].isin(selected_regions)]
+
+    # Select relevant columns for NG enrollment
+    male_ng_cols = [col for col in filtered_df.columns if 'NG' in col and 'Male' in col]
+    female_ng_cols = [col for col in filtered_df.columns if 'NG' in col and 'Female' in col]
+
+    if selected_gender == 'Male':
+        filtered_df['SNed'] = filtered_df[male_ng_cols].sum(axis=1)
+        gender_cols = ['SNed']
+        stack_name_map = {'SNed': 'Male'}
+    elif selected_gender == 'Female':
+        filtered_df['SNed'] = filtered_df[female_ng_cols].sum(axis=1)
+        gender_cols = ['SNed']
+        stack_name_map = {'SNed': 'Female'}
+    else:
+        filtered_df['SNed_Male'] = filtered_df[male_ng_cols].sum(axis=1)
+        filtered_df['SNed_Female'] = filtered_df[female_ng_cols].sum(axis=1)
+        gender_cols = ['SNed_Male', 'SNed_Female']
+        stack_name_map = {'SNed_Male': 'Male', 'SNed_Female': 'Female'}
+
+    # Group by sector and sum
+    grouped = filtered_df.groupby('Sector')[gender_cols].sum().reset_index()
+    melted = pd.melt(grouped, id_vars='Sector', var_name='Gender', value_name='Enrollment')
+    melted['Gender'] = melted['Gender'].map(stack_name_map)
+
+    fig = px.bar(
+        melted,
+        x='Sector',
+        y='Enrollment',
+        color='Gender',
+        barmode='stack',
+        text='Enrollment',
+        title='SNed Enrollment by School Sector and Gender'
+    )
+
+    fig.update_layout(
+        xaxis_title='School Sector',
+        yaxis_title='Total Enrollment',
+        plot_bgcolor='white',
+        paper_bgcolor='white',
+        font=dict(size=13),
+        legend_title_text='',
+        margin=dict(l=20, r=20, t=50, b=40)
+    )
+    fig.update_traces(texttemplate='%{text:,}', textposition='inside')
+    return fig
+
+
 if __name__ == "__main__":
     app.run(debug=True)
