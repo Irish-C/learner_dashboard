@@ -443,6 +443,10 @@ def update_school_options(search_value):
     Input('gender_filter', 'value')
 )
 def update_top_schools_chart(selected_regions, selected_grades, selected_gender):
+    filtered_data = data.copy()
+    if selected_regions:
+        filtered_data = filtered_data[filtered_data['Region'].isin(selected_regions)]
+
     selected_cols_male = []
     selected_cols_female = []
 
@@ -459,7 +463,6 @@ def update_top_schools_chart(selected_regions, selected_grades, selected_gender)
         selected_cols_female = [col for col in grade_columns if 'Female' in col]
 
     # Apply gender filtering to the DataFrame
-    filtered_data = data.copy()
     if selected_gender == 'Male':
         filtered_data['Filtered Enrollment'] = filtered_data[selected_cols_male].sum(axis=1)
     elif selected_gender == 'Female':
