@@ -760,42 +760,68 @@ region_mapping = {
     'Region XII': 'Soccsksargen'
 }
 
+import plotly.graph_objects as go
+
 @app.callback(
     Output('enrollment_choropleth_map', 'figure'),
     Input('region_filter', 'value')
 )
 def update_enrollment_choropleth(selected_regions):
-    # Start from the full dataset
+    # 1) Copy + remap region names
     df_sy = data.copy()
-
-    # Remap region names for consistency with GeoJSON
     df_sy['Region'] = df_sy['Region'].apply(lambda x: region_mapping.get(x, x))
 
-    # Apply region filter if provided
-    if selected_regions:
-        mapped_regions = [region_mapping.get(r, r) for r in selected_regions]
-        df_sy = df_sy[df_sy['Region'].isin(mapped_regions)]
-
-    # Group by Region to compute total enrollment
-    region_enrollment = df_sy.groupby('Region', as_index=False)['Total Enrollment'].sum()
-
-    # Create Choropleth Map
-    fig = px.choropleth(
-        data_frame=region_enrollment,
-        geojson=geojson_data,
-        featureidkey='properties.name',  # adjust to your GeoJSON property key
-        locations='Region',
-        color='Total Enrollment',
-        color_continuous_scale="Viridis",
-        projection="mercator",
-        hover_data={'Total Enrollment': True, 'Region': True}
+    # 2) Total enrollment for every region
+    full_enrollment = (
+        df_sy
+        .groupby('Region', as_index=False)['Total Enrollment']
+        .sum()
     )
 
-    fig.update_geos(fitbounds="locations", visible=False)
+    # 3) If a filter is applied, restrict to those regions; else use all
+    if selected_regions:
+        mapped = [region_mapping.get(r, r) for r in selected_regions]
+        region_enrollment = full_enrollment[full_enrollment['Region'].isin(mapped)]
+    else:
+        region_enrollment = full_enrollment.copy()
+
+    # 4) Build layered choropleth
+    fig = go.Figure()
+
+    # 4a) Base: all regions in light grey
+    fig.add_choropleth(
+        geojson=geojson_data,
+        locations=full_enrollment['Region'],
+        z=[0]*len(full_enrollment),            # dummy zeros
+        featureidkey='properties.name',
+        colorscale=[[0, 'lightgrey'], [1, 'lightgrey']],
+        showscale=False,
+        marker_line_width=0.5,
+        marker_line_color='white',
+        hoverinfo='none'
+    )
+
+    # 4b) Overlay: colored for selected/all regions
+    fig.add_choropleth(
+        geojson=geojson_data,
+        locations=region_enrollment['Region'],
+        z=region_enrollment['Total Enrollment'],
+        featureidkey='properties.name',
+        colorbar_title="Total Enrollment",
+        coloraxis="coloraxis"
+    )
+
+    # 5) Shared color axis and layout
     fig.update_layout(
+        coloraxis=dict(
+            colorscale="Viridis",
+            cmin=full_enrollment['Total Enrollment'].min(),
+            cmax=full_enrollment['Total Enrollment'].max()
+        ),
         title="Total Enrollment by Region",
-        height=500,
-        margin={"r":0,"t":50,"l":0,"b":0}
+        geo=dict(fitbounds="locations", visible=False),
+        margin={"r":0,"t":50,"l":0,"b":0},
+        height=500
     )
 
     return fig
