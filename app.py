@@ -8,6 +8,7 @@ from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 import pandas as pd
 import re
+import json
 
 from app_data import data, grade_columns, combined_shs_track_df, correct_region_order, grade_options
 
@@ -735,7 +736,69 @@ def update_k_to_12_distribution(selected_regions, selected_gender, selected_year
 
     return fig
 
+with open('ph.json', 'r', encoding='utf-8') as file:
+    geojson_data = json.load(file)
 
+# Mapping of DataFrame regions to GeoJSON regions
+region_mapping = {
+    'BARMM': 'Autonomous Region in Muslim Mindanao',
+    'CAR': 'Cordillera Administrative Region',
+    'CARAGA': 'Caraga',
+    'MIMAROPA': 'Mimaropa',
+    'NCR': 'National Capital Region',
+    'Region I': 'Ilocos',
+    'Region II': 'Cagayan Valley',
+    'Region III': 'Central Luzon',
+    'Region IV-A': 'Calabarzon',
+    'Region V': 'Bicol',
+    'Region VI': 'Western Visayas',
+    'Region VII': 'Central Visayas',
+    'Region VIII': 'Eastern Visayas',
+    'Region IX': 'Zamboanga Peninsula',
+    'Region X': 'Northern Mindanao',
+    'Region XI': 'Davao',
+    'Region XII': 'Soccsksargen'
+}
+
+@app.callback(
+    Output('enrollment_choropleth_map', 'figure'),
+    Input('region_filter', 'value')
+)
+def update_enrollment_choropleth(selected_regions):
+    # Start from the full dataset
+    df_sy = data.copy()
+
+    # Remap region names for consistency with GeoJSON
+    df_sy['Region'] = df_sy['Region'].apply(lambda x: region_mapping.get(x, x))
+
+    # Apply region filter if provided
+    if selected_regions:
+        mapped_regions = [region_mapping.get(r, r) for r in selected_regions]
+        df_sy = df_sy[df_sy['Region'].isin(mapped_regions)]
+
+    # Group by Region to compute total enrollment
+    region_enrollment = df_sy.groupby('Region', as_index=False)['Total Enrollment'].sum()
+
+    # Create Choropleth Map
+    fig = px.choropleth(
+        data_frame=region_enrollment,
+        geojson=geojson_data,
+        featureidkey='properties.name',  # adjust to your GeoJSON property key
+        locations='Region',
+        color='Total Enrollment',
+        color_continuous_scale="Viridis",
+        projection="mercator",
+        hover_data={'Total Enrollment': True, 'Region': True}
+    )
+
+    fig.update_geos(fitbounds="locations", visible=False)
+    fig.update_layout(
+        title="Total Enrollment by Region",
+        height=500,
+        margin={"r":0,"t":50,"l":0,"b":0}
+    )
+
+    return fig
 
 if __name__ == "__main__":
     app.run(debug=True)
