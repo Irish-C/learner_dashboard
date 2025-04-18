@@ -32,8 +32,7 @@ def dashboard_content(data, grade_options, region_options, combined_shs_track_df
                 "paddingLeft": "10px"
             }),
             dbc.Card(
-             [
-            dbc.CardBody(
+             [dbc.CardBody(
                 dbc.Row([
                     dbc.Col([
                         html.Label("School Year:"),
@@ -105,8 +104,13 @@ def dashboard_content(data, grade_options, region_options, combined_shs_track_df
             )
         ],
         className="mb-4 shadow-sm no-hover",
-        style={"padding": "10px", "borderRadius": "10px", "boxShadow": "none", "transition": "none"}
-    ),
+        style={"padding": "10px", 
+               "borderRadius": "10px", 
+                "position": "sticky",
+                "top": "30px", 
+                "zIndex": "1000",
+                "boxShadow": "0 4px 6px rgba(0, 0, 0, 0.1)"
+               }),
 
 
             # ✅ Charts & Tabs
