@@ -590,6 +590,71 @@ def update_sned_sector_chart(selected_year, selected_regions, selected_gender):
     fig.update_traces(texttemplate='%{text:,}', textposition='inside')
     return fig
 
+@app.callback(
+    Output('transition_rate_chart', 'figure'),
+    Input('school_year_filter', 'value'),
+    Input('region_filter', 'value'),
+    Input('gender_filter', 'value')
+)
+def update_transition_rate_chart(selected_sy, selected_regions, selected_gender):
+    df_sy_n = data[data['School Year'] == selected_sy]
+
+    # Previous year setup (mocked)
+    try:
+        previous_sy = str(int(selected_sy.split('-')[0]) - 1) + '-' + str(int(selected_sy.split('-')[1]) - 1)
+    except:
+        previous_sy = "N/A"
+    df_sy_n1 = data[data['School Year'] == previous_sy]
+
+    if selected_regions:
+        df_sy_n = df_sy_n[df_sy_n['Region'].isin(selected_regions)]
+        df_sy_n1 = df_sy_n1[df_sy_n1['Region'].isin(selected_regions)]
+
+    # Helper function
+    def gender_filter(df, grade_base):
+        if selected_gender == 'Male':
+            cols = [f"{grade_base} Male"]
+        elif selected_gender == 'Female':
+            cols = [f"{grade_base} Female"]
+        else:
+            cols = [f"{grade_base} Male", f"{grade_base} Female"]
+        return df[cols].sum().sum()
+
+    # Placeholder logic if no prev year exists
+    if df_sy_n1.empty:
+        tr_elem_jhs = 0
+        tr_jhs_shs = 0
+    else:
+        g6 = gender_filter(df_sy_n1, "G6")
+        g7 = gender_filter(df_sy_n, "G7")
+        tr_elem_jhs = (g7 / g6) * 100 if g6 else 0
+
+        g10 = gender_filter(df_sy_n1, "G10")
+        g11_cols = [col for col in df_sy_n.columns if "G11" in col and (selected_gender in col or selected_gender == 'All')]
+        g11 = df_sy_n[g11_cols].sum().sum()
+        tr_jhs_shs = (g11 / g10) * 100 if g10 else 0
+
+    fig = go.Figure()
+
+    fig.add_trace(go.Indicator(
+        mode="gauge+number+delta",
+        value=tr_elem_jhs,
+        domain={'x': [0, 0.5], 'y': [0, 1]},
+        title={'text': "Elementary to JHS"},
+        gauge={'axis': {'range': [None, 100]}, 'bar': {'color': "#1f77b4"}}
+    ))
+
+    fig.add_trace(go.Indicator(
+        mode="gauge+number+delta",
+        value=tr_jhs_shs,
+        domain={'x': [0.5, 1], 'y': [0, 1]},
+        title={'text': "JHS to SHS"},
+        gauge={'axis': {'range': [None, 100]}, 'bar': {'color': "#ff7f0e"}}
+    ))
+
+    fig.update_layout(title="Transition Rates (Placeholder as there are no previous year)", height=300)
+    return fig
+
 
 if __name__ == "__main__":
     app.run(debug=True)
