@@ -655,6 +655,87 @@ def update_transition_rate_chart(selected_sy, selected_regions, selected_gender)
     fig.update_layout(title="Transition Rates (Placeholder as there are no previous year)", height=300)
     return fig
 
+@app.callback(
+    Output('k_to_12_distribution_chart', 'figure'),
+    Input('region_filter', 'value'),
+    Input('gender_filter', 'value'),
+    Input('school_year_filter', 'value')
+)
+def update_k_to_12_distribution(selected_regions, selected_gender, selected_year):
+    filtered = data.copy()
+
+    if selected_year:
+        filtered = filtered[filtered['School Year'] == selected_year]
+    if selected_regions:
+        filtered = filtered[filtered['Region'].isin(selected_regions)]
+
+    # Define grade groupings
+    level_order = ['K', 'G1', 'G2', 'G3', 'G4', 'G5', 'G6', 'Elem NG',
+                   'G7', 'G8', 'G9', 'G10', 'JHS NG', 'G11', 'G12']
+    level_labels = {
+        'K': 'Kinder', 'G1': 'Grade 1', 'G2': 'Grade 2', 'G3': 'Grade 3', 'G4': 'Grade 4',
+        'G5': 'Grade 5', 'G6': 'Grade 6', 'Elem NG': 'NG-ES', 'G7': 'Grade 7',
+        'G8': 'Grade 8', 'G9': 'Grade 9', 'G10': 'Grade 10', 'JHS NG': 'NG-JHS',
+        'G11': 'Grade 11', 'G12': 'Grade 12'
+    }
+
+    level_group = {
+        'K': 'ES', 'G1': 'ES', 'G2': 'ES', 'G3': 'ES', 'G4': 'ES', 'G5': 'ES', 'G6': 'ES', 'Elem NG': 'ES',
+        'G7': 'JHS', 'G8': 'JHS', 'G9': 'JHS', 'G10': 'JHS', 'JHS NG': 'JHS',
+        'G11': 'SHS', 'G12': 'SHS'
+    }
+
+    records = []
+    for level in level_order:
+        male_cols = [col for col in data.columns if col.startswith(level) and 'Male' in col]
+        female_cols = [col for col in data.columns if col.startswith(level) and 'Female' in col]
+
+        if selected_gender == 'Male':
+            total = filtered[male_cols].sum().sum()
+        elif selected_gender == 'Female':
+            total = filtered[female_cols].sum().sum()
+        else:
+            total = filtered[male_cols + female_cols].sum().sum()
+
+        records.append({
+            'Level': level_labels[level],
+            'Enrollment': total,
+            'Group': level_group[level]
+        })
+
+    dist_df = pd.DataFrame(records)
+
+    fig = px.bar(
+        dist_df,
+        x='Level',
+        y='Enrollment',
+        color='Group',
+        category_orders={'Level': list(level_labels.values())},
+        color_discrete_map={'ES': '#a3c4f3', 'JHS': '#2a6fdb', 'SHS': '#071952'},
+        title='Enrollment Distribution Kinder to Grade 12 (include SNed)',
+        text='Enrollment'
+    )
+
+    fig.update_traces(
+        texttemplate='%{text:,}',
+        textposition='outside',
+        marker_line_width=0
+    )
+
+    fig.update_layout(
+        xaxis_title='',
+        yaxis_title='Enrollment',
+        plot_bgcolor='white',
+        paper_bgcolor='white',
+        margin=dict(l=20, r=20, t=50, b=20),
+        legend=dict(orientation='h', y=-0.2, x=0.5, xanchor='center'),
+        font=dict(size=13),
+        bargap=0.2
+    )
+
+    return fig
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)
