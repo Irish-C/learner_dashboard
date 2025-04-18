@@ -4,7 +4,7 @@ import re
 dataset_path = 'data.csv'
 data = pd.read_csv(dataset_path)
 
-grade_columns = [col for col in data.columns if re.match(r'^(K|G\d{1,2}|Elem NG|JHS NG)', col)]
+grade_columns = [col for col in data.columns if re.match(r'^(K|G1(?!\d)|G2|G3|G4|G5|G6|G7|G8|G9|G10|G11|G12|Elem NG|JHS NG)', col)]
 data['Total Male'] = data[[col for col in grade_columns if 'Male' in col]].sum(axis=1)
 data['Total Female'] = data[[col for col in grade_columns if 'Female' in col]].sum(axis=1)
 data['Total Enrollment'] = data['Total Male'] + data['Total Female']
@@ -27,8 +27,6 @@ correct_region_order = [
 
 region_options = [{'label': r, 'value': r} for r in correct_region_order if r in data['Region'].unique()]
 
-# Grade Columns for filtering
-grade_columns = [col for col in data.columns if re.match(r'^(K|G\d{1,2}|Elem NG|JHS NG)', col)]
 
 # Build optimized combined SHS dataframe with Region, Grade, Gender, Track, and School Year
 shs_track_records = []

@@ -176,24 +176,31 @@ def update_charts(selected_regions, selected_grades, selected_gender):
     if selected_regions:
         filtered_data = filtered_data[filtered_data['Region'].isin(selected_regions)]
 
-    selected_grade_cols = []
+    selected_cols_male = []
+    selected_cols_female = []
+
     if selected_grades:
         for grade in selected_grades:
-            if selected_gender == 'Male':
-                selected_grade_cols += [col for col in data.columns if grade in col and 'Male' in col]
-            elif selected_gender == 'Female':
-                selected_grade_cols += [col for col in data.columns if grade in col and 'Female' in col]
+            if grade in ['G11', 'G12']:
+                selected_cols_male += [col for col in data.columns if col.startswith(grade) and 'Male' in col]
+                selected_cols_female += [col for col in data.columns if col.startswith(grade) and 'Female' in col]
             else:
-                selected_grade_cols += [col for col in data.columns if grade in col]
-        filtered_data['Selected Grades Total'] = filtered_data[selected_grade_cols].sum(axis=1)
+                selected_cols_male += [f"{grade} Male"]
+                selected_cols_female += [f"{grade} Female"]
     else:
-        filtered_data['Selected Grades Total'] = filtered_data['Total Enrollment']
+        selected_cols_male = [col for col in grade_columns if 'Male' in col]
+        selected_cols_female = [col for col in grade_columns if 'Female' in col]
 
+    # Apply gender filtering to the DataFrame
+    filtered_data = data.copy()
     if selected_gender == 'Male':
-        filtered_data['Selected Grades Total'] = filtered_data[[col for col in grade_columns if 'Male' in col]].sum(axis=1)
+        filtered_data['Selected Grades Total'] = filtered_data[selected_cols_male].sum(axis=1)
     elif selected_gender == 'Female':
-        filtered_data['Selected Grades Total'] = filtered_data[[col for col in grade_columns if 'Female' in col]].sum(axis=1)
+        filtered_data['Selected Grades Total'] = filtered_data[selected_cols_female].sum(axis=1)
+    else:
+        filtered_data['Selected Grades Total'] = filtered_data[selected_cols_male + selected_cols_female].sum(axis=1)
 
+    # Group by Region
     agg_data = filtered_data.groupby('Region')['Selected Grades Total'].sum().reset_index()
 
 # Bar chart
@@ -211,12 +218,6 @@ def update_charts(selected_regions, selected_grades, selected_gender):
     bar_chart.update_layout(xaxis_title='Region', yaxis_title='Total Enrollment')
 
     # Pie Chart
-    if selected_grades:
-        selected_cols_male = [col for col in data.columns if any(g in col for g in selected_grades) and 'Male' in col]
-        selected_cols_female = [col for col in data.columns if any(g in col for g in selected_grades) and 'Female' in col]
-    else:
-        selected_cols_male = [col for col in grade_columns if 'Male' in col]
-        selected_cols_female = [col for col in grade_columns if 'Female' in col]
     total_male = filtered_data[selected_cols_male].sum().sum()
     total_female = filtered_data[selected_cols_female].sum().sum()
     pie_chart = px.pie(
@@ -226,31 +227,16 @@ def update_charts(selected_regions, selected_grades, selected_gender):
         hole=0.6,
         color_discrete_sequence=['#b0cfff', '#f9c9e2']
     )
-
     # Filter by selected regions
     if selected_regions:
         filtered_data = filtered_data[filtered_data['Region'].isin(selected_regions)]
-
-    # Determine relevant columns based on selected grades and gender
-    selected_columns = []
-    if selected_grades:
-        for grade in selected_grades:
-            if selected_gender == 'Male':
-                selected_columns += [col for col in data.columns if grade in col and 'Male' in col]
-            elif selected_gender == 'Female':
-                selected_columns += [col for col in data.columns if grade in col and 'Female' in col]
-            else:
-                selected_columns += [col for col in data.columns if grade in col]
+    
+    if selected_gender == 'Male':
+        filtered_data['Selected Grades Total'] = filtered_data[selected_cols_male].sum(axis=1)
+    elif selected_gender == 'Female':
+        filtered_data['Selected Grades Total'] = filtered_data[selected_cols_female].sum(axis=1)
     else:
-        if selected_gender == 'Male':
-            selected_columns = [col for col in grade_columns if 'Male' in col]
-        elif selected_gender == 'Female':
-            selected_columns = [col for col in grade_columns if 'Female' in col]
-        else:
-            selected_columns = grade_columns
-
-    # Calculate total enrollment based on selected columns
-    filtered_data['Selected Grades Total'] = filtered_data[selected_columns].sum(axis=1)
+        filtered_data['Selected Grades Total'] = filtered_data[selected_cols_male + selected_cols_female].sum(axis=1)
 
     # Group by Division and Region
     agg_division = filtered_data.groupby(['Division', 'Region']).agg({
@@ -457,24 +443,29 @@ def update_school_options(search_value):
     Input('gender_filter', 'value')
 )
 def update_top_schools_chart(selected_regions, selected_grades, selected_gender):
-    filtered_data = data.copy()
+    selected_cols_male = []
+    selected_cols_female = []
 
-    if selected_regions:
-        filtered_data = filtered_data[filtered_data['Region'].isin(selected_regions)]
-
-    selected_cols = []
     if selected_grades:
         for grade in selected_grades:
-            if selected_gender == 'Male':
-                selected_cols += [col for col in grade_columns if grade in col and 'Male' in col]
-            elif selected_gender == 'Female':
-                selected_cols += [col for col in grade_columns if grade in col and 'Female' in col]
+            if grade in ['G11', 'G12']:
+                selected_cols_male += [col for col in data.columns if col.startswith(grade) and 'Male' in col]
+                selected_cols_female += [col for col in data.columns if col.startswith(grade) and 'Female' in col]
             else:
-                selected_cols += [col for col in grade_columns if grade in col]
+                selected_cols_male += [f"{grade} Male"]
+                selected_cols_female += [f"{grade} Female"]
     else:
-        selected_cols = [col for col in grade_columns if selected_gender in col] if selected_gender != 'All' else grade_columns
+        selected_cols_male = [col for col in grade_columns if 'Male' in col]
+        selected_cols_female = [col for col in grade_columns if 'Female' in col]
 
-    filtered_data['Filtered Enrollment'] = filtered_data[selected_cols].sum(axis=1)
+    # Apply gender filtering to the DataFrame
+    filtered_data = data.copy()
+    if selected_gender == 'Male':
+        filtered_data['Filtered Enrollment'] = filtered_data[selected_cols_male].sum(axis=1)
+    elif selected_gender == 'Female':
+        filtered_data['Filtered Enrollment'] = filtered_data[selected_cols_female].sum(axis=1)
+    else:
+        filtered_data['Filtered Enrollment'] = filtered_data[selected_cols_male + selected_cols_female].sum(axis=1)
 
     # Top 5 schools by enrollment (regardless of sector)
     top_schools_df = (
@@ -688,8 +679,14 @@ def update_k_to_12_distribution(selected_regions, selected_gender, selected_year
 
     records = []
     for level in level_order:
-        male_cols = [col for col in data.columns if col.startswith(level) and 'Male' in col]
-        female_cols = [col for col in data.columns if col.startswith(level) and 'Female' in col]
+        if level in ['G11', 'G12']:
+            male_cols = [col for col in data.columns if col.startswith(level) and 'Male' in col]
+            female_cols = [col for col in data.columns if col.startswith(level) and 'Female' in col]
+        else:
+            male_cols = [col for col in data.columns if col == f"{level} Male"]
+            female_cols = [col for col in data.columns if col == f"{level} Female"]
+
+
 
         if selected_gender == 'Male':
             total = filtered[male_cols].sum().sum()
