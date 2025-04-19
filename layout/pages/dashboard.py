@@ -205,6 +205,19 @@ def dashboard_content(data, grade_options, region_options, combined_shs_track_df
                             width=12
                         )
                     ], className="mb-4"),
+                    dbc.Row([
+                        dbc.Col(
+                            dbc.Card([
+                                dbc.CardBody([
+                                    dcc.Loading(
+                                        dcc.Graph(id='coc_sector_chart'),
+                                        type='default'
+                                    )
+                                ])
+                            ]),
+                            width=12
+                        )
+                    ], className="mb-4"),
 
                 dbc.Row([
                 html.H4("Enrollment Table"),

@@ -826,5 +826,57 @@ def update_enrollment_choropleth(selected_regions):
 
     return fig
 
+#Stacked bar chart of school offerings by COC
+@app.callback(
+    Output('coc_sector_chart', 'figure'),
+    Input('school_year_filter', 'value'),
+    Input('region_filter', 'value'),
+    Input('grade_filter', 'value'),
+    Input('gender_filter', 'value')
+)
+def update_coc_sector_chart(selected_sy, selected_regions, selected_grades, selected_gender):
+    # Filter dataset based on controls
+    df = data.copy()
+    df = df[df['School Year'] == selected_sy]
+    if selected_regions:
+        mapped = [region_mapping.get(r, r) for r in selected_regions]
+        df = df[df['Region'].isin(mapped)]
+    if selected_grades:
+        df = df[df['Grade Level'].isin(selected_grades)]
+    if selected_gender != 'All':
+        df = df[df['Gender'] == selected_gender]
+
+    # Count schools by COC category and sector
+    df_counts = (
+        df
+        .groupby(['Modified COC', 'Sector'])
+        .size()
+        .reset_index(name='Count')
+    )
+    # Ensure categories order
+    coc_order = ['Purely ES', 'Purely JHS', 'Purely SHS', 'ES and JHS', 'JHS with SHS', 'All Offering']
+    df_counts['Modified COC'] = pd.Categorical(df_counts['Modified COC'], categories=coc_order, ordered=True)
+    df_counts = df_counts.sort_values('Modified COC')
+
+    # Create stacked bar
+    fig = px.bar(
+        df_counts,
+        x='Modified COC',
+        y='Count',
+        color='Sector',
+        category_orders={'Modified COC': coc_order, 'Sector': ['Public', 'Private', 'SUCsLUCs']},
+        labels={'Count': 'Number of Schools', 'Modified COC': 'COC Offering', 'Sector': 'Sector'},
+        barmode='stack'
+    )
+    fig.update_layout(
+        title='School Offerings by COC Type and Sector',
+        xaxis_title=None,
+        yaxis_title='Number of Schools',
+        legend_title='Sector',
+        margin=dict(l=40, r=20, t=50, b=40),
+        height=400
+    )
+    return fig
+
 if __name__ == "__main__":
     app.run(debug=True)
