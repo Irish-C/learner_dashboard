@@ -213,7 +213,7 @@ def update_charts(selected_regions, selected_grades, selected_gender):
         color_discrete_sequence=['#b0cfff', '#f9c9e2']
     )
 
-    pie_chart.update_traces(textinfo='percent+label')
+    pie_chart.update_traces(textinfo='percent')
 
     pie_chart.update_layout(
         margin=dict(t=30, b=0, l=0, r=0),
