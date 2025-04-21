@@ -22,7 +22,7 @@ def dashboard_content(data, grade_options, region_options, combined_shs_track_df
             html.Br(),
 
             # ✅ KPI Cards (dynamic via callback)
-            dcc.Loading(html.Div(id='kpi_card_row', className='mb-4')),
+            html.Div(id='kpi_card_row', className='mb-4'),
             # ✅ Row-based Filter Panel (new layout)
             html.Div("Filter Control Panel", style={
                 "fontWeight": "600",

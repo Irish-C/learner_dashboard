@@ -266,8 +266,34 @@ def update_charts(selected_regions, selected_grades, selected_gender):
     # Aggregate stats
     total_students = int(filtered_data['Selected Grades Total'].sum())
     total_schools = filtered_data['BEIS School ID'].nunique()
-    most_enrolled_region = filtered_data.groupby('Region')['Selected Grades Total'].sum().idxmax()
     region_total = filtered_data.groupby('Region')['Selected Grades Total'].sum().max()
+
+    # 🔓 Use full dataset to get the true most enrolled region (before filtering by selected_regions)
+    full_region_data = data.copy()
+
+    # Optional: filter by gender and grades, but NOT by region
+    selected_cols = []
+    if selected_grades:
+        for grade in selected_grades:
+            if grade in ['G11', 'G12']:
+                selected_cols += [col for col in full_region_data.columns if col.startswith(grade)]
+            else:
+                selected_cols += [f"{grade} Male", f"{grade} Female"]
+    else:
+        selected_cols = grade_columns
+
+    if selected_gender == 'Male':
+        full_region_data['Selected Grades Total'] = full_region_data[[col for col in selected_cols if 'Male' in col]].sum(axis=1)
+    elif selected_gender == 'Female':
+        full_region_data['Selected Grades Total'] = full_region_data[[col for col in selected_cols if 'Female' in col]].sum(axis=1)
+    else:
+        full_region_data['Selected Grades Total'] = full_region_data[[col for col in selected_cols]].sum(axis=1)
+
+    # 🔍 Calculate most enrolled region regardless of region filter
+    region_enrollment = full_region_data.groupby('Region')['Selected Grades Total'].sum()
+    most_enrolled_region = region_enrollment.idxmax()
+    region_total = region_enrollment.max()
+
 
     # KPI Cards (now with Region card inside the 3-col row)
     kpi_cards = dbc.Row([
