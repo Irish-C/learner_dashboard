@@ -837,14 +837,35 @@ def update_enrollment_choropleth(selected_regions):
 def update_coc_sector_chart(selected_sy, selected_regions, selected_grades, selected_gender):
     # Filter dataset based on controls
     df = data.copy()
+
     df = df[df['School Year'] == selected_sy]
+
     if selected_regions:
-        mapped = [region_mapping.get(r, r) for r in selected_regions]
-        df = df[df['Region'].isin(mapped)]
+        df = df[df['Region'].isin(selected_regions)]
+
+    selected_cols_male = []
+    selected_cols_female = []
+
     if selected_grades:
-        df = df[df['Grade Level'].isin(selected_grades)]
-    if selected_gender != 'All':
-        df = df[df['Gender'] == selected_gender]
+        for grade in selected_grades:
+            if grade in ['G11', 'G12']:
+                selected_cols_male += [col for col in data.columns if col.startswith(grade) and 'Male' in col]
+                selected_cols_female += [col for col in data.columns if col.startswith(grade) and 'Female' in col]
+            else:
+                selected_cols_male += [f"{grade} Male"]
+                selected_cols_female += [f"{grade} Female"]
+    else:
+        selected_cols_male = [col for col in grade_columns if 'Male' in col]
+        selected_cols_female = [col for col in grade_columns if 'Female' in col]
+    
+    if selected_gender == 'Male':
+        df['Selected Grades Total'] = df[selected_cols_male].sum(axis=1)
+    elif selected_gender == 'Female':
+        df['Selected Grades Total'] = df[selected_cols_female].sum(axis=1)
+    else:
+        df['Selected Grades Total'] = df[selected_cols_male + selected_cols_female].sum(axis=1)
+
+    df = df[df['Selected Grades Total'] > 0]
 
     # Count schools by COC category and sector
     df_counts = (
