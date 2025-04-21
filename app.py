@@ -218,6 +218,8 @@ def update_charts(selected_regions, selected_grades, selected_gender):
     bar_chart.update_layout(xaxis_title='Region', yaxis_title='Total Enrollment')
 
     # Pie Chart
+    if selected_regions:
+        filtered_data = filtered_data[filtered_data['Region'].isin(selected_regions)]
     total_male = filtered_data[selected_cols_male].sum().sum()
     total_female = filtered_data[selected_cols_female].sum().sum()
     pie_chart = px.pie(
