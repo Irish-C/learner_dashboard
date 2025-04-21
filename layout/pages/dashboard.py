@@ -118,17 +118,23 @@ def dashboard_content(data, grade_options, region_options, combined_shs_track_df
                         dbc.Col(
                             dbc.Card([
                                 dbc.CardBody([
-                                    dcc.Loading(dcc.Graph(id='enrollment_bar_chart'))
+                                    dcc.Loading(dcc.Graph(id='enrollment_choropleth_map'))
                                 ])
                             ]),
-                            width=6),
+                            width=8),
                         dbc.Col(
                             dbc.Card([
                                 dbc.CardBody([
-                                    dcc.Loading(dcc.Graph(id='gender_pie_chart'))
+                                    dcc.Loading(
+                                    dcc.Graph(id='gender_pie_chart', config={'displayModeBar': False}),
+                                    type='default'
+                                )
+
                                 ])
                             ]),
-                            width=6),
+                                width=4,
+                                style={'height': '2px', "padding": "0.3rem"} 
+                            )
                     ], className="mb-4"),
                     dbc.Row([
                         dbc.Col(
@@ -185,19 +191,6 @@ def dashboard_content(data, grade_options, region_options, combined_shs_track_df
                                 dbc.CardBody([
                                     dcc.Loading(
                                         dcc.Graph(id='transition_rate_chart'),
-                                        type='default'
-                                    )
-                                ])
-                            ]),
-                            width=12
-                        )
-                    ], className="mb-4"),
-                    dbc.Row([
-                        dbc.Col(
-                            dbc.Card([
-                                dbc.CardBody([
-                                    dcc.Loading(
-                                        dcc.Graph(id='enrollment_choropleth_map'),
                                         type='default'
                                     )
                                 ])

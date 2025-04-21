@@ -161,8 +161,7 @@ def navigate(n_dashboard, n_enrollment, n_help, n_settings, current_path):
 
 # Dashboard Page
 @app.callback(
-    [Output('enrollment_bar_chart', 'figure'),
-     Output('gender_pie_chart', 'figure'),
+    [Output('gender_pie_chart', 'figure'),
      Output('enrollment_vs_schools_chart', 'figure'),
      Output('kpi_card_row', 'children')],
     [Input('region_filter', 'value'),
@@ -199,23 +198,6 @@ def update_charts(selected_regions, selected_grades, selected_gender):
         filtered_data['Selected Grades Total'] = filtered_data[selected_cols_female].sum(axis=1)
     else:
         filtered_data['Selected Grades Total'] = filtered_data[selected_cols_male + selected_cols_female].sum(axis=1)
-
-    # Group by Region
-    agg_data = filtered_data.groupby('Region')['Selected Grades Total'].sum().reset_index()
-
-# Bar chart
-    region_order_to_use = correct_region_order if agg_data['Region'].nunique() > 10 else None
-    bar_chart = px.bar(
-        agg_data,
-        x='Region',
-        y='Selected Grades Total',
-        title='Enrollment Distribution by Region (Choropleth)',
-        color='Region',
-        text='Selected Grades Total',
-        category_orders={'Region': region_order_to_use} if region_order_to_use else {}
-    )
-
-    bar_chart.update_layout(xaxis_title='Region', yaxis_title='Total Enrollment')
 
     # Pie Chart
     if selected_regions:
@@ -322,7 +304,7 @@ def update_charts(selected_regions, selected_grades, selected_gender):
             style={"marginBottom": "15px"}
         ),
     ], justify="center", align="start")
-    return bar_chart, pie_chart, fig_combo, kpi_cards
+    return pie_chart, fig_combo, kpi_cards
 
 # Dashboard Page
 @app.callback(
