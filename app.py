@@ -211,6 +211,15 @@ def update_charts(selected_regions, selected_grades, selected_gender):
         hole=0.6,
         color_discrete_sequence=['#b0cfff', '#f9c9e2']
     )
+
+    pie_chart.update_traces(textinfo='percent+label')
+
+    pie_chart.update_layout(
+        margin=dict(t=40, b=20, l=0, r=0),
+        height=250,  # or adjust for your visual preference
+        showlegend=True  # set to False if pie labels suffice
+    )
+
     # Filter by selected regions
     if selected_regions:
         filtered_data = filtered_data[filtered_data['Region'].isin(selected_regions)]
