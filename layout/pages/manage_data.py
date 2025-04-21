@@ -1,18 +1,7 @@
 import dash_bootstrap_components as dbc
 from dash import html, dcc
 import pandas as pd
-
-schools_df = pd.read_csv("schools.csv")
-
-region_options = [{'label': r, 'value': r} for r in sorted(schools_df['Region'].dropna().unique())]
-division_options = [{'label': d, 'value': d} for d in sorted(schools_df['Division'].dropna().unique())]
-barangay_options = [{'label': b, 'value': b} for b in sorted(schools_df['Barangay'].dropna().unique())]
-school_options = [{'label': name, 'value': sid} for sid, name in zip(schools_df['BEIS School ID'], schools_df['School Name'])]
-
-grade_options = [{'label': f'Grade {g}', 'value': f'G{g}'} for g in range(1, 13)]
-grade_options.insert(0, {'label': 'Kinder', 'value': 'K'})
-gender_options = [{'label': 'Male', 'value': 'Male'}, {'label': 'Female', 'value': 'Female'}]
-
+from app_data import region_options,division_options,barangay_options,school_options,gender_options,grade_options
 form_layout = dbc.Container([
     html.H3("Add New Enrollment Entry", className="mb-3"),
     dbc.Row([
@@ -37,68 +26,56 @@ form_layout = dbc.Container([
 ], fluid=True)
 
 
-def manage_data_content():
-    return html.Div(children=[
+def manage_data_content(region_options, division_options, school_options, barangay_options):
+    return dbc.Container([
         html.H1("Manage Data Page", className="page-title"),
-        dbc.Card([
-                    dbc.CardBody([
-                        dbc.Row([
-                            dbc.Col([
-                                html.Label("School Year"),
-                                dcc.Input(id='input-year', type='text', placeholder='e.g., 2023-2024', className='form-control')
-                            ]),
-                            dbc.Col([
-                                html.Label("Region"),
-                                dcc.Dropdown(id='input-region', className='form-control')
-                            ]),
-                            dbc.Col([
-                                html.Label("Division"),
-                                dcc.Dropdown(id='input-division', className='form-control')
-                            ])
-                        ], className='mb-3'),
-
-                        dbc.Row([
-                            dbc.Col([
-                                html.Label("School Name"),
-                                dcc.Dropdown(id='input-school-name', className='form-control')
-                            ]),
-                            dbc.Col([
-                                html.Label("Barangay"),
-                                dcc.Dropdown(id='input-barangay', className='form-control')
-                            ])
-                        ], className='mb-3'),
-
-                        dbc.Row([
-                            dbc.Col([
-                                html.Label("Grade Level"),
-                                dcc.Dropdown(
-                                    id='input-grade-level',
-                                    options=[
-                                        {'label': f'Grade {i}', 'value': f'G{i}'} for i in range(1, 13)
-                                    ] + [{'label': 'Kinder', 'value': 'K'}],
-                                    className='form-control'
-                                )
-                            ]),
-                            dbc.Col([
-                                html.Label("Gender"),
-                                dcc.Dropdown(
-                                    id='input-gender',
-                                    options=[{'label': 'Male', 'value': 'Male'}, {'label': 'Female', 'value': 'Female'}],
-                                    className='form-control'
-                                )
-                            ]),
-                            dbc.Col([
-                                html.Label("Enrollment Count"),
-                                dcc.Input(id='input-enrollment', type='number', placeholder='Enter number', className='form-control')
-                            ])
-                        ], className='mb-3'),
-
-                        html.Div([
-                            dbc.Button("Submit Entry", id='submit-entry-btn', color='primary'),
-                            html.Div(id='submit-success-message', className='mt-3')
-                        ])
-                    ])
-                ])
-            ])
-
-print("Manage Data loaded...")
+        html.H3("Add New Enrollment Record", className="mb-4"),
+        dbc.Row([
+            dbc.Col([
+                dbc.Label("Region"),
+                dcc.Dropdown(id='input_region', options=region_options, placeholder="Select Region")
+            ]),
+            dbc.Col([
+                dbc.Label("Division"),
+                dcc.Dropdown(id='input_division', options=division_options, placeholder="Select Division")
+            ]),
+        ], className="mb-3"),
+        dbc.Row([
+            dbc.Col([
+                dbc.Label("School Name"),
+                dcc.Dropdown(id='input_school_name', options=school_options, placeholder="Select School")
+            ]),
+            dbc.Col([
+                dbc.Label("Barangay"),
+                dcc.Dropdown(id='input_barangay', options=barangay_options, placeholder="Select Barangay")
+            ]),
+        ], className="mb-3"),
+        dbc.Row([
+            dbc.Col([
+                dbc.Label("School Year"),
+                dcc.Input(id='input_school_year', type='text', placeholder="e.g., 2024-2025", className="form-control")
+            ]),
+            dbc.Col([
+                dbc.Label("Grade Level"),
+                dcc.Dropdown(id='input_grade', options=[{'label': f'Grade {i}', 'value': f'G{i}'} for i in range(1, 13)],
+                             placeholder="Select Grade")
+            ]),
+            dbc.Col([
+                dbc.Label("Gender"),
+                dcc.Dropdown(id='input_gender', options=[
+                    {'label': 'Male', 'value': 'Male'},
+                    {'label': 'Female', 'value': 'Female'}
+                ], placeholder="Select Gender")
+            ]),
+        ], className="mb-3"),
+        dbc.Row([
+            dbc.Col([
+                dbc.Label("Enrollment Count"),
+                dcc.Input(id='input_enrollment', type='number', placeholder="Enter Enrollment Count", className="form-control")
+            ]),
+        ], className="mb-3"),
+        dbc.Button("Submit", id="submit_data_btn", color="primary", className="mt-3"),
+        html.Div(id='submission_status', className="mt-3")
+    ])
+    
+print("Manage Data loaded...")        
