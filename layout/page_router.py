@@ -1,7 +1,7 @@
 from dash import html
 from layout.pages import (
     dashboard_content,
-    enrollment_content,
+    manage_data_content,
     help_content,
     settings_content,
 )
@@ -19,8 +19,8 @@ def get_content_style(is_collapsed):
 def create_content(page, data, grade_options, region_options, combined_shs_track_df):
     if page == "dashboard":
         return dashboard_content(data, grade_options, region_options, combined_shs_track_df)
-    elif page == "enrollment":
-        return enrollment_content()
+    elif page == "manage_data":
+        return manage_data_content()
     elif page == "help":
         return help_content()
     elif page == "settings":

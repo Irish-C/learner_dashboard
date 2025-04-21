@@ -16,23 +16,19 @@ def create_sidebar(is_collapsed=False, current_page=None):
         "textAlign": "left" if not is_collapsed else "center",
     }
 
-    toggle_icon = DashIconify(
-        icon="mdi:menu-open" if is_collapsed else "mdi:menu-close",
-        width=24,
-        style={"margin": "10px 0", "marginLeft": "5px"}
-    )
+    toggle_icon = html.Span("\u2630", style={"marginTop": "0px", "marginBottom": "50px"}) if is_collapsed else html.Span("\u00AB", style={"marginTop": "50px"})
 
     toggle_button = html.Button(
-        toggle_icon,
+        html.Span(toggle_icon, style={"fontSize": "1.2rem"}),
         id='sidebar-toggle',
         className="sidebar-toggle-button"
     )
 
-
+    # Define menu items with active state
     menu_items = html.Div([
         html.Button(
             [
-                DashIconify(icon="mdi:view-dashboard", width=24),  # Rounded dashboard icon
+                DashIconify(icon="mdi:view-dashboard", width=24),
                 html.Span("Dashboard", className="navitem-text")
             ],
             id='btn-1',
@@ -40,8 +36,8 @@ def create_sidebar(is_collapsed=False, current_page=None):
         ),
         html.Button(
             [
-                DashIconify(icon="mdi:chart-areaspline", width=24),
-                html.Span("Enrollment", className="navitem-text")
+                DashIconify(icon="mdi:database-edit", width=24),
+                html.Span("EduData", className="navitem-text")
             ],
             id='btn-2',
             className="navitem" + (" active" if current_page == 2 else ""),
@@ -56,7 +52,7 @@ def create_sidebar(is_collapsed=False, current_page=None):
         ),
         html.Button(
             [
-                DashIconify(icon="mdi:cogs", width=24),
+                DashIconify(icon="mdi:cog-outline", width=24),
                 html.Span("Settings", className="navitem-text")
             ],
             id='btn-4',

@@ -19,7 +19,7 @@ from layout import header, page_router, sidebar
 # Mapping of numeric values to page names
 PAGE_CONSTANTS = {
     1: 'dashboard',
-    2: 'enrollment',
+    2: 'manage_data',
     3: 'help',
     4: 'settings'
 }
@@ -149,7 +149,7 @@ def navigate(n_dashboard, n_enrollment, n_help, n_settings, current_path):
         button_id = ctx.triggered[0]['prop_id'].split('.')[0]
         if button_id == 'btn-1':  # Redirect to '1' (Dashboard)
             return f'/1'
-        elif button_id == 'btn-2':  # Redirect to '2' (Enrollment)
+        elif button_id == 'btn-2':  # Redirect to '2' (Manage Data)
             return f'/2'
         elif button_id == 'btn-3':  # Redirect to '3' (Help)
             return f'/3'
