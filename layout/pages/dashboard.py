@@ -234,6 +234,3 @@ def dashboard_content(data, grade_options, region_options, combined_shs_track_df
                     style_table={'overflowX': 'auto'}
                     )
                 ])])])
-
-
-
