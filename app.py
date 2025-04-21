@@ -275,13 +275,35 @@ def update_charts(selected_regions, selected_grades, selected_gender):
             dbc.Card(
                 dbc.CardBody([
                     html.Div([
-                        html.I(className="fas fa-user-graduate", style={"fontSize": "30px", "color": "#007BFF", "marginRight": "10px"}),
-                        html.H5("Total Learners", style={"color": "var(--gray-color)"}),
-                        html.H2(f"{total_students:,}", style={"color": "var(--blue-color)"})
-                    ])
+                        html.I(className="fas fa-user-graduate", style={
+                            "fontSize": "30px",
+                            "color": "var(--green-color)",
+                            "marginBottom": "10px"
+                        }),
+                        html.H5("Total Enrolled", style={
+                            "color": "var(--gray-color)",
+                            "margin": "0",
+                            "fontWeight": "bold"
+                        }),
+                        html.H2(f"{total_students:,}", style={
+                            "color": "var(--green-color)",
+                            "margin": "0"
+                        })
+                    ], style={
+                        "display": "flex",
+                        "flexDirection": "column",
+                        "alignItems": "center",
+                        "justifyContent": "center",
+                        "height": "100%"
+                    })
                 ]),
                 color="light",
-                style={"borderRadius": "10px", "boxShadow": "0px 4px 6px rgba(0, 0, 0, 0.1)"}
+                style={
+                    "borderRadius": "10px",
+                    "boxShadow": "0px 4px 6px rgba(0, 0, 0, 0.1)",
+                    "borderBottom": "5px solid #28a745",
+                    "padding": "10px"
+                }
             ),
             width=4, style={"marginBottom": "15px"}
         ),
@@ -289,13 +311,35 @@ def update_charts(selected_regions, selected_grades, selected_gender):
             dbc.Card(
                 dbc.CardBody([
                     html.Div([
-                        html.I(className="fas fa-school", style={"fontSize": "30px", "color": "#007BFF", "marginRight": "10px"}),
-                        html.H5("Total Schools", style={"color": "var(--gray-color)"}),
-                        html.H2(f"{total_schools:,}", style={"color": "var(--blue-color)"})
-                    ])
+                        html.I(className="fas fa-school", style={
+                            "fontSize": "30px",
+                            "color": "var(--yellow-color)",
+                            "marginBottom": "10px"
+                        }),
+                        html.H5("Total Schools", style={
+                            "color": "var(--gray-color)",
+                            "margin": "0",
+                            "fontWeight": "bold"
+                        }),
+                        html.H2(f"{total_schools:,}", style={
+                            "color": "var(--yellow-color)",
+                            "margin": "0"
+                        })
+                    ], style={
+                        "display": "flex",
+                        "flexDirection": "column",
+                        "alignItems": "center",
+                        "justifyContent": "center",
+                        "height": "100%"
+                    })
                 ]),
                 color="light",
-                style={"borderRadius": "10px", "boxShadow": "0px 4px 6px rgba(0, 0, 0, 0.1)"}
+                style={
+                    "borderRadius": "10px",
+                    "boxShadow": "0px 4px 6px rgba(0, 0, 0, 0.1)",
+                    "borderBottom": "5px solid #ffc107",
+                    "padding": "10px"
+                }
             ),
             width=4, style={"marginBottom": "15px"}
         ),
@@ -303,16 +347,41 @@ def update_charts(selected_regions, selected_grades, selected_gender):
             dbc.Card(
                 dbc.CardBody([
                     html.Div([
-                        html.H6("Most Enrolled Region as of (school year)", className="card-subtitle mb-2 text-muted text-center"),
-                        html.H4(f"{most_enrolled_region}: {region_total/1000:.2f}k", className="card-title text-center")
-                    ])
+                        html.I(className="fas fa-map-marked-alt", style={
+                            "fontSize": "35px",
+                            "color": "#e74c3c",
+                            "marginBottom": "10px"
+                        }),
+                        html.H5("Most Enrolled Region as of (school year)", style={
+                            "color": "var(--gray-color)",
+                            "margin": "0",
+                            "fontWeight": "bold"
+
+                        }),
+                        html.H3(f"{most_enrolled_region}: {region_total/1000:.2f}k", style={
+                            "color": "#e74c3c",
+                            "margin": "0",
+                        })
+                    ], style={
+                        "display": "flex",
+                        "flexDirection": "column",
+                        "alignItems": "center",
+                        "justifyContent": "center",
+                        "height": "100%"
+                    })
                 ]),
                 color="light",
-                style={"borderTop": "5px solid #e74c3c", "borderRadius": "10px", "padding": "10px"}
+                style={
+                    "borderRadius": "10px",
+                    "boxShadow": "0px 4px 6px rgba(0, 0, 0, 0.1)",
+                    "borderBottom": "5px solid #e74c3c",
+                    "padding": "10px"
+                }
             ),
             width=4, style={"marginBottom": "15px"}
         )
     ], justify="center", align="start")
+
 
     # Standalone Most Enrolled Division Card
     most_enrolled_division_text = filtered_data.groupby('Division')['Selected Grades Total'].sum().idxmax()
