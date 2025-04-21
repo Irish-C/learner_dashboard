@@ -826,7 +826,7 @@ def update_enrollment_choropleth(selected_regions):
 
     return fig
 
-#Stacked bar chart of school offerings by COC
+# Callback for updating Stacked bar chart of school offerings by COC
 @app.callback(
     Output('coc_sector_chart', 'figure'),
     Input('school_year_filter', 'value'),
@@ -835,36 +835,46 @@ def update_enrollment_choropleth(selected_regions):
     Input('gender_filter', 'value')
 )
 def update_coc_sector_chart(selected_sy, selected_regions, selected_grades, selected_gender):
-    # Filter dataset based on controls
+    # Make a copy of the full dataset
     df = data.copy()
 
+    # Filter Dataset by selected school year
     df = df[df['School Year'] == selected_sy]
 
+    # Filter Dataset to inlcude only those regions
     if selected_regions:
         df = df[df['Region'].isin(selected_regions)]
 
+    # Initialize empty lists 
     selected_cols_male = []
     selected_cols_female = []
 
+    # Dynamically determine which columns to sum based on selected grades
     if selected_grades:
         for grade in selected_grades:
             if grade in ['G11', 'G12']:
+                # For G11 and G12, match all subject-specific Male/Female columns
                 selected_cols_male += [col for col in data.columns if col.startswith(grade) and 'Male' in col]
                 selected_cols_female += [col for col in data.columns if col.startswith(grade) and 'Female' in col]
             else:
+                # For lower grades, columns are named like "G1 Male", "G1 Female", etc.
                 selected_cols_male += [f"{grade} Male"]
                 selected_cols_female += [f"{grade} Female"]
     else:
+        # If no grades are selected, default to all available grade columns
         selected_cols_male = [col for col in grade_columns if 'Male' in col]
         selected_cols_female = [col for col in grade_columns if 'Female' in col]
     
+    # Compute total enrollment based on selected gender
     if selected_gender == 'Male':
         df['Selected Grades Total'] = df[selected_cols_male].sum(axis=1)
     elif selected_gender == 'Female':
         df['Selected Grades Total'] = df[selected_cols_female].sum(axis=1)
     else:
+        # If gender is "All", sum both male and female selected columns
         df['Selected Grades Total'] = df[selected_cols_male + selected_cols_female].sum(axis=1)
 
+    # Filter out schools that have no enrollment in the selected grades and gender
     df = df[df['Selected Grades Total'] > 0]
 
     # Count schools by COC category and sector
@@ -885,10 +895,18 @@ def update_coc_sector_chart(selected_sy, selected_regions, selected_grades, sele
         x='Modified COC',
         y='Count',
         color='Sector',
-        category_orders={'Modified COC': coc_order, 'Sector': ['Public', 'Private', 'SUCsLUCs']},
-        labels={'Count': 'Number of Schools', 'Modified COC': 'COC Offering', 'Sector': 'Sector'},
+        category_orders={
+            'Modified COC': coc_order, 
+            'Sector': ['Public', 'Private', 'SUCsLUCs'] # Order Sectors
+            },
+        labels={
+            'Count': 'Number of Schools', 
+            'Modified COC': 'COC Offering', 
+            'Sector': 'Sector'},
         barmode='stack'
     )
+
+    # Update the chart layout 
     fig.update_layout(
         title='School Offerings by COC Type and Sector',
         xaxis_title=None,
@@ -897,6 +915,7 @@ def update_coc_sector_chart(selected_sy, selected_regions, selected_grades, sele
         margin=dict(l=40, r=20, t=50, b=40),
         height=400
     )
+
     return fig
 
 if __name__ == "__main__":
