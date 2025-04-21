@@ -9,6 +9,7 @@ import plotly.graph_objects as go
 import pandas as pd
 import re
 import json
+import os
 
 from app_data import data, grade_columns, combined_shs_track_df, correct_region_order, grade_options
 
@@ -1040,6 +1041,61 @@ def update_coc_sector_chart(selected_sy, selected_regions, selected_grades, sele
     )
 
     return fig
+
+@app.callback(
+    Output("submit-entry", "children"),
+    Input("submit-entry", "n_clicks"),
+    State("input-year", "value"),
+    State("input-region", "value"),
+    State("input-division", "value"),
+    State("input-barangay", "value"),
+    State("input-school", "value"),
+    State("input-grade", "value"),
+    State("input-gender", "value"),
+    State("input-enrollment", "value"),
+    prevent_initial_call=True
+)
+def submit_new_entry(n_clicks, year, region, division, barangay, school_id, grade, gender, enrollment):
+    if not all([year, region, division, barangay, school_id, grade, gender, enrollment]):
+        return "Please fill all fields."
+
+    filename = f"data_{year}.csv"
+
+    # If file doesn't exist, create a new one
+    if not os.path.exists(filename):
+        columns = ['School Year', 'BEIS School ID', 'Region', 'Division', 'Barangay', 'Total Enrollment'] + \
+                  [f"{g} {s}" for g in ['K'] + [f"G{i}" for i in range(1, 13)] for s in ['Male', 'Female']]
+        new_df = pd.DataFrame(columns=columns)
+
+        # Initialize other columns to N/A
+        row = {col: "N/A" for col in new_df.columns}
+    else:
+        new_df = pd.read_csv(filename)
+        row = {col: "N/A" for col in new_df.columns}
+
+    # Retrieve static info from schools.csv
+    school_info = pd.read_csv("schools.csv")
+    school_row = school_info[school_info['BEIS School ID'] == school_id].iloc[0]
+
+    # Assign known fields
+    row['School Year'] = year
+    row['BEIS School ID'] = school_id
+    row['Region'] = region
+    row['Division'] = division
+    row['Barangay'] = barangay
+    row['School Name'] = school_row['School Name']
+    row['Sector'] = school_row['Sector']
+
+    # Set enrollment in correct column
+    target_col = f"{grade} {gender}"
+    row[target_col] = int(enrollment)
+    row['Total Enrollment'] = int(enrollment)
+
+    # Append new row to CSV
+    new_df = pd.concat([new_df, pd.DataFrame([row])], ignore_index=True)
+    new_df.to_csv(filename, index=False)
+
+    return "✔ Entry Added!"
 
 if __name__ == "__main__":
     app.run(debug=True)
