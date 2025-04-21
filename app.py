@@ -216,8 +216,8 @@ def update_charts(selected_regions, selected_grades, selected_gender):
     pie_chart.update_traces(textinfo='percent+label')
 
     pie_chart.update_layout(
-        margin=dict(t=40, b=20, l=0, r=0),
-        height=250,  # or adjust for your visual preference
+        margin=dict(t=30, b=0, l=0, r=0),
+        height=296,  # or adjust for your visual preference
         showlegend=True  # set to False if pie labels suffice
     )
 

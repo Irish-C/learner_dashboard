@@ -121,25 +121,25 @@ def dashboard_content(data, grade_options, region_options, combined_shs_track_df
                                 ])
                             ]),
                             width=8),
-                            dbc.Col(
-                                [
-                                    dbc.Card([
-                                        dbc.CardBody([
-                                            dcc.Loading(
-                                                dcc.Graph(id='gender_pie_chart', config={'displayModeBar': False}),
-                                                type='default'
-                                            )
-                                        ])
-                                    ]),
-                                    html.Br(),
-                                    dcc.Loading(
-                                        html.Div(id='most_enrolled_division_card', className='mb-4'),
-                                        type='default'
-                                    )
-                                ],
-                                width=4,
-                                style={'padding': "0.3rem"}
-                            ),
+                        dbc.Col(
+                            [
+                                dcc.Loading(
+                                    html.Div(id='most_enrolled_division_card', className='mb-4'),
+                                    type='default'
+                                ),
+                                dbc.Card([
+                                    dbc.CardBody([
+                                        dcc.Loading(
+                                            dcc.Graph(id='gender_pie_chart', config={'displayModeBar': False}),
+                                            type='default'
+                                        )
+                                    ])
+                                ])
+                            ],
+                            width=4,
+                            style={'padding': "0.3rem"},
+                            className="mb-4"  # <-- This adds margin below
+                        ),
                     dbc.Row([
                         dbc.Col(
                             dbc.Card([
