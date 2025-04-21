@@ -32,7 +32,7 @@ def create_sidebar(is_collapsed=False, current_page=None):
                 html.Span("Dashboard", className="navitem-text")
             ],
             id='btn-1',
-            className="navitem" + (" active" if current_page == 1 else ""),
+            className="navitem" + (" active" if current_page == "dashboard" else ""),
         ),
         html.Button(
             [
@@ -40,7 +40,7 @@ def create_sidebar(is_collapsed=False, current_page=None):
                 html.Span("EduData", className="navitem-text")
             ],
             id='btn-2',
-            className="navitem" + (" active" if current_page == 2 else ""),
+            className="navitem" + (" active" if current_page == "manage_data" else ""),
         ),
         html.Button(
             [
@@ -48,7 +48,7 @@ def create_sidebar(is_collapsed=False, current_page=None):
                 html.Span("Help", className="navitem-text")
             ],
             id='btn-3',
-            className="navitem" + (" active" if current_page == 3 else ""),
+            className="navitem" + (" active" if current_page == "help" else ""),
         ),
         html.Button(
             [
@@ -56,7 +56,7 @@ def create_sidebar(is_collapsed=False, current_page=None):
                 html.Span("Settings", className="navitem-text")
             ],
             id='btn-4',
-            className="navitem" + (" active" if current_page == 4 else ""),
+            className="navitem" + (" active" if current_page == "settings" else ""),
         ),
     ])
 

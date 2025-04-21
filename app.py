@@ -1,4 +1,3 @@
-
 import dash
 import dash_bootstrap_components as dbc
 from dash import dcc, html, callback_context
@@ -11,11 +10,13 @@ import re
 import json
 import os
 
+from layout.sidebar import create_sidebar
+from layout.header import create_header
+from layout.page_router import get_content_style, create_content
+from layout.cards import create_metric_card
 from app_data import data, grade_columns, combined_shs_track_df, correct_region_order, grade_options
 
 region_options = [{'label': r, 'value': r} for r in correct_region_order]
-
-from layout import header, page_router, sidebar
 
 # Mapping of numeric values to page names
 PAGE_CONSTANTS = {
@@ -39,124 +40,92 @@ app = dash.Dash(
 with open('assets/index_template.html', 'r') as file:
     app.index_string = file.read()
 
-# Layout with numeric constant for the default page (1 = 'dashboard')
-app.layout = html.Div(children=[ 
-    dcc.Location(id='url', refresh=False, pathname='/1'),  # Default page is '1' for Dashboard
-    dcc.Store(id='current-page', data=1),  # Default page is '1' for Dashboard
-    dcc.Store(id='sidebar-collapsed', data=False),
-    html.Div(className="body-style", children=[ 
-        header.create_header(),
-        html.Div(className="app-container", children=[ 
-            html.Div(id='sidebar-container'), 
-            html.Div(id='content'),
-        ])
-    ])
-])
-
-@app.callback(
-    Output('sidebar-container', 'children'),
-    Input('sidebar-collapsed', 'data'),
-    State('current-page', 'data')
+# Define the layout
+app.layout = html.Div(
+    className="body-style",
+    children=[
+        # Store the sidebar toggle state
+        dcc.Store(id='sidebar-toggle-state', data=False),
+        
+        # Store current page
+        dcc.Store(id='current-page', data="dashboard"),
+        
+        # Header
+        create_header(),
+        
+        # Main content area with sidebar and page content
+        html.Div(
+            className="app-container",
+            children=[
+                # Sidebar (wrapped in a div container for dynamic updates)
+                html.Div(
+                    id="sidebar-container",
+                    children=[create_sidebar(is_collapsed=False, current_page="dashboard")]
+                ),
+                
+                # Page content
+                html.Div(
+                    id="content",
+                    style=get_content_style(False),
+                    children=create_content("dashboard", data, grade_options, region_options, combined_shs_track_df)
+                )
+            ]
+        )
+    ]
 )
-def update_sidebar_view(is_collapsed, current_page):
-    return sidebar.create_sidebar(is_collapsed, current_page)
 
-
+# Callback to toggle sidebar
 @app.callback(
-    Output('content', 'children'),
-    Output('current-page', 'data'),
-    Input('url', 'pathname'),
-    State('current-page', 'data'),
-)
-def update_content(pathname, current_page):
-    page_num = int(pathname.lstrip('/'))  # Convert pathname to integer (e.g., '1' becomes 1)
-    
-    # Retrieve the page name from the numeric value
-    page = PAGE_CONSTANTS.get(page_num, 'dashboard')  # Default to 'dashboard' if invalid page
-    
-    return page_router.create_content(
-        page, 
-        data, 
-        grade_options, 
-        region_options, 
-        combined_shs_track_df
-        ), page_num
-
-@app.callback(
-    Output('sidebar-collapsed', 'data'),
-    Input('sidebar-toggle', 'n_clicks'),
-    State('sidebar-collapsed', 'data'),
+    Output("sidebar-container", "children", allow_duplicate=True), 
+    Output("content", "style"), 
+    Output("sidebar-toggle-state", "data"),
+    Input("sidebar-toggle", "n_clicks"),
+    State("sidebar-toggle-state", "data"), 
+    State("current-page", "data"),
     prevent_initial_call=True
 )
-def toggle_sidebar(n, is_collapsed):
-    if n is None:
-        return is_collapsed
-    return not is_collapsed
-
-@app.callback(
-    Output('content', 'style'),
-    Input('sidebar-collapsed', 'data'),
-    prevent_initial_call=False
-)
-def adjust_content_margin(is_collapsed):
-    return page_router.get_content_style(is_collapsed)
-
-# Callback to update active link in the sidebar (using numeric constants)
-@app.callback(
-    Output('btn-1', 'className'),  # Updated IDs to numeric constants
-    Output('btn-2', 'className'),
-    Output('btn-3', 'className'),
-    Output('btn-4', 'className'),
-    Input('url', 'pathname'),
-    [State('btn-1', 'className'),
-     State('btn-2', 'className'),
-     State('btn-3', 'className'),
-     State('btn-4', 'className')]
-)
-def update_active_link(pathname, class_dashboard, class_enrollment, class_help, class_settings):
-    active_class = "navitem active"
-    inactive_class = "navitem"
+def toggle_sidebar(n_clicks, is_collapsed, current_page):
+    if n_clicks:
+        is_collapsed = not is_collapsed
     
-    # Get page number from pathname
-    page_num = int(pathname.lstrip('/'))
+    # Update sidebar with new collapsed state and current page
+    updated_sidebar = create_sidebar(is_collapsed=is_collapsed, current_page=current_page)
     
-    # Map numeric page value to actual page name
-    if page_num == 1:
-        return active_class, inactive_class, inactive_class, inactive_class
-    elif page_num == 2:
-        return inactive_class, active_class, inactive_class, inactive_class
-    elif page_num == 3:
-        return inactive_class, inactive_class, active_class, inactive_class
-    elif page_num == 4:
-        return inactive_class, inactive_class, inactive_class, active_class
+    # Update content margin
+    content_style = get_content_style(is_collapsed)
     
-    return inactive_class, inactive_class, inactive_class, inactive_class
+    return [updated_sidebar], content_style, is_collapsed
 
-# Navigation callback using numeric constants
+# Callback to change pages
 @app.callback(
-    Output('url', 'pathname'),
-    Input('btn-1', 'n_clicks'),  # Updated button IDs
-    Input('btn-2', 'n_clicks'),
-    Input('btn-3', 'n_clicks'),
-    Input('btn-4', 'n_clicks'),
-    State('url', 'pathname'),
-    prevent_initial_call=True
+    Output("content", "children"), 
+    Output("current-page", "data"), 
+    Output("sidebar-container", "children"),
+    Input("btn-1", "n_clicks"),
+    Input("btn-2", "n_clicks"),
+    Input("btn-3", "n_clicks"),
+    Input("btn-4", "n_clicks"),
+    State("current-page", "data"), 
+    State("sidebar-toggle-state", "data")
 )
-def navigate(n_dashboard, n_enrollment, n_help, n_settings, current_path):
+def change_page(btn1, btn2, btn3, btn4, current_page, is_collapsed):
     ctx = callback_context
     if not ctx.triggered:
-        return current_path
-    else:
-        button_id = ctx.triggered[0]['prop_id'].split('.')[0]
-        if button_id == 'btn-1':  # Redirect to '1' (Dashboard)
-            return f'/1'
-        elif button_id == 'btn-2':  # Redirect to '2' (Manage Data)
-            return f'/2'
-        elif button_id == 'btn-3':  # Redirect to '3' (Help)
-            return f'/3'
-        elif button_id == 'btn-4':  # Redirect to '4' (Settings)
-            return f'/4'
-    return current_path
+        return create_content("dashboard", data, grade_options, region_options, combined_shs_track_df), "dashboard", create_sidebar(is_collapsed=is_collapsed, current_page="dashboard")
+    
+    button_id = ctx.triggered[0]["prop_id"].split(".")[0]
+    
+    if button_id == "btn-1":
+        return create_content("dashboard", data, grade_options, region_options, combined_shs_track_df), "dashboard", create_sidebar(is_collapsed=is_collapsed, current_page="dashboard")
+    elif button_id == "btn-2":
+        return create_content("manage_data", data, grade_options, region_options, combined_shs_track_df), "manage_data", create_sidebar(is_collapsed=is_collapsed, current_page="manage_data")
+    elif button_id == "btn-3":
+        return create_content("help", data, grade_options, region_options, combined_shs_track_df), "help", create_sidebar(is_collapsed=is_collapsed, current_page="help")
+    elif button_id == "btn-4":
+        return create_content("settings", data, grade_options, region_options, combined_shs_track_df), "settings", create_sidebar(is_collapsed=is_collapsed, current_page="settings")
+    
+    # Default to dashboard
+    return create_content("dashboard", data, grade_options, region_options, combined_shs_track_df), "dashboard", create_sidebar(is_collapsed=is_collapsed, current_page="dashboard")
 
 
 
@@ -263,7 +232,7 @@ def update_charts(selected_regions, selected_grades, selected_gender):
         yaxis_title='Total Enrollment'
     )
 
-    # KPI Cards Layout with icons and styling improvements
+    # KPI Cards Layout
     # Aggregate stats
     total_students = int(filtered_data['Selected Grades Total'].sum())
     total_schools = filtered_data['BEIS School ID'].nunique()
@@ -305,7 +274,8 @@ def update_charts(selected_regions, selected_grades, selected_gender):
                         html.I(className="fas fa-user-graduate", style={
                             "fontSize": "30px",
                             "color": "var(--green-color)",
-                            "marginBottom": "10px"
+                            "marginBottom": "10px",
+                            "backgroundColor": "color: var(--accent-color)",
                         }),
                         html.H5("Total Enrolled", style={
                             "color": "var(--gray-color)",

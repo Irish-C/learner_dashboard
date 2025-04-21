@@ -14,9 +14,6 @@
   --gray-color: #5A5A5A; /* Gray */
   --white-color: #FFFFFF; /* White */
   --blue-color: #007BFF;  /* Blue */
-  --green-color: #28a745;  /* Green */
-  --yellow-color: #ffc107;  /* Yellow */
-
 }
 /* Global Styles */
 .body-style {
@@ -372,4 +369,50 @@ h4.chart-title { /* For card title */
   .chart-title {
       text-align: center;
   }
+}
+
+/* KPI Card Styles - Enhanced */
+.kpi-card {
+  background: #ffffff;
+  border-left: 6px solid var(--primary-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  min-height: 150px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.3s ease;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.kpi-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+}
+
+.kpi-card h5 {
+  font-size: 1.2rem;
+  margin: 0;
+  color: #555;
+  margin-bottom: 15px;
+}
+
+.kpi-card h2 {
+  margin: 0;
+  font-weight: bold;
+  color: #222;
+  margin-bottom: 10px;
+  font-size: 2rem;
+}
+
+.filter-panel {
+  position: sticky;
+  top: 30px;
+  z-index: 1000;
+  background-color: white;
+  border-radius: 10px;
+  padding: 15px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
 }
