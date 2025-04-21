@@ -40,7 +40,65 @@ form_layout = dbc.Container([
 def manage_data_content():
     return html.Div(children=[
         html.H1("Manage Data Page", className="page-title"),
-        html.Div("Content for Manage Data Page goes here.", style={"fontSize": "1.2rem"})
-    ])
+        dbc.Card([
+                    dbc.CardBody([
+                        dbc.Row([
+                            dbc.Col([
+                                html.Label("School Year"),
+                                dcc.Input(id='input-year', type='text', placeholder='e.g., 2023-2024', className='form-control')
+                            ]),
+                            dbc.Col([
+                                html.Label("Region"),
+                                dcc.Dropdown(id='input-region', className='form-control')
+                            ]),
+                            dbc.Col([
+                                html.Label("Division"),
+                                dcc.Dropdown(id='input-division', className='form-control')
+                            ])
+                        ], className='mb-3'),
+
+                        dbc.Row([
+                            dbc.Col([
+                                html.Label("School Name"),
+                                dcc.Dropdown(id='input-school-name', className='form-control')
+                            ]),
+                            dbc.Col([
+                                html.Label("Barangay"),
+                                dcc.Dropdown(id='input-barangay', className='form-control')
+                            ])
+                        ], className='mb-3'),
+
+                        dbc.Row([
+                            dbc.Col([
+                                html.Label("Grade Level"),
+                                dcc.Dropdown(
+                                    id='input-grade-level',
+                                    options=[
+                                        {'label': f'Grade {i}', 'value': f'G{i}'} for i in range(1, 13)
+                                    ] + [{'label': 'Kinder', 'value': 'K'}],
+                                    className='form-control'
+                                )
+                            ]),
+                            dbc.Col([
+                                html.Label("Gender"),
+                                dcc.Dropdown(
+                                    id='input-gender',
+                                    options=[{'label': 'Male', 'value': 'Male'}, {'label': 'Female', 'value': 'Female'}],
+                                    className='form-control'
+                                )
+                            ]),
+                            dbc.Col([
+                                html.Label("Enrollment Count"),
+                                dcc.Input(id='input-enrollment', type='number', placeholder='Enter number', className='form-control')
+                            ])
+                        ], className='mb-3'),
+
+                        html.Div([
+                            dbc.Button("Submit Entry", id='submit-entry-btn', color='primary'),
+                            html.Div(id='submit-success-message', className='mt-3')
+                        ])
+                    ])
+                ])
+            ])
 
 print("Manage Data loaded...")
