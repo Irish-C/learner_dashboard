@@ -56,3 +56,15 @@ for _, row in data.iterrows():
                         })
 
 combined_shs_track_df = pd.DataFrame(shs_track_records)
+
+# Manage Data Page
+schools_df = pd.read_csv("schools.csv")
+
+region_options = [{'label': r, 'value': r} for r in sorted(schools_df['Region'].dropna().unique())]
+division_options = [{'label': d, 'value': d} for d in sorted(schools_df['Division'].dropna().unique())]
+barangay_options = [{'label': b, 'value': b} for b in sorted(schools_df['Barangay'].dropna().unique())]
+school_options = [{'label': name, 'value': sid} for sid, name in zip(schools_df['BEIS School ID'], schools_df['School Name'])]
+
+grade_options = [{'label': f'Grade {g}', 'value': f'G{g}'} for g in range(1, 13)]
+grade_options.insert(0, {'label': 'Kinder', 'value': 'K'})
+gender_options = [{'label': 'Male', 'value': 'Male'}, {'label': 'Female', 'value': 'Female'}]
