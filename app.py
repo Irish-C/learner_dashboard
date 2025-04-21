@@ -163,7 +163,8 @@ def navigate(n_dashboard, n_enrollment, n_help, n_settings, current_path):
 @app.callback(
     [Output('gender_pie_chart', 'figure'),
      Output('enrollment_vs_schools_chart', 'figure'),
-     Output('kpi_card_row', 'children')],
+     Output('kpi_card_row', 'children'),
+     Output('most_enrolled_division_card', 'children')],
     [Input('region_filter', 'value'),
      Input('grade_filter', 'value'),
      Input('gender_filter', 'value')]
@@ -262,10 +263,13 @@ def update_charts(selected_regions, selected_grades, selected_gender):
     )
 
     # KPI Cards Layout with icons and styling improvements
+    # Aggregate stats
     total_students = int(filtered_data['Selected Grades Total'].sum())
     total_schools = filtered_data['BEIS School ID'].nunique()
-    most_enrolled_division = filtered_data.groupby('Division')['Selected Grades Total'].sum().idxmax()
+    most_enrolled_region = filtered_data.groupby('Region')['Selected Grades Total'].sum().idxmax()
+    region_total = filtered_data.groupby('Region')['Selected Grades Total'].sum().max()
 
+    # KPI Cards (now with Region card inside the 3-col row)
     kpi_cards = dbc.Row([
         dbc.Col(
             dbc.Card(
@@ -273,14 +277,13 @@ def update_charts(selected_regions, selected_grades, selected_gender):
                     html.Div([
                         html.I(className="fas fa-user-graduate", style={"fontSize": "30px", "color": "#007BFF", "marginRight": "10px"}),
                         html.H5("Total Learners", style={"color": "var(--gray-color)"}),
-                        html.H2(f"{total_students:,}", style={"color": "var(--blue-color"}),
+                        html.H2(f"{total_students:,}", style={"color": "var(--blue-color)"})
                     ])
                 ]),
-                color="light",  # Light background for the card
+                color="light",
                 style={"borderRadius": "10px", "boxShadow": "0px 4px 6px rgba(0, 0, 0, 0.1)"}
             ),
-            width=4,
-            style={"marginBottom": "15px"}
+            width=4, style={"marginBottom": "15px"}
         ),
         dbc.Col(
             dbc.Card(
@@ -288,32 +291,64 @@ def update_charts(selected_regions, selected_grades, selected_gender):
                     html.Div([
                         html.I(className="fas fa-school", style={"fontSize": "30px", "color": "#007BFF", "marginRight": "10px"}),
                         html.H5("Total Schools", style={"color": "var(--gray-color)"}),
-                        html.H2(f"{total_schools:,}", style={"color": "var(--blue-color"}),
+                        html.H2(f"{total_schools:,}", style={"color": "var(--blue-color)"})
                     ])
                 ]),
                 color="light",
                 style={"borderRadius": "10px", "boxShadow": "0px 4px 6px rgba(0, 0, 0, 0.1)"}
             ),
-            width=4,
-            style={"marginBottom": "15px"}
+            width=4, style={"marginBottom": "15px"}
         ),
         dbc.Col(
             dbc.Card(
                 dbc.CardBody([
                     html.Div([
-                        html.I(className="fas fa-users-cog", style={"fontSize": "30px", "color": "#007BFF", "marginRight": "10px"}),
-                        html.H5("Most Enrolled Division", style={"color": "var(--gray-color)"}),
-                        html.H2(f"{most_enrolled_division}", style={"color": "var(--blue-color"}),
+                        html.H6("Most Enrolled Region as of (school year)", className="card-subtitle mb-2 text-muted text-center"),
+                        html.H4(f"{most_enrolled_region}: {region_total/1000:.2f}k", className="card-title text-center")
                     ])
                 ]),
                 color="light",
-                style={"borderRadius": "10px", "boxShadow": "0px 4px 6px rgba(0, 0, 0, 0.1)"}
+                style={"borderTop": "5px solid #e74c3c", "borderRadius": "10px", "padding": "10px"}
             ),
-            width=4,
-            style={"marginBottom": "15px"}
-        ),
+            width=4, style={"marginBottom": "15px"}
+        )
     ], justify="center", align="start")
-    return pie_chart, fig_combo, kpi_cards
+
+    # Standalone Most Enrolled Division Card
+    most_enrolled_division_text = filtered_data.groupby('Division')['Selected Grades Total'].sum().idxmax()
+    most_enrolled_division_card = html.Div([
+        dbc.Card(
+            dbc.CardBody([
+                html.Div([
+                    html.I(className="fas fa-users-cog", style={
+                        "fontSize": "30px",
+                        "color": "#007BFF",
+                        "marginBottom": "0.5rem"
+                    }),
+                    html.H5("Most Enrolled Division", style={
+                        "color": "var(--gray-color)",
+                        "textAlign": "center",
+                        "margin": "0",
+                        "lineHeight": "1.2"
+                    }),
+                    html.H2(f"{most_enrolled_division_text}", style={
+                        "color": "var(--blue-color)",
+                        "textAlign": "center",
+                        "margin": "0"
+                    })  # dynamic text
+                ])
+            ]),
+            style={
+                "borderRadius": "10px",
+                "boxShadow": "0px 4px 6px rgba(0, 0, 0, 0.1)",
+                "width": "100%"  # ensure it fills its column
+            }
+        )
+    ])
+
+
+    return pie_chart, fig_combo, kpi_cards, most_enrolled_division_card
+
 
 # Dashboard Page
 @app.callback(

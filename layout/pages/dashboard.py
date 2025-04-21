@@ -22,8 +22,7 @@ def dashboard_content(data, grade_options, region_options, combined_shs_track_df
             html.Br(),
 
             # ✅ KPI Cards (dynamic via callback)
-            html.Div(id='kpi_card_row', className='mb-4'),
-
+            dcc.Loading(html.Div(id='kpi_card_row', className='mb-4')),
             # ✅ Row-based Filter Panel (new layout)
             html.Div("Filter Control Panel", style={
                 "fontWeight": "600",
@@ -122,20 +121,25 @@ def dashboard_content(data, grade_options, region_options, combined_shs_track_df
                                 ])
                             ]),
                             width=8),
-                        dbc.Col(
-                            dbc.Card([
-                                dbc.CardBody([
+                            dbc.Col(
+                                [
+                                    dbc.Card([
+                                        dbc.CardBody([
+                                            dcc.Loading(
+                                                dcc.Graph(id='gender_pie_chart', config={'displayModeBar': False}),
+                                                type='default'
+                                            )
+                                        ])
+                                    ]),
+                                    html.Br(),
                                     dcc.Loading(
-                                    dcc.Graph(id='gender_pie_chart', config={'displayModeBar': False}),
-                                    type='default'
-                                )
-
-                                ])
-                            ]),
+                                        html.Div(id='most_enrolled_division_card', className='mb-4'),
+                                        type='default'
+                                    )
+                                ],
                                 width=4,
-                                style={'height': '2px', "padding": "0.3rem"} 
-                            )
-                    ], className="mb-4"),
+                                style={'padding': "0.3rem"}
+                            ),
                     dbc.Row([
                         dbc.Col(
                             dbc.Card([
@@ -229,7 +233,7 @@ def dashboard_content(data, grade_options, region_options, combined_shs_track_df
                     filter_action='native',
                     style_table={'overflowX': 'auto'}
                     )
-                ])])
+                ])])])
 
 
 
