@@ -297,10 +297,10 @@ def load_protected_page(login_data):
     ], fluid=True)
 )
 @app.callback(
-    Output('password', 'type'),
+    Output('input-password', 'type'),
     Output('toggle-password-visibility', 'className'),
     Input('toggle-password-visibility', 'n_clicks'),
-    State('password', 'type'),
+    State('input-password', 'type'),
     prevent_initial_call=True
 )
 def toggle_password_visibility(n_clicks, current_type):
