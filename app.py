@@ -51,7 +51,9 @@ login_page = dbc.Container([
             dbc.Input(id="input-email", placeholder="Email Address", type="email", className="w-100"),
             dbc.Input(id="input-password", placeholder="Password", type="password", className="w-100"),
             dbc.Button("Login", id="login-button", color="primary", className="w-100"),
-            html.Div(id="login-message", className="text-danger text-center")
+            html.Div(id="login-message", className="text-center", style={"color": "red", "marginTop": "10px", "fontWeight": "bold", "fontSize": "16px"
+    }
+)
         ], width=4)
     ], justify="center", style={"paddingTop": "15%"}),
 ], fluid=True)
@@ -90,14 +92,25 @@ app.layout = html.Div([
     prevent_initial_call=True
 )
 def verify_login(n_clicks, first_name, last_name, email, password):
-    pw_hash = hash_password(password or "")
+    # Check if fields are missing
+    if not all([first_name, last_name, email, password]):
+        return dash.no_update, "⚠️ Please fill in all fields."
+
+    # Hash the password
+    pw_hash = hash_password(password)
+
+    # Check against the user database
     for user in USER_DATA:
         if (user["first_name"].lower() == (first_name or "").lower() and
             user["last_name"].lower() == (last_name or "").lower() and
             user["email"].lower() == (email or "").lower() and
             user["password"] == pw_hash):
+            # ✅ Correct login → Clear error
             return {"logged_in": True, "user": f"{first_name} {last_name}"}, ""
-    return {"logged_in": False}, "Invalid credentials. Please try again."
+
+    # Invalid login → KEEP showing error
+    return dash.no_update, "❌ Invalid credentials. Please try again."
+
 
 # Callback to toggle sidebar
 @app.callback(
@@ -179,7 +192,64 @@ def load_protected_page(login_data):
                 )
             ]
         )
-    return login_page
+    return html.Div(
+    style={
+        "height": "100vh",
+        "display": "flex",
+        "alignItems": "center",
+        "justifyContent": "center",
+        "background": "linear-gradient(to right, #BFDBFE, #DE082C)",  # Gradient background
+        "padding": "20px"
+    },
+    children=dbc.Container([
+        dcc.Store(id="login-state", storage_type="session", data={"logged_in": False}),
+        dbc.Row([
+            dbc.Col([
+                html.Div([
+                    html.H2("Login", className="text-center mb-4", style={"fontWeight": "bold", "color": "black"}),
+
+                    # First Name Input
+                    dbc.Input(id="input-firstname", placeholder="First Name", type="text", className="mb-3",
+                              style={"border": "none", "borderBottom": "1px solid gray", "borderRadius": "0", "backgroundColor": "transparent"}),
+
+                    # Last Name Input
+                    dbc.Input(id="input-lastname", placeholder="Last Name", type="text", className="mb-3",
+                              style={"border": "none", "borderBottom": "1px solid gray", "borderRadius": "0", "backgroundColor": "transparent"}),
+
+                    # Email Input
+                    dbc.Input(id="input-email", placeholder="Email", type="email", className="mb-3",
+                              style={"border": "none", "borderBottom": "1px solid gray", "borderRadius": "0", "backgroundColor": "transparent"}),
+
+                    # Password Input
+                    dbc.Input(id="input-password", placeholder="Password", type="password", className="mb-4",
+                              style={"border": "none", "borderBottom": "1px solid gray", "borderRadius": "0", "backgroundColor": "transparent"}),
+
+                    # Login Button
+                    dbc.Button("Login", id="login-button", color="primary", className="w-100", style={
+                        "background": "linear-gradient(to right, #4facfe, #8f51ea)",
+                        "border": "none",
+                        "fontWeight": "bold"
+                    }),
+
+                    # Login Message
+                    html.Div(id="login-message", className="text-center", style={
+                        "color": "red",
+                        "marginTop": "15px",
+                        "fontWeight": "bold",
+                        "fontSize": "16px"
+                    })
+                ], style={
+                    "backgroundColor": "white",
+                    "padding": "40px",
+                    "borderRadius": "15px",
+                    "boxShadow": "0px 4px 10px rgba(0,0,0,0.1)",
+                    "width": "100%",
+                    "maxWidth": "400px"
+                })
+            ], width=12, md=6, lg=4)
+        ], justify="center")
+    ], fluid=True)
+)
 
 # Dashboard Page
 @app.callback(
