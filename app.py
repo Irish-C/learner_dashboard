@@ -306,6 +306,7 @@ def update_charts(selected_regions, selected_grades, selected_gender):
                 ]),
                 color="light",
                 style={
+                    "height": "175px",
                     "borderRadius": "10px",
                     "boxShadow": "0px 4px 6px rgba(0, 0, 0, 0.1)",
                     "borderBottom": "5px solid #28a745",
@@ -342,6 +343,7 @@ def update_charts(selected_regions, selected_grades, selected_gender):
                 ]),
                 color="light",
                 style={
+                    "height": "175px",
                     "borderRadius": "10px",
                     "boxShadow": "0px 4px 6px rgba(0, 0, 0, 0.1)",
                     "borderBottom": "5px solid #ffc107",
@@ -379,6 +381,7 @@ def update_charts(selected_regions, selected_grades, selected_gender):
                 ]),
                 color="light",
                 style={
+                    "height": "175px",
                     "borderRadius": "10px",
                     "boxShadow": "0px 4px 6px rgba(0, 0, 0, 0.1)",
                     "borderBottom": "5px solid #e74c3c",
@@ -444,6 +447,7 @@ def update_charts(selected_regions, selected_grades, selected_gender):
                 ]),
                 color="light",
                 style={
+                    "height": "175px",
                     "borderRadius": "10px",
                     "boxShadow": "0px 4px 6px rgba(0, 0, 0, 0.1)",
                     "borderBottom": "5px solid #3498db",
