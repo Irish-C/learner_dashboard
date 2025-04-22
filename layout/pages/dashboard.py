@@ -114,32 +114,45 @@ def dashboard_content(data, grade_options, region_options, combined_shs_track_df
 
             # ✅ Charts & Tabs
                     dbc.Row([
+                        # First column with the first card (graph)
                         dbc.Col(
                             dbc.Card([
                                 dbc.CardBody([
-                                    dcc.Loading(dcc.Graph(id='enrollment_choropleth_map', config={'displayModeBar': False}, style={'height': '100%'}))
+                                    dcc.Loading(dcc.Graph(
+                                        id='enrollment_choropleth_map',
+                                        config={'displayModeBar': False},
+                                        style={'height': '100%'}
+                                    ))
                                 ])
-                            ]),
-                            width=8),
+                            ], style={'height': '600px'}),  # Set height of the card
+                            width=8  # Take up 8 out of 12 columns
+                        ),
+    
+                        # Second column with two cards (one for division and one for pie chart)
                         dbc.Col(
                             [
+                                # First card for "most enrolled division"
                                 dcc.Loading(
                                     html.Div(id='most_enrolled_division_card', className='mb-4'),
                                     type='default'
                                 ),
+                                # Second card for the pie chart
                                 dbc.Card([
                                     dbc.CardBody([
                                         dcc.Loading(
-                                            dcc.Graph(id='gender_pie_chart', config={'displayModeBar': False}),
+                                            dcc.Graph(
+                                                id='gender_pie_chart',
+                                                config={'displayModeBar': False},
+                                                style={'height': '100%'}
+                                            ),
                                             type='default'
                                         )
                                     ])
-                                ])
+                                ], style={'height': '400px'})  # Set height of the pie chart card
                             ],
-                            width=4,
-                            style={'padding': "0.3rem"},
-                            className="mb-4"  # <-- This adds margin below
-                        ),
+                            width=4,  # Take up 4 out of 12 columns
+                        )
+                    ]),
                     dbc.Row([
                         dbc.Col(
                             dbc.Card([
@@ -233,4 +246,4 @@ def dashboard_content(data, grade_options, region_options, combined_shs_track_df
                     filter_action='native',
                     style_table={'overflowX': 'auto'}
                     )
-                ])])])
+                ])])
