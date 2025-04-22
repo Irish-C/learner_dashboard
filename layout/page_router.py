@@ -16,11 +16,11 @@ def get_content_style(is_collapsed):
         "transition": "margin-left 0.3s ease",
     }
 
-def create_content(page, data, grade_options, region_options, combined_shs_track_df, division_options, school_options, barangay_options):
+def create_content(page, data, grade_options, region_options, combined_shs_track_df):
     if page == "dashboard":
         return dashboard_content(data, grade_options, region_options, combined_shs_track_df)
     elif page == "manage_data":
-        return manage_data_content(region_options, division_options, school_options, barangay_options)
+        return manage_data_content()
     elif page == "help":
         return help_content()
     elif page == "settings":

@@ -15,7 +15,15 @@ from layout.sidebar import create_sidebar
 from layout.header import create_header
 from layout.page_router import get_content_style, create_content
 from layout.cards import create_metric_card
-from app_data import data, grade_columns, combined_shs_track_df, correct_region_order, grade_options, barangay_options, division_options, school_options
+from app_data import data, grade_columns, combined_shs_track_df, correct_region_order, grade_options
+from app_data import (
+    get_dropdown_options,
+    get_school_metadata,
+    load_schools,
+    load_enrollment_data,
+    sanitize_enrollment_data,
+    save_enrollment_data
+)
 
 region_options = [{'label': r, 'value': r} for r in correct_region_order]
 
@@ -149,21 +157,21 @@ def toggle_sidebar(n_clicks, is_collapsed, current_page):
 def change_page(btn1, btn2, btn3, btn4, current_page, is_collapsed):
     ctx = callback_context
     if not ctx.triggered:
-        return create_content("dashboard", data, grade_options, region_options, combined_shs_track_df, division_options, school_options, barangay_options), "dashboard", create_sidebar(is_collapsed=is_collapsed, current_page="dashboard")
+        return create_content("dashboard", data, grade_options, region_options, combined_shs_track_df), "dashboard", create_sidebar(is_collapsed=is_collapsed, current_page="dashboard")
     
     button_id = ctx.triggered[0]["prop_id"].split(".")[0]
     
     if button_id == "btn-1":
-        return create_content("dashboard", data, grade_options, region_options, combined_shs_track_df, division_options, school_options, barangay_options), "dashboard", create_sidebar(is_collapsed=is_collapsed, current_page="dashboard")
+        return create_content("dashboard", data, grade_options, region_options, combined_shs_track_df), "dashboard", create_sidebar(is_collapsed=is_collapsed, current_page="dashboard")
     elif button_id == "btn-2":
-        return create_content("manage_data", data, grade_options, region_options, combined_shs_track_df, division_options, school_options, barangay_options), "manage_data", create_sidebar(is_collapsed=is_collapsed, current_page="manage_data")
+        return create_content("manage_data", data, grade_options, region_options, combined_shs_track_df), "manage_data", create_sidebar(is_collapsed=is_collapsed, current_page="manage_data")
     elif button_id == "btn-3":
-        return create_content("help", data, grade_options, region_options, combined_shs_track_df, division_options, school_options, barangay_options), "help", create_sidebar(is_collapsed=is_collapsed, current_page="help")
+        return create_content("help", data, grade_options, region_options, combined_shs_track_df), "help", create_sidebar(is_collapsed=is_collapsed, current_page="help")
     elif button_id == "btn-4":
-        return create_content("settings", data, grade_options, region_options, combined_shs_track_df, division_options, school_options, barangay_options), "settings", create_sidebar(is_collapsed=is_collapsed, current_page="settings")
+        return create_content("settings", data, grade_options, region_options, combined_shs_track_df), "settings", create_sidebar(is_collapsed=is_collapsed, current_page="settings")
     
     # Default to dashboard
-    return create_content("dashboard", data, grade_options, region_options, combined_shs_track_df, division_options, school_options, barangay_options), "dashboard", create_sidebar(is_collapsed=is_collapsed, current_page="dashboard")
+    return create_content("dashboard", data, grade_options, region_options, combined_shs_track_df), "dashboard", create_sidebar(is_collapsed=is_collapsed, current_page="dashboard")
 
 # Call back for login to dashboard
 @app.callback(
@@ -185,8 +193,7 @@ def load_protected_page(login_data):
                             create_sidebar(is_collapsed=False, current_page="dashboard")
                         ]),
                         html.Div(id="content", style=get_content_style(False), children=create_content(
-                            "dashboard", data, grade_options, region_options, combined_shs_track_df,
-                            division_options, school_options, barangay_options
+                            "dashboard", data, grade_options, region_options, combined_shs_track_df
                         ))
                     ]
                 )
