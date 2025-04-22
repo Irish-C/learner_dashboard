@@ -1417,23 +1417,38 @@ def submit_data(n_clicks, school_name, year, grade, gender, count):
     school_id = meta["BEIS School ID"]
     filename = f"data_{year}.csv"
 
-    grade_cols = [f"G{g} Male" for g in range(1, 13)] + [f"G{g} Female" for g in range(1, 13)]
-    required_cols = ["School Year", "BEIS School ID"] + grade_cols
+    # Define the correct column order
+    correct_columns = [
+        "School Year", "BEIS School ID", "K Male", "K Female", "G1 Male", "G1 Female",
+        "G2 Male", "G2 Female", "G3 Male", "G3 Female", "G4 Male", "G4 Female",
+        "G5 Male", "G5 Female", "G6 Male", "G6 Female", "Elem NG Male", "Elem NG Female",
+        "G7 Male", "G7 Female", "G8 Male", "G8 Female", "G9 Male", "G9 Female",
+        "G10 Male", "G10 Female", "JHS NG Male", "JHS NG Female",
+        "G11 ACAD - ABM Male", "G11 ACAD - ABM Female", "G11 ACAD - HUMSS Male", "G11 ACAD - HUMSS Female",
+        "G11 ACAD STEM Male", "G11 ACAD STEM Female", "G11 ACAD GAS Male", "G11 ACAD GAS Female",
+        "G11 ACAD PBM Male", "G11 ACAD PBM Female", "G11 TVL Male", "G11 TVL Female",
+        "G11 SPORTS Male", "G11 SPORTS Female", "G11 ARTS Male", "G11 ARTS Female",
+        "G12 ACAD - ABM Male", "G12 ACAD - ABM Female", "G12 ACAD - HUMSS Male", "G12 ACAD - HUMSS Female",
+        "G12 ACAD STEM Male", "G12 ACAD STEM Female", "G12 ACAD GAS Male", "G12 ACAD GAS Female",
+        "G12 ACAD PBM Male", "G12 ACAD PBM Female", "G12 TVL Male", "G12 TVL Female",
+        "G12 SPORTS Male", "G12 SPORTS Female", "G12 ARTS Male", "G12 ARTS Female"
+    ]
 
+    # Load or initialize the DataFrame
     if os.path.exists(filename):
         df = pd.read_csv(filename)
         # Ensure all required columns exist
-        for col in required_cols:
+        for col in correct_columns:
             if col not in df.columns:
                 df[col] = "N/A"
-        df = df[required_cols]  # Keep correct column order
+        df = df[correct_columns]  # Reorder columns
     else:
-        df = pd.DataFrame(columns=required_cols)
+        df = pd.DataFrame(columns=correct_columns)
 
     # Locate or create the row
     match = (df['School Year'] == year) & (df['BEIS School ID'] == school_id)
     if not match.any():
-        new_row = {col: "N/A" for col in df.columns}
+        new_row = {col: "N/A" for col in correct_columns}
         new_row["School Year"] = year
         new_row["BEIS School ID"] = school_id
         df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
@@ -1442,18 +1457,16 @@ def submit_data(n_clicks, school_name, year, grade, gender, count):
         row_idx = df[match].index[0]
 
     # Add to current value
-    def add_to_column(col):
-        existing = df.at[row_idx, col]
+    column_name = f"{grade} {gender}"
+    if column_name in df.columns:
+        existing = df.at[row_idx, column_name]
         existing = 0 if pd.isna(existing) or existing == "N/A" else int(existing)
-        df.at[row_idx, col] = existing + count
+        df.at[row_idx, column_name] = existing + count
+    else:
+        return f"Column '{column_name}' does not exist in the data."
 
-    if gender == "Male":
-        add_to_column(f"{grade} Male")
-    elif gender == "Female":
-        add_to_column(f"{grade} Female")
-
-    # Ensure other fields stay untouched; just write the updated DataFrame back
-    df.to_csv(filename, index=False)
+    # Save the updated DataFrame
+    df.to_csv(filename, index=False, na_rep="N/A")
 
     return f"Enrollment successfully updated for {school_name} ({grade}, {gender}) in {year}."
 
