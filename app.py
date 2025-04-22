@@ -1388,6 +1388,9 @@ def autofill_fields(school_name):
         school["Modified COC"]
     )
 
+import os
+import pandas as pd
+
 @app.callback(
     Output("submission_feedback", "children"),
     Input("submit_button", "n_clicks"),
@@ -1414,41 +1417,45 @@ def submit_data(n_clicks, school_name, year, grade, gender, count):
     school_id = meta["BEIS School ID"]
     filename = f"data_{year}.csv"
 
+    grade_cols = [f"G{g} Male" for g in range(1, 13)] + [f"G{g} Female" for g in range(1, 13)]
+    required_cols = ["School Year", "BEIS School ID"] + grade_cols
+
     if os.path.exists(filename):
         df = pd.read_csv(filename)
+        # Ensure all required columns exist
+        for col in required_cols:
+            if col not in df.columns:
+                df[col] = "N/A"
+        df = df[required_cols]  # Keep correct column order
     else:
-        grade_cols = [f"G{g} Male" for g in range(1, 13)] + [f"G{g} Female" for g in range(1, 13)]
-        df = pd.DataFrame(columns=["School Year", "BEIS School ID"] + grade_cols)
+        df = pd.DataFrame(columns=required_cols)
 
-    row_idx = df[(df['School Year'] == year) & (df['BEIS School ID'] == school_id)].index
-    if row_idx.empty:
+    # Locate or create the row
+    match = (df['School Year'] == year) & (df['BEIS School ID'] == school_id)
+    if not match.any():
         new_row = {col: "N/A" for col in df.columns}
         new_row["School Year"] = year
         new_row["BEIS School ID"] = school_id
-        df.loc[len(df)] = new_row
-        row_idx = [len(df) - 1]
+        df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
+        row_idx = df.index[-1]
+    else:
+        row_idx = df[match].index[0]
 
-    row = row_idx[0]
+    # Add to current value
+    def add_to_column(col):
+        existing = df.at[row_idx, col]
+        existing = 0 if pd.isna(existing) or existing == "N/A" else int(existing)
+        df.at[row_idx, col] = existing + count
 
-    # Add to existing value rather than overwrite
-    def add_count(column):
-        existing = df.at[row, column]
-        previous = 0 if pd.isna(existing) or existing == "N/A" else int(existing)
-        df.at[row, column] = previous + count
+    if gender == "Male":
+        add_to_column(f"{grade} Male")
+    elif gender == "Female":
+        add_to_column(f"{grade} Female")
 
-    if gender == 'Male':
-        add_count(f"{grade} Male")
-    elif gender == 'Female':
-        add_count(f"{grade} Female")
-
-    # Fill empty cells with "N/A"
-    for col in df.columns[2:]:
-        if pd.isna(df.at[row, col]) or df.at[row, col] == "":
-            df.at[row, col] = "N/A"
-
+    # Ensure other fields stay untouched; just write the updated DataFrame back
     df.to_csv(filename, index=False)
 
-    return f"Enrollment updated for {school_name} ({grade}, {gender}) in {year}."
+    return f"Enrollment successfully updated for {school_name} ({grade}, {gender}) in {year}."
 
 if __name__ == "__main__":
     app.run(debug=True)
