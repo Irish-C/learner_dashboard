@@ -1341,59 +1341,99 @@ def update_coc_sector_chart(selected_sy, selected_regions, selected_grades, sele
     return fig
 
 @app.callback(
-    Output("submit-entry", "children"),
-    Input("submit-entry", "n_clicks"),
-    State("input-year", "value"),
-    State("input-region", "value"),
-    State("input-division", "value"),
-    State("input-barangay", "value"),
-    State("input-school", "value"),
-    State("input-grade", "value"),
-    State("input-gender", "value"),
-    State("input-enrollment", "value"),
-    prevent_initial_call=True
+    Output('input_division', 'options'),
+    Output('input_division', 'disabled'),
+    Input('input_region', 'value')
 )
-def submit_new_entry(n_clicks, year, region, division, barangay, school_id, grade, gender, enrollment):
-    if not all([year, region, division, barangay, school_id, grade, gender, enrollment]):
+def update_divisions(region):
+    if not region:
+        return [], True
+    schools_df = load_schools()
+    filtered = schools_df[schools_df['Region'] == region]
+    return [{'label': d, 'value': d} for d in sorted(filtered['Division'].dropna().unique())], False
+
+@app.callback(
+    Output('input_school_name', 'options'),
+    Output('input_school_name', 'disabled'),
+    Input('input_division', 'value')
+)
+def update_schools(division):
+    if not division:
+        return [], True
+    schools_df = load_schools()
+    filtered = schools_df[schools_df['Division'] == division]
+    return [{'label': s, 'value': s} for s in sorted(filtered['School Name'].dropna().unique())], False
+
+
+@app.callback(
+    Output('beis_school_id_display', 'value'),
+    Output('auto_barangay', 'value'),
+    Output('auto_sector', 'value'),
+    Output('auto_subclassification', 'value'),
+    Output('auto_type', 'value'),
+    Output('auto_coc', 'value'),
+    Input('input_school_name', 'value')
+)
+def autofill_fields(school_name):
+    if not school_name:
+        return [""] * 6
+    schools_df = load_schools()
+    school = schools_df[schools_df['School Name'] == school_name].iloc[0]
+    return (
+        school["BEIS School ID"],
+        school["Barangay"],
+        school["Sector"],
+        school["School Subclassification"],
+        school["School Type"],
+        school["Modified COC"]
+    )
+
+@app.callback(
+    Output("submission_feedback", "children"),
+    Input("submit_button", "n_clicks"),
+    State("input_school_name", "value"),
+    State("input_school_year", "value"),
+    State("input_grade", "value"),
+    State("input_gender", "value"),
+    State("input_enrollment", "value")
+)
+def submit_data(n_clicks, school_name, year, grade, gender, count):
+    if not n_clicks:
+        return ""
+    if not all([school_name, year, grade, gender, count]):
         return "Please fill all fields."
 
-    filename = f"data_{year}.csv"
+    try:
+        count = int(count)
+        if count < 0:
+            return "Enrollment count cannot be negative."
+    except (ValueError, TypeError):
+        return "Please enter a valid enrollment number."
 
-    # If file doesn't exist, create a new one
-    if not os.path.exists(filename):
-        columns = ['School Year', 'BEIS School ID', 'Region', 'Division', 'Barangay', 'Total Enrollment'] + \
-                  [f"{g} {s}" for g in ['K'] + [f"G{i}" for i in range(1, 13)] for s in ['Male', 'Female']]
-        new_df = pd.DataFrame(columns=columns)
+    meta = get_school_metadata(school_name)
+    school_id = meta["BEIS School ID"]
+    df = load_enrollment_data()
 
-        # Initialize other columns to N/A
-        row = {col: "N/A" for col in new_df.columns}
-    else:
-        new_df = pd.read_csv(filename)
-        row = {col: "N/A" for col in new_df.columns}
+    row_idx = df[(df['School Year'] == year) & (df['BEIS School ID'] == school_id)].index
+    if row_idx.empty:
+        new_row = {'School Year': year, 'BEIS School ID': school_id}
+        for col in df.columns:
+            if col not in new_row:
+                new_row[col] = "N/A"
+        df.loc[len(df)] = new_row
+        row_idx = [len(df) - 1]
 
-    # Retrieve static info from schools.csv
-    school_info = pd.read_csv("schools.csv")
-    school_row = school_info[school_info['BEIS School ID'] == school_id].iloc[0]
+    row = row_idx[0]
+    if gender == 'Male':
+        df.at[row, f"{grade} Male"] = count
+    elif gender == 'Female':
+        df.at[row, f"{grade} Female"] = count
 
-    # Assign known fields
-    row['School Year'] = year
-    row['BEIS School ID'] = school_id
-    row['Region'] = region
-    row['Division'] = division
-    row['Barangay'] = barangay
-    row['School Name'] = school_row['School Name']
-    row['Sector'] = school_row['Sector']
+    df = sanitize_enrollment_data(df, row)
+    save_enrollment_data(df)
 
-    # Set enrollment in correct column
-    target_col = f"{grade} {gender}"
-    row[target_col] = int(enrollment)
-    row['Total Enrollment'] = int(enrollment)
-
-    # Append new row to CSV
-    new_df = pd.concat([new_df, pd.DataFrame([row])], ignore_index=True)
-    new_df.to_csv(filename, index=False)
-
-    return "✔ Entry Added!"
+    action = "updated" if row_idx[0] in df.index else "created"
+    return f"Record {action} for {school_name} ({grade}) in {year}."
 
 if __name__ == "__main__":
     app.run(debug=True)

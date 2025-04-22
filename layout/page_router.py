@@ -20,7 +20,7 @@ def create_content(page, data, grade_options, region_options, combined_shs_track
     if page == "dashboard":
         return dashboard_content(data, grade_options, region_options, combined_shs_track_df)
     elif page == "manage_data":
-        return manage_data_content()
+        return manage_data_content(region_options, grade_options)
     elif page == "help":
         return help_content()
     elif page == "settings":
