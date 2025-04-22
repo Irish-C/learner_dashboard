@@ -1412,28 +1412,43 @@ def submit_data(n_clicks, school_name, year, grade, gender, count):
 
     meta = get_school_metadata(school_name)
     school_id = meta["BEIS School ID"]
-    df = load_enrollment_data()
+    filename = f"data_{year}.csv"
+
+    if os.path.exists(filename):
+        df = pd.read_csv(filename)
+    else:
+        grade_cols = [f"G{g} Male" for g in range(1, 13)] + [f"G{g} Female" for g in range(1, 13)]
+        df = pd.DataFrame(columns=["School Year", "BEIS School ID"] + grade_cols)
 
     row_idx = df[(df['School Year'] == year) & (df['BEIS School ID'] == school_id)].index
     if row_idx.empty:
-        new_row = {'School Year': year, 'BEIS School ID': school_id}
-        for col in df.columns:
-            if col not in new_row:
-                new_row[col] = "N/A"
+        new_row = {col: "N/A" for col in df.columns}
+        new_row["School Year"] = year
+        new_row["BEIS School ID"] = school_id
         df.loc[len(df)] = new_row
         row_idx = [len(df) - 1]
 
     row = row_idx[0]
+
+    # Add to existing value rather than overwrite
+    def add_count(column):
+        existing = df.at[row, column]
+        previous = 0 if pd.isna(existing) or existing == "N/A" else int(existing)
+        df.at[row, column] = previous + count
+
     if gender == 'Male':
-        df.at[row, f"{grade} Male"] = count
+        add_count(f"{grade} Male")
     elif gender == 'Female':
-        df.at[row, f"{grade} Female"] = count
+        add_count(f"{grade} Female")
 
-    df = sanitize_enrollment_data(df, row)
-    save_enrollment_data(df)
+    # Fill empty cells with "N/A"
+    for col in df.columns[2:]:
+        if pd.isna(df.at[row, col]) or df.at[row, col] == "":
+            df.at[row, col] = "N/A"
 
-    action = "updated" if row_idx[0] in df.index else "created"
-    return f"Record {action} for {school_name} ({grade}) in {year}."
+    df.to_csv(filename, index=False)
+
+    return f"Enrollment updated for {school_name} ({grade}, {gender}) in {year}."
 
 if __name__ == "__main__":
     app.run(debug=True)
