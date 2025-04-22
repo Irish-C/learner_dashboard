@@ -264,8 +264,18 @@ def update_charts(selected_regions, selected_grades, selected_gender):
     most_enrolled_region = region_enrollment.idxmax()
     region_total = region_enrollment.max()
 
+    # Calculate the sector counts and percentages
+    sector_counts = data['Sector'].value_counts()
+    total_schools = sector_counts.sum()
+    sector_percentage = (sector_counts / total_schools) * 100
 
-    # KPI Cards (now with Region card inside the 3-col row)
+    # Format percentages for each sector
+    public_percentage = sector_percentage.get('Public', 0)
+    private_percentage = sector_percentage.get('Private', 0)
+    sucs_lucs_percentage = sector_percentage.get('SUCsLUCs', 0) 
+
+
+    # KPI Cards (now with Sector card inside the 4-col row)
     kpi_cards = dbc.Row([
         dbc.Col(
             dbc.Card(
@@ -302,7 +312,7 @@ def update_charts(selected_regions, selected_grades, selected_gender):
                     "padding": "10px"
                 }
             ),
-            width=4, style={"marginBottom": "15px"}
+            width=3, style={"marginBottom": "15px", 'padding': "0.5rem"}
         ),
         dbc.Col(
             dbc.Card(
@@ -338,7 +348,7 @@ def update_charts(selected_regions, selected_grades, selected_gender):
                     "padding": "10px"
                 }
             ),
-            width=4, style={"marginBottom": "15px"}
+            width=3, style={"marginBottom": "15px", 'padding': "0.5rem"}
         ),
         dbc.Col(
             dbc.Card(
@@ -375,7 +385,72 @@ def update_charts(selected_regions, selected_grades, selected_gender):
                     "padding": "10px"
                 }
             ),
-            width=4, style={"marginBottom": "15px"}
+            width=3, style={"marginBottom": "15px", 'padding': "0.5rem"}
+        ),
+        dbc.Col(
+            dbc.Card(
+                dbc.CardBody([
+                    html.Div([
+                        html.I(className="fas fa-chalkboard-teacher", style={
+                            "fontSize": "35px",
+                            "color": "#3498db",
+                            "marginBottom": "10px"
+                        }),
+                        html.H5("School Sector Ratio", style={
+                            "color": "var(--gray-color)",
+                            "margin": "0",
+                            "fontWeight": "bold"
+                        }),
+                        html.H3(f"{public_percentage:.2f}% | {private_percentage:.2f}% | {sucs_lucs_percentage:.2f}%", style={
+                            "color": "#3498db",
+                            "margin": "0",
+                            "fontSize": "20px"
+                        }),
+                        html.Div([
+                            html.P("Public", style={
+                                "color": "var(--gray-color)",
+                                "fontSize": "14px",
+                                "margin": "5px 15px",
+                                "fontWeight": "bold",
+                                "textAlign": "center"
+                            }),
+                            html.P("Private", style={
+                                "color": "var(--gray-color)",
+                                "fontSize": "14px",
+                                "margin": "5px 15px",
+                                "fontWeight": "bold",
+                                "textAlign": "center"
+                            }),
+                            html.P("SUCs/LUCs", style={
+                                "color": "var(--gray-color)",
+                                "fontSize": "14px",
+                                "margin": "5px 15px",
+                                "fontWeight": "bold",
+                                "textAlign": "center"
+                            })
+                        ], style={
+                            "display": "flex",
+                            "justifyContent": "center",
+                            "alignItems": "center",  # Align labels in the same row
+                            "width": "100%",
+                        })
+                            ], style={
+                                "display": "flex",
+                                "flexDirection": "column",
+                                "alignItems": "center",
+                                "justifyContent": "center",
+                                "height": "100%"
+                            })
+                ]),
+                color="light",
+                style={
+                    "borderRadius": "10px",
+                    "boxShadow": "0px 4px 6px rgba(0, 0, 0, 0.1)",
+                    "borderBottom": "5px solid #3498db",
+                    "padding": "10px"
+                }
+            ),
+            width=3, style={"marginBottom": "15px", 'padding': "0.5rem"}
         )
     ], justify="center", align="start")
 
