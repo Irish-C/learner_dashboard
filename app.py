@@ -330,7 +330,7 @@ def update_charts(selected_regions, selected_grades, selected_gender):
                             "fontWeight": "bold"
                         }),
                         html.H2(f"{total_schools:,}", style={
-                            "color": "FBC02D",
+                            "color": "#FBC02D",
                             "margin": "0"
                         })
                     ], style={
@@ -370,6 +370,7 @@ def update_charts(selected_regions, selected_grades, selected_gender):
                         html.H3(f"{most_enrolled_region}: {region_total/1000:.2f}k", style={
                             "color": "#e74c3c",
                             "margin": "0",
+                            "fontSize": "24px"
                         })
                     ], style={
                         "display": "flex",
