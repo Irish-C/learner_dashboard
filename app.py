@@ -283,7 +283,7 @@ def update_charts(selected_regions, selected_grades, selected_gender):
                     html.Div([
                         html.I(className="fas fa-user-graduate", style={
                             "fontSize": "30px",
-                            "color": "var(--green-color)",
+                            "color": "#008000",
                             "marginBottom": "10px",
                             "backgroundColor": "color: var(--accent-color)",
                         }),
@@ -293,7 +293,7 @@ def update_charts(selected_regions, selected_grades, selected_gender):
                             "fontWeight": "bold"
                         }),
                         html.H2(f"{total_students:,}", style={
-                            "color": "var(--green-color)",
+                            "color": "#008000",
                             "margin": "0"
                         })
                     ], style={
@@ -320,7 +320,7 @@ def update_charts(selected_regions, selected_grades, selected_gender):
                     html.Div([
                         html.I(className="fas fa-school", style={
                             "fontSize": "30px",
-                            "color": "var(--yellow-color)",
+                            "color": "#FBC02D",
                             "marginBottom": "10px"
                         }),
                         html.H5("Total Schools", style={
@@ -329,7 +329,7 @@ def update_charts(selected_regions, selected_grades, selected_gender):
                             "fontWeight": "bold"
                         }),
                         html.H2(f"{total_schools:,}", style={
-                            "color": "var(--yellow-color)",
+                            "color": "FBC02D",
                             "margin": "0"
                         })
                     ], style={
