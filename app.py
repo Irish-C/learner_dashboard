@@ -216,24 +216,63 @@ def load_protected_page(login_data):
                     html.H2("Login", className="text-center mb-4", style={"fontWeight": "bold", "color": "black"}),
 
                     # First Name Input
-                    dbc.Input(id="input-firstname", placeholder="First Name", type="text", className="mb-3",
-                              style={"border": "none", "borderBottom": "1px solid gray", "borderRadius": "0", "backgroundColor": "transparent"}),
-
+                    dbc.Input(id="input-firstname", type="text", placeholder="First Name", className="mb-3",
+                              style={
+                                'width': '100%',
+                                'paddingRight': '40px',
+                                'padding': '10px',
+                                'fontSize': '16px',
+                                'borderRadius': '5px',
+                                'border': '1px solid #ccc'
+                            }),
                     # Last Name Input
-                    dbc.Input(id="input-lastname", placeholder="Last Name", type="text", className="mb-3",
-                              style={"border": "none", "borderBottom": "1px solid gray", "borderRadius": "0", "backgroundColor": "transparent"}),
-
+                    dbc.Input(id="input-lastname", type="text", placeholder="Last Name", className="mb-3",
+                              style={
+                                'width': '100%',
+                                'paddingRight': '40px',
+                                'padding': '10px',
+                                'fontSize': '16px',
+                                'borderRadius': '5px',
+                                'border': '1px solid #ccc'
+                            }),
                     # Email Input
-                    dbc.Input(id="input-email", placeholder="Email", type="email", className="mb-3",
-                              style={"border": "none", "borderBottom": "1px solid gray", "borderRadius": "0", "backgroundColor": "transparent"}),
-
+                    dbc.Input(id="input-email", type="email", placeholder='Enter your password', className='mb-3',
+                            style={
+                                'width': '100%',
+                                'paddingRight': '40px',
+                                'padding': '10px',
+                                'fontSize': '16px',
+                                'borderRadius': '5px',
+                                'border': '1px solid #ccc'
+                            }),
                     # Password Input
-                    dbc.Input(id="input-password", placeholder="Password", type="password", className="mb-4",
-                              style={"border": "none", "borderBottom": "1px solid gray", "borderRadius": "0", "backgroundColor": "transparent"}),
-
+                    html.Div([
+                        dcc.Input(id='input-password', type='password', placeholder='Enter your password', className='mb-3',
+                            style={
+                                'width': '100%',
+                                'paddingRight': '40px',
+                                'padding': '10px',
+                                'fontSize': '16px',
+                                'borderRadius': '5px',
+                                'border': '1px solid #ccc'
+                            }),
+                        html.I(
+                            id='toggle-password-visibility',
+                            className='fas fa-eye',
+                            n_clicks=0,
+                            style={
+                                'position': 'absolute',
+                                'right': '10px',
+                                'top': '40%',
+                                'transform': 'translateY(-50%)',
+                                'cursor': 'pointer',
+                                'color': '#888'
+                            }
+                        )
+                    ], style={'position': 'relative', 'width': '100%'}),
                     # Login Button
                     dbc.Button("Login", id="login-button", color="primary", className="w-100", style={
-                        "background": "linear-gradient(to right, #4facfe, #8f51ea)",
+                        "background": "linear-gradient(to right, #5A5A5A, #333333)",
                         "border": "none",
                         "fontWeight": "bold"
                     }),
@@ -257,6 +296,17 @@ def load_protected_page(login_data):
         ], justify="center")
     ], fluid=True)
 )
+@app.callback(
+    Output('password', 'type'),
+    Output('toggle-password-visibility', 'className'),
+    Input('toggle-password-visibility', 'n_clicks'),
+    State('password', 'type'),
+    prevent_initial_call=True
+)
+def toggle_password_visibility(n_clicks, current_type):
+    if current_type == 'password':
+        return 'text', 'fas fa-eye-slash'
+    return 'password', 'fas fa-eye'
 
 # Dashboard Page
 @app.callback(
