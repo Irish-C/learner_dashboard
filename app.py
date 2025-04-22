@@ -1039,9 +1039,10 @@ def update_enrollment_choropleth(selected_sy, selected_regions, selected_grades,
             cmax=full_enrollment['Total Enrollment'].max()
         ),
         title="Total Enrollment by Region",
+        height=500,
         geo=dict(fitbounds="locations", visible=False),
         margin={"r":0,"t":50,"l":0,"b":0},
-        height=500
+        dragmode=False
     )
 
     return fig

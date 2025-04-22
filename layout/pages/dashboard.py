@@ -117,7 +117,7 @@ def dashboard_content(data, grade_options, region_options, combined_shs_track_df
                         dbc.Col(
                             dbc.Card([
                                 dbc.CardBody([
-                                    dcc.Loading(dcc.Graph(id='enrollment_choropleth_map'))
+                                    dcc.Loading(dcc.Graph(id='enrollment_choropleth_map', config={'displayModeBar': False}, style={'height': '100%'}))
                                 ])
                             ]),
                             width=8),
