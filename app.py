@@ -856,46 +856,93 @@ region_mapping = {
 
 import plotly.graph_objects as go
 
+from dash import Input, Output
+
+# Precompute all grade‑gender columns once
+grade_columns = [
+    col for col in data.columns
+    if any(col.startswith(prefix) for prefix in
+           ['K', 'G1','G2','G3','G4','G5','G6','Elem','JHS','G7','G8','G9','G10','G11','G12'])
+    and ('Male' in col or 'Female' in col)
+]
+
 @app.callback(
     Output('enrollment_choropleth_map', 'figure'),
-    Input('region_filter', 'value')
+    [
+        Input('school_year_filter', 'value'),
+        Input('region_filter',       'value'),
+        Input('grade_filter',        'value'),
+        Input('gender_filter',       'value'),
+    ]
 )
-def update_enrollment_choropleth(selected_regions):
-    # 1) Copy + remap region names
-    df_sy = data.copy()
-    df_sy['Region'] = df_sy['Region'].apply(lambda x: region_mapping.get(x, x))
+def update_enrollment_choropleth(selected_sy, selected_regions, selected_grades, selected_gender):
+    # 1) Copy + filter by School Year
+    df = data.copy()
+    df = df[df['School Year'] == selected_sy]
 
-    # 2) Total enrollment for every region
+    # 3) Build lists of grade‑gender columns
+    selected_cols_male   = []
+    selected_cols_female = []
+
+    if selected_grades:
+        for grade in selected_grades:
+            if grade in ['G11', 'G12']:
+                # include all subject‑specific columns for those grades
+                selected_cols_male   += [c for c in grade_columns if c.startswith(grade) and 'Male' in c]
+                selected_cols_female += [c for c in grade_columns if c.startswith(grade) and 'Female' in c]
+            else:
+                selected_cols_male.append(f"{grade} Male")
+                selected_cols_female.append(f"{grade} Female")
+    else:
+        # no grade selected → default to all
+        selected_cols_male   = [c for c in grade_columns if 'Male'   in c]
+        selected_cols_female = [c for c in grade_columns if 'Female' in c]
+
+    # 4) Sum up based on gender filter
+    if selected_gender == 'Male':
+        df['Selected Grades Total'] = df[selected_cols_male].sum(axis=1)
+    elif selected_gender == 'Female':
+        df['Selected Grades Total'] = df[selected_cols_female].sum(axis=1)
+    else:  # 'All'
+        df['Selected Grades Total'] = df[selected_cols_male + selected_cols_female].sum(axis=1)
+
+    # 5) Drop schools with zero enrollment in selection
+    df = df[df['Selected Grades Total'] > 0]
+
+    # 6) Aggregate by Region
+    #    (and remap region names if you need)
+    df['Region'] = df['Region'].apply(lambda x: region_mapping.get(x, x))
     full_enrollment = (
-        df_sy
-        .groupby('Region', as_index=False)['Total Enrollment']
+        df
+        .groupby('Region', as_index=False)['Selected Grades Total']
         .sum()
+        .rename(columns={'Selected Grades Total': 'Total Enrollment'})
     )
 
-    # 3) If a filter is applied, restrict to those regions; else use all
+    # 7) Apply region filter for the overlay
     if selected_regions:
         mapped = [region_mapping.get(r, r) for r in selected_regions]
         region_enrollment = full_enrollment[full_enrollment['Region'].isin(mapped)]
     else:
         region_enrollment = full_enrollment.copy()
 
-    # 4) Build layered choropleth
+    # 8) Build layered choropleth
     fig = go.Figure()
 
-    # 4a) Base: all regions in light grey
+    # base layer (grey)
     fig.add_choropleth(
         geojson=geojson_data,
         locations=full_enrollment['Region'],
-        z=[0]*len(full_enrollment),            # dummy zeros
+        z=[0]*len(full_enrollment),
         featureidkey='properties.name',
-        colorscale=[[0, 'lightgrey'], [1, 'lightgrey']],
+        colorscale=[[0,'lightgrey'],[1,'lightgrey']],
         showscale=False,
         marker_line_width=0.5,
         marker_line_color='white',
         hoverinfo='none'
     )
 
-    # 4b) Overlay: colored for selected/all regions
+    # overlay with actual totals
     fig.add_choropleth(
         geojson=geojson_data,
         locations=region_enrollment['Region'],
@@ -905,7 +952,6 @@ def update_enrollment_choropleth(selected_regions):
         coloraxis="coloraxis"
     )
 
-    # 5) Shared color axis and layout
     fig.update_layout(
         coloraxis=dict(
             colorscale="Viridis",
