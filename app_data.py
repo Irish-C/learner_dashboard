@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import re
 
 dataset_path = 'data.csv'
@@ -58,13 +59,36 @@ for _, row in data.iterrows():
 combined_shs_track_df = pd.DataFrame(shs_track_records)
 
 # Manage Data Page
-schools_df = pd.read_csv("schools.csv")
+SCHOOLS_PATH = 'schools.csv'
+ENROLLMENT_PATH = 'data_2023-2024.csv'
 
-region_options = [{'label': r, 'value': r} for r in sorted(schools_df['Region'].dropna().unique())]
-division_options = [{'label': d, 'value': d} for d in sorted(schools_df['Division'].dropna().unique())]
-barangay_options = [{'label': b, 'value': b} for b in sorted(schools_df['Barangay'].dropna().unique())]
-school_options = [{'label': name, 'value': sid} for sid, name in zip(schools_df['BEIS School ID'], schools_df['School Name'])]
+def load_schools():
+    return pd.read_csv(SCHOOLS_PATH)
 
-grade_options = [{'label': f'Grade {g}', 'value': f'G{g}'} for g in range(1, 13)]
-grade_options.insert(0, {'label': 'Kinder', 'value': 'K'})
-gender_options = [{'label': 'Male', 'value': 'Male'}, {'label': 'Female', 'value': 'Female'}]
+def load_enrollment_data():
+    return pd.read_csv(ENROLLMENT_PATH)
+
+def get_dropdown_options():
+    schools_df = load_schools()
+
+    region_options = [{'label': r, 'value': r} for r in sorted(schools_df['Region'].dropna().unique())]
+    division_options = [{'label': d, 'value': d} for d in sorted(schools_df['Division'].dropna().unique())]
+    school_options = [{'label': s, 'value': s} for s in sorted(schools_df['School Name'].dropna().unique())]
+    barangay_options = [{'label': b, 'value': b} for b in sorted(schools_df['Barangay'].dropna().unique())]
+
+    return region_options, division_options, school_options, barangay_options
+
+def get_school_metadata(school_name):
+    schools_df = load_schools()
+    return schools_df[schools_df['School Name'] == school_name].iloc[0]
+
+def sanitize_enrollment_data(df, row_index):
+    # Format empty or 0 values in the enrollment columns as 'N/A'
+    for col in df.columns[2:]:  # Skip 'School Year' and 'BEIS School ID'
+        val = df.at[row_index, col]
+        if pd.isna(val) or val == 0 or val == 0.0:
+            df.at[row_index, col] = "N/A"
+    return df
+
+def save_enrollment_data(df):
+    df.to_csv(ENROLLMENT_PATH, index=False)
