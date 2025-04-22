@@ -228,22 +228,4 @@ def dashboard_content(data, grade_options, region_options, combined_shs_track_df
                             width=12
                         )
                     ], className="mb-4"),
-
-                dbc.Row([
-                html.H4("Enrollment Table"),
-                dash_table.DataTable(
-                    id='enrollment_table',
-                    columns=[
-                        {'name': 'Region', 'id': 'Region'},
-                        {'name': 'Division', 'id': 'Division'},
-                        {'name': 'Total Male', 'id': 'Total Male', 'type': 'numeric'},
-                        {'name': 'Total Female', 'id': 'Total Female', 'type': 'numeric'},
-                        {'name': 'Total Enrollment', 'id': 'Total Enrollment', 'type': 'numeric'}
-                    ],
-                    data=data[['Region', 'Division', 'Total Male', 'Total Female', 'Total Enrollment']].to_dict('records'),
-                    page_size=10,
-                    sort_action='native',
-                    filter_action='native',
-                    style_table={'overflowX': 'auto'}
-                    )
-                ])])
+])

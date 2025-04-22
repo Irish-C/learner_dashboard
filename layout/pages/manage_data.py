@@ -1,8 +1,8 @@
 
 import dash_bootstrap_components as dbc
-from dash import html, dcc
+from dash import html, dcc, dash_table
 
-def manage_data_content(region_options, grade_options):
+def manage_data_content(region_options, grade_options, school_year_options):
     return dbc.Container([
         html.H1("Manage Data Page", className="page-title mb-4"),
         html.H3("Add New Enrollment Record", className="mb-4"),
@@ -66,12 +66,7 @@ def manage_data_content(region_options, grade_options):
         dbc.Row([
             dbc.Col([
                 dbc.Label("School Year"),
-                dcc.Dropdown(
-                    id='input_school_year',
-                    options=[{'label': '2015-2016', 'value': '2015-2016'}, {'label': '2016-2017', 'value': '2016-2017'}, {'label': '2017-2018', 'value': '2017-2018'}, {'label': '2018-2019', 'value': '2018-2019'}, {'label': '2019-2020', 'value': '2019-2020'}, {'label': '2020-2021', 'value': '2020-2021'}, {'label': '2021-2022', 'value': '2021-2022'}, {'label': '2022-2023', 'value': '2022-2023'}, {'label': '2023-2024', 'value': '2023-2024'}, {'label': '2024-2025', 'value': '2024-2025'}, {'label': '2025-2026', 'value': '2025-2026'}, {'label': '2026-2027', 'value': '2026-2027'}],
-                    placeholder="Select School Year",
-                    className="text-center"
-                )
+                dcc.Dropdown(id='input_school_year', options=school_year_options, placeholder="Select School Year")
             ], width=6),
             dbc.Col([
                 dbc.Label("Grade Level"),
@@ -103,5 +98,24 @@ def manage_data_content(region_options, grade_options):
             className="text-center mb-5"
         ),
 
-        html.Div(id="submission_feedback", className="text-success mt-3")
+        html.Div(id="submission_feedback", className="text-success mt-3"),
+
+        html.Hr(),
+        html.H4("View Enrollment Table by School Year", className="mt-4 mb-2"),
+        dbc.Row([
+            dbc.Col([
+                dbc.Label("Select School Year to View Table"),
+                dcc.Dropdown(id='table_school_year', options=school_year_options, placeholder="Choose a Year")
+            ])
+        ], className="mb-3"),
+
+        dash_table.DataTable(
+            id='enrollment_table',
+            columns=[],
+            data=[],
+            page_size=10,
+            sort_action='native',
+            filter_action='native',
+            style_table={'overflowX': 'auto'}
+        )
     ], fluid=True)

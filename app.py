@@ -25,7 +25,22 @@ from app_data import (
     save_enrollment_data
 )
 
+
+from layout.pages.manage_data import manage_data_content
+
+# Generate school year options dynamically
+from datetime import datetime
+current_year = datetime.now().year
+school_year_options = [
+    {'label': f"{y}-{y+1}", 'value': f"{y}-{y+1}"} 
+    for y in range(current_year - 10, current_year + 2)
+]
+
+# Example layout call with all three arguments
+
+
 region_options = [{'label': r, 'value': r} for r in correct_region_order]
+layout = manage_data_content(region_options, grade_options, school_year_options)
 
 # Sample user database
 USER_DATA = [
@@ -157,21 +172,21 @@ def toggle_sidebar(n_clicks, is_collapsed, current_page):
 def change_page(btn1, btn2, btn3, btn4, current_page, is_collapsed):
     ctx = callback_context
     if not ctx.triggered:
-        return create_content("dashboard", data, grade_options, region_options, combined_shs_track_df), "dashboard", create_sidebar(is_collapsed=is_collapsed, current_page="dashboard")
+        return create_content("dashboard", data, grade_options, region_options, combined_shs_track_df, school_year_options), "dashboard", create_sidebar(is_collapsed=is_collapsed, current_page="dashboard")
     
     button_id = ctx.triggered[0]["prop_id"].split(".")[0]
     
     if button_id == "btn-1":
-        return create_content("dashboard", data, grade_options, region_options, combined_shs_track_df), "dashboard", create_sidebar(is_collapsed=is_collapsed, current_page="dashboard")
+        return create_content("dashboard", data, grade_options, region_options, combined_shs_track_df, school_year_options), "dashboard", create_sidebar(is_collapsed=is_collapsed, current_page="dashboard")
     elif button_id == "btn-2":
-        return create_content("manage_data", data, grade_options, region_options, combined_shs_track_df), "manage_data", create_sidebar(is_collapsed=is_collapsed, current_page="manage_data")
+        return create_content("manage_data", data, grade_options, region_options, combined_shs_track_df, school_year_options), "manage_data", create_sidebar(is_collapsed=is_collapsed, current_page="manage_data")
     elif button_id == "btn-3":
-        return create_content("help", data, grade_options, region_options, combined_shs_track_df), "help", create_sidebar(is_collapsed=is_collapsed, current_page="help")
+        return create_content("help", data, grade_options, region_options, combined_shs_track_df, school_year_options), "help", create_sidebar(is_collapsed=is_collapsed, current_page="help")
     elif button_id == "btn-4":
-        return create_content("settings", data, grade_options, region_options, combined_shs_track_df), "settings", create_sidebar(is_collapsed=is_collapsed, current_page="settings")
+        return create_content("settings", data, grade_options, region_options, combined_shs_track_df, school_year_options), "settings", create_sidebar(is_collapsed=is_collapsed, current_page="settings")
     
     # Default to dashboard
-    return create_content("dashboard", data, grade_options, region_options, combined_shs_track_df), "dashboard", create_sidebar(is_collapsed=is_collapsed, current_page="dashboard")
+    return create_content("dashboard", data, grade_options, region_options, combined_shs_track_df, school_year_options), "dashboard", create_sidebar(is_collapsed=is_collapsed, current_page="dashboard")
 
 # Call back for login to dashboard
 @app.callback(
@@ -193,7 +208,7 @@ def load_protected_page(login_data):
                             create_sidebar(is_collapsed=False, current_page="dashboard")
                         ]),
                         html.Div(id="content", style=get_content_style(False), children=create_content(
-                            "dashboard", data, grade_options, region_options, combined_shs_track_df
+                            "dashboard", data, grade_options, region_options, combined_shs_track_df, school_year_options
                         ))
                     ]
                 )
@@ -706,15 +721,6 @@ def toggle_modal(school_id, close_click, is_open):
         ])
     
     return is_open, "", ""
-
-@app.callback(
-    Output('enrollment_table', 'data'),
-    Input('school_year_filter', 'value')
-)
-def update_table(selected_year):
-    filtered_data = data[data['School Year'] == selected_year]
-    return filtered_data[['Region', 'Division', 'Total Male', 'Total Female', 'Total Enrollment']].to_dict('records')
-
 
 @app.callback(
     Output('shs_track_bar_chart', 'figure'),
@@ -1469,6 +1475,43 @@ def submit_data(n_clicks, school_name, year, grade, gender, count):
     df.to_csv(filename, index=False, na_rep="N/A")
 
     return f"Enrollment successfully updated for {school_name} ({grade}, {gender}) in {year}."
+
+@app.callback(
+    Output('enrollment_table', 'data'),
+    Output('enrollment_table', 'columns'),
+    Input('table_school_year', 'value')
+)
+def update_enrollment_table(school_year):
+    if not school_year:
+        return [], []
+
+    file_path = f"data_{school_year}.csv"
+    if not os.path.exists(file_path):
+        return [], []
+
+    df = pd.read_csv(file_path)
+
+    # Convert any N/A to 0 for numeric aggregation
+    numeric_df = df.replace("N/A", 0)
+    numeric_df = numeric_df.apply(pd.to_numeric, errors='ignore')
+
+    # Infer gendered columns
+    male_cols = [col for col in df.columns if "Male" in col]
+    female_cols = [col for col in df.columns if "Female" in col]
+
+    numeric_df["Total Male"] = numeric_df[male_cols].sum(axis=1, numeric_only=True)
+    numeric_df["Total Female"] = numeric_df[female_cols].sum(axis=1, numeric_only=True)
+    numeric_df["Total Enrollment"] = numeric_df["Total Male"] + numeric_df["Total Female"]
+
+    # Inject Region and Division from school metadata if needed
+    if "Region" not in numeric_df.columns or "Division" not in numeric_df.columns:
+        from app_data import load_schools
+        schools_df = load_schools()
+        numeric_df = numeric_df.merge(schools_df[["BEIS School ID", "Region", "Division"]], on="BEIS School ID", how="left")
+
+    summary = numeric_df.groupby(["Region", "Division"], as_index=False)[["Total Male", "Total Female", "Total Enrollment"]].sum()
+
+    return summary.to_dict("records"), [{"name": col, "id": col} for col in summary.columns]
 
 if __name__ == "__main__":
     app.run(debug=True)
