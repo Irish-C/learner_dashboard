@@ -10,7 +10,6 @@ import re
 import json
 import os
 import hashlib
-import hashlib
 
 from layout.sidebar import create_sidebar
 from layout.header import create_header
@@ -20,6 +19,19 @@ from app_data import data, grade_columns, combined_shs_track_df, correct_region_
 
 region_options = [{'label': r, 'value': r} for r in correct_region_order]
 
+# Sample user database
+USER_DATA = [
+    {"first_name": "Andrei", "last_name": "Cruz", "email": "andreivc@deped.com", "password": "pass123"},
+    {"first_name": "Christian", "last_name": "Luces", "email": "chrisitanml@deped.com", "password": "mypassword"}
+]
+
+def hash_password(pw):
+    return hashlib.sha256(pw.encode()).hexdigest()
+
+for user in USER_DATA:
+    user["password"] = hash_password(user["password"])
+
+
 # Mapping of numeric values to page names
 PAGE_CONSTANTS = {
     1: 'dashboard',
@@ -27,6 +39,22 @@ PAGE_CONSTANTS = {
     3: 'help',
     4: 'settings'
 }
+
+#log in page layout
+login_page = dbc.Container([
+    dcc.Store(id="login-state", storage_type="session", data={"logged_in": False}),
+    dbc.Row([
+        dbc.Col([
+            html.H3("Login", className="text-center mb-3"),
+            dbc.Input(id="input-firstname", placeholder="First Name", type="text", className="w-100"),
+            dbc.Input(id="input-lastname", placeholder="Last Name", type="text", className="w-100"),
+            dbc.Input(id="input-email", placeholder="Email Address", type="email", className="w-100"),
+            dbc.Input(id="input-password", placeholder="Password", type="password", className="w-100"),
+            dbc.Button("Login", id="login-button", color="primary", className="w-100"),
+            html.Div(id="login-message", className="text-danger text-center")
+        ], width=4)
+    ], justify="center", style={"paddingTop": "15%"}),
+], fluid=True)
 
 # Dash App
 app = dash.Dash(
@@ -38,43 +66,38 @@ app = dash.Dash(
     title="Learner Information System"
 )
 
+
 # Load index template from the HTML file
 with open('assets/index_template.html', 'r') as file:
     app.index_string = file.read()
 
 # Define the layout
-app.layout = html.Div(
-    className="body-style",
-    children=[
-        # Store the sidebar toggle state
-        dcc.Store(id='sidebar-toggle-state', data=False),
-        
-        # Store current page
-        dcc.Store(id='current-page', data="dashboard"),
-        
-        # Header
-        create_header(),
-        
-        # Main content area with sidebar and page content
-        html.Div(
-            className="app-container",
-            children=[
-                # Sidebar (wrapped in a div container for dynamic updates)
-                html.Div(
-                    id="sidebar-container",
-                    children=[create_sidebar(is_collapsed=False, current_page="dashboard")]
-                ),
-                
-                # Page content
-                html.Div(
-                    id="content",
-                    style=get_content_style(False),
-                    children=create_content("dashboard", data, grade_options, region_options, combined_shs_track_df, division_options, school_options, barangay_options)
-                )
-            ]
-        )
-    ]
+app.layout = html.Div([
+    dcc.Location(id="url"),
+    dcc.Store(id="login-state", storage_type="session", data={"logged_in": False}),
+    html.Div(id="page-content")  # placeholder that will be filled by callback
+])
+
+# Callback for login
+@app.callback(
+    Output("login-state", "data"),
+    Output("login-message", "children"),
+    Input("login-button", "n_clicks"),
+    State("input-firstname", "value"),
+    State("input-lastname", "value"),
+    State("input-email", "value"),
+    State("input-password", "value"),
+    prevent_initial_call=True
 )
+def verify_login(n_clicks, first_name, last_name, email, password):
+    pw_hash = hash_password(password or "")
+    for user in USER_DATA:
+        if (user["first_name"].lower() == (first_name or "").lower() and
+            user["last_name"].lower() == (last_name or "").lower() and
+            user["email"].lower() == (email or "").lower() and
+            user["password"] == pw_hash):
+            return {"logged_in": True, "user": f"{first_name} {last_name}"}, ""
+    return {"logged_in": False}, "Invalid credentials. Please try again."
 
 # Callback to toggle sidebar
 @app.callback(
@@ -129,7 +152,34 @@ def change_page(btn1, btn2, btn3, btn4, current_page, is_collapsed):
     # Default to dashboard
     return create_content("dashboard", data, grade_options, region_options, combined_shs_track_df, division_options, school_options, barangay_options), "dashboard", create_sidebar(is_collapsed=is_collapsed, current_page="dashboard")
 
-
+# Call back for login to dashboard
+@app.callback(
+    Output("page-content", "children"),
+    Input("login-state", "data")
+)
+def load_protected_page(login_data):
+    if login_data["logged_in"]:
+        return html.Div(
+            className="body-style",
+            children=[
+                dcc.Store(id='sidebar-toggle-state', data=False),
+                dcc.Store(id='current-page', data="dashboard"),
+                create_header(),
+                html.Div(
+                    className="app-container",
+                    children=[
+                        html.Div(id="sidebar-container", children=[
+                            create_sidebar(is_collapsed=False, current_page="dashboard")
+                        ]),
+                        html.Div(id="content", style=get_content_style(False), children=create_content(
+                            "dashboard", data, grade_options, region_options, combined_shs_track_df,
+                            division_options, school_options, barangay_options
+                        ))
+                    ]
+                )
+            ]
+        )
+    return login_page
 
 # Dashboard Page
 @app.callback(
