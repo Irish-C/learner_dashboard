@@ -1090,11 +1090,33 @@ def update_enrollment_choropleth(selected_sy, selected_regions, selected_grades,
             cmin=full_enrollment['Total Enrollment'].min(),
             cmax=full_enrollment['Total Enrollment'].max()
         ),
-        title="Total Enrollment by Region",
+        title="Regional Enrollment",
         height=500,
         geo=dict(fitbounds="locations", visible=False),
         margin={"r":0,"t":50,"l":0,"b":0},
-        dragmode=False
+        dragmode=False,
+
+        title_font=dict(
+            size=20,  # Similar size to your provided H5 (adjust as needed)
+            color="var(--gray-color)",  # Matches the color in your example
+            family="Arial, sans-serif",  # Default font
+            weight="bold"  # Set to normal or bold based on your preference
+        ),
+
+        annotations=[
+        dict(
+            x=0.5,  # Position of the subheading (centered horizontally)
+            y=0,  # Position below the title (adjust as necessary)
+            text="This map visualizes the learner distribution across all regions in the Philippines.",
+            showarrow=False,
+            font=dict(
+                size=14,
+                color="gray",
+                style="italic"
+            ),
+            align="center"
+        )
+    ]
     )
 
     return fig
