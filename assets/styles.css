@@ -279,7 +279,7 @@
 /* Chart Title Styles */
 h1.page-title { /* For the main page headings*/
   margin-bottom: 15px !important;
-  font-size: 4rem;
+  font-size: 3.5rem;
   font-weight: bold;
   color: var(--primary-color);
   text-align: left;

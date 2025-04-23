@@ -19,7 +19,7 @@ def dashboard_content(data, grade_options, region_options, combined_shs_track_df
     return dbc.Container(
         fluid=True,
         children=[
-            html.H1("Dashboard", style={"fontSize": "2rem", "fontWeight": "700", "color": "#343a40"}),
+            html.H1("Dashboard", className="page-title"),
             html.P("Welcome Back, Teacher!", style={"fontSize": "1.1rem", "color": "#6c757d"}),
             html.Br(),
 
