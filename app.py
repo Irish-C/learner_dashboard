@@ -381,6 +381,12 @@ def update_charts(selected_regions, selected_grades, selected_gender):
 
     pie_chart.update_layout(
         margin=dict(t=30, b=0, l=0, r=0),
+        title_font=dict(
+            size=20,  
+            color="var(--gray-color)",  
+            family="Arial, sans-serif",  
+            weight="bold"  
+        ),
         height=296,  # or adjust for your visual preference
         showlegend=True  # set to False if pie labels suffice
     )
@@ -422,6 +428,12 @@ def update_charts(selected_regions, selected_grades, selected_gender):
 
     fig_combo.update_layout(
         title='Top 15 Divisions: Total Enrollment and Number of Schools',
+        title_font=dict(
+            size=20,  
+            color="var(--gray-color)",  
+            family="Arial, sans-serif",  
+            weight="bold"  
+        ),
         xaxis_title='Division',
         yaxis_title='Total Enrollment'
     )
@@ -757,6 +769,9 @@ def update_shs_track_chart(selected_year, selected_regions, selected_gender):
     # 🔐 Defensive: check again if grouped is empty
     if grouped.empty:
         return px.bar(title="No data to display")
+    
+    # Sort the grouped data by 'Total Enrollment' in ascending order
+    grouped = grouped.sort_values(by='Total Enrollment', ascending=True)
 
     # 📊 Plot the chart safely
     try:
@@ -767,9 +782,23 @@ def update_shs_track_chart(selected_year, selected_regions, selected_gender):
             color='Grade Level',
             orientation='h',
             text='Total Enrollment',
-            title='Enrollment Distribution by SHS Track (G11 and G12)'
+            title='Senior High Track Enrollment Overview'
         )
-        fig.update_layout(xaxis_title='Total Enrollment', yaxis_title='Track')
+
+        fig.update_layout(
+            title='Senior High Track Enrollment Overview',
+            scene=dict(
+                xaxis_title='Track',
+                yaxis_title='Total Enrollment',
+                zaxis_title='Grade Level'
+            ),
+            title_font=dict(
+                size=20,  
+                color="var(--gray-color)",  
+                family="Arial, sans-serif",
+                weight= "bold"
+            ),
+        )
         return fig
     except Exception as e:
         print("SHS Chart Rendering Error:", e)
@@ -861,7 +890,7 @@ def update_top_schools_chart(selected_regions, selected_grades, selected_gender)
             ))
 
     fig.update_layout(
-        title='Top 5 Schools by Enrollment',
+        title='Top 5 Most Enrolled Schools',
         barmode='stack',
         showlegend=True,
         legend_title_text='',
@@ -881,7 +910,13 @@ def update_top_schools_chart(selected_regions, selected_grades, selected_gender)
         ),
 
         font=dict(size=13),
-        legend=dict(orientation='h', y=-0.25, x=0.5, xanchor='center')
+        legend=dict(orientation='h', y=-0.25, x=0.5, xanchor='center'),
+        title_font=dict(
+            size=20,  
+            color="var(--gray-color)",
+            family="Arial, sans-serif",
+            weight= "bold"
+        ),
     )
     return fig
 
