@@ -206,9 +206,11 @@ def dashboard_content(data, grade_options, region_options, combined_shs_track_df
                             dbc.Card([
                                 dbc.CardBody([
                                     dcc.Loading(
-                                        dcc.Graph(id='k_to_12_distribution_chart'),
-                                        type='default'
-                                    )
+                                        dcc.Graph(
+                                        id='k_to_12_distribution_chart',
+                                        config={'displayModeBar': False},
+                                        style={'height': '100%'}
+                                    )),
                                 ])
                             ]),
                             width=12

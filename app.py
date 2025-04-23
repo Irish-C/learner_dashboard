@@ -974,7 +974,7 @@ def update_sned_sector_chart(selected_year, selected_regions, selected_gender):
         paper_bgcolor='white',
         font=dict(size=13),
         height=350,
-        legend_title_text='',
+        legend_title_text='Gender',
         margin=dict(l=20, r=20, t=80, b=40),
         title_font=dict(
             size=20,  
@@ -1124,7 +1124,7 @@ def update_k_to_12_distribution(selected_regions, selected_gender, selected_year
         color='Group',
         category_orders={'Level': list(level_labels.values())},
         color_discrete_map={'ES': '#a3c4f3', 'JHS': '#2a6fdb', 'SHS': '#071952'},
-        title='Enrollment Distribution Kinder to Grade 12 (include SNed)',
+        title='Enrollment Across Grade and Non Grade Levels',
         text='Enrollment'
     )
 
@@ -1137,12 +1137,18 @@ def update_k_to_12_distribution(selected_regions, selected_gender, selected_year
     fig.update_layout(
         xaxis_title='',
         yaxis_title='Enrollment',
+        font=dict(size=13),  # Set font size here
         plot_bgcolor='white',
         paper_bgcolor='white',
-        margin=dict(l=20, r=20, t=50, b=20),
+        margin=dict(l=20, r=20, t=70, b=20),
         legend=dict(orientation='h', y=-0.2, x=0.5, xanchor='center'),
-        font=dict(size=13),
-        bargap=0.2
+        bargap=0.2,
+        title_font=dict(
+            size=20,  
+            color="var(--gray-color)",  
+            family="Arial, sans-serif",  
+            weight="bold"  
+        )
     )
 
     return fig
@@ -1389,7 +1395,7 @@ def update_coc_sector_chart(selected_sy, selected_regions, selected_grades, sele
     # Update the chart layout 
     fig.update_layout(
         title='School Offerings by Certificate of Completion (COC)<br>Type and Sector',
-        xaxis_title='Sector',
+        xaxis_title='Type',
         yaxis_title='Number of Schools',
         font=dict(size=13),
         plot_bgcolor='white',
