@@ -1372,12 +1372,20 @@ def update_coc_sector_chart(selected_sy, selected_regions, selected_grades, sele
 
     # Update the chart layout 
     fig.update_layout(
-        title='School Offerings by COC Type and Sector',
-        xaxis_title=None,
+        title='School Offerings by Certificate of Completion (COC)<br>Type and Sector',
+        xaxis_title='Sector',
         yaxis_title='Number of Schools',
+        plot_bgcolor='white',
+        paper_bgcolor='white',
         legend_title='Sector',
-        margin=dict(l=40, r=20, t=50, b=40),
-        height=300
+        margin=dict(l=40, r=20, t=80, b=40),
+        height=350,
+        title_font=dict(
+            size=20,  
+            color="var(--gray-color)",  
+            family="Arial, sans-serif",  
+            weight="bold"  
+        )
     )
 
     return fig
