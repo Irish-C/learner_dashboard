@@ -256,7 +256,7 @@ def load_protected_page(login_data):
             ], style={"textAlign": "center"}),
 
             # Input Fields
-            dcc.Store(id="user-first-name"),
+            dcc.Store(id='user-first-name', data={}),
             dbc.Input(id="input-firstname", placeholder="First Name", type="text", className="mb-3", style={"fontFamily": "Roboto, sans-serif"}),
             dbc.Input(id="input-lastname", placeholder="Last Name", type="text", className="mb-3", style={"fontFamily": "Roboto, sans-serif"}),
             dbc.Input(id="input-email", placeholder="Email Address", type="email", className="mb-3", style={"fontFamily": "Roboto, sans-serif"}),
@@ -333,8 +333,10 @@ def toggle_password_visibility(n_clicks, current_type):
 )
 
 def store_user_first_name(n_clicks, firstname):
-    # Assuming user logged in and `firstname` is captured
-    return {"firstname": firstname}
+    if n_clicks > 0:  # Check if the button has been clicked
+        print(f"Storing first name: {firstname}")
+        return {"firstname": firstname}
+    return dash.no_update
 
 def toggle_password_visibility(n_clicks, current_type):
     if current_type == 'password':

@@ -1,8 +1,12 @@
-from dash import dcc, html
+from dash import dcc, html, Dash
 import dash_bootstrap_components as dbc
+from dash.dependencies import Input, Output
 from flask_login import current_user
 
+app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+
 def dashboard_content(data, grade_options, region_options, combined_shs_track_df, school_year_options):
+    first_name = data.get('user-first-name', '') 
     no_border_style = {
         "border": "none",
         "boxShadow": "0 4px 6px rgba(0, 0, 0, 0.1)",
@@ -21,7 +25,7 @@ def dashboard_content(data, grade_options, region_options, combined_shs_track_df
         fluid=True,
         children=[
             html.H1("Dashboard", className="page-title"),
-            html.P(f"Welcome Back, ________ .", style={"fontSize": "1.1rem", "color": "#6c757d"}),
+            html.P(id='greeting-text', style={"fontSize": "1.1rem", "color": "#6c757d"}),
             html.Br(),
 
             html.Div(id='kpi_card_row', className='mb-4'),
@@ -192,3 +196,15 @@ def dashboard_content(data, grade_options, region_options, combined_shs_track_df
             ])
         ]
     )
+
+# Callback function to update the greeting text
+@app.callback(
+    Output('greeting-text', 'children'),  # The component we want to update
+    Input('user-first-name', 'data')  # Listening to the 'data' in the store component
+)
+def update_greeting(user_data):
+    print(f"Callback triggered with data: {user_data}")  # Debugging line to check the data received
+    if user_data:
+        first_name = user_data.get('firstname')  # Access the first name stored in the 'data' of dcc.Store
+        return f"Welcome Back, {first_name}."  # Update greeting text
+    return "Welcome Back, Guest."  # Default message
