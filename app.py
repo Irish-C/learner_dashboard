@@ -973,6 +973,7 @@ def update_sned_sector_chart(selected_year, selected_regions, selected_gender):
         plot_bgcolor='white',
         paper_bgcolor='white',
         font=dict(size=13),
+        height=300,
         legend_title_text='',
         margin=dict(l=20, r=20, t=50, b=40)
     )
@@ -1376,7 +1377,7 @@ def update_coc_sector_chart(selected_sy, selected_regions, selected_grades, sele
         yaxis_title='Number of Schools',
         legend_title='Sector',
         margin=dict(l=40, r=20, t=50, b=40),
-        height=400
+        height=300
     )
 
     return fig

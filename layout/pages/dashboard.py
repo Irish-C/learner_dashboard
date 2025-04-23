@@ -113,6 +113,7 @@ def dashboard_content(data, grade_options, region_options, combined_shs_track_df
 
 
             # ✅ Charts & Tabs
+                    # First Row
                     dbc.Row([
                         # First column with the first card (graph)
                         dbc.Col(
@@ -125,7 +126,8 @@ def dashboard_content(data, grade_options, region_options, combined_shs_track_df
                                     ))
                                 ])
                             ], style={'height': '600px'}),  # Set height of the card
-                            width=8  # Take up 8 out of 12 columns
+                            width=8,  # Take up 8 out of 12 columns
+                            className="mb-4"
                         ),
     
                         # Second column with two cards (one for division and one for pie chart)
@@ -151,43 +153,54 @@ def dashboard_content(data, grade_options, region_options, combined_shs_track_df
                                 ], style={'height': '400px'})  # Set height of the pie chart card
                             ],
                             width=4,  # Take up 4 out of 12 columns
+                            className="mb-4"
                         )
                     ]),
+
+                    # 2nd Row
                     dbc.Row([
                         dbc.Col(
                             dbc.Card([
                                 dbc.CardBody([
-                                    dcc.Loading(dcc.Graph(id='enrollment_vs_schools_chart'))
+                                    dcc.Loading(dcc.Graph(
+                                        id='enrollment_vs_schools_chart',
+                                        config={'displayModeBar': False},
+                                        style={'height': '100%'}
+                                        ))
                                 ])
                             ]),
-                            width=6),
-                        dbc.Col(
-                            dbc.Card([
-                                dbc.CardBody([
-                                    dcc.Loading(dcc.Graph(id='shs_track_bar_chart'))
-                                ])
-                            ]),
-                            width=6),
-                            ], className="mb-4"),
+                            width=12,
+                            className="mb-4"
+                            )
+                    ]),
+
+                    # 3rd Row
                     dbc.Row([
                         dbc.Col(
                             dbc.Card([
                                 dbc.CardBody([
-                                    dcc.Loading(dcc.Graph(id='top_schools_chart'))
-                                ])
-                            ]),
-                            width=6),
-                            dbc.Col([
-                                dbc.Card([
-                                    dbc.CardBody([
-                                        dcc.Loading(
-                                            dcc.Graph(id='sned_sector_chart'),
-                                            type="default"
-                                        )
-                                    ])
-                                ], className="mb-4")
-                            ], width=6),
-                        ], className="mb-4"),
+                                    dcc.Loading(dcc.Graph(
+                                        id='top_schools_chart'
+                                    ))
+                            ])
+                        ]),
+                        width=6,
+                        className="mb-4"
+                    ),
+                        dbc.Col(
+                            dbc.Card([
+                                dbc.CardBody([
+                                    dcc.Loading(dcc.Graph(
+                                        id='shs_track_bar_chart'
+                                    ))
+                            ])
+                        ]),
+                        width=6,
+                        className="mb-4"
+                    )
+                    ]),
+
+                    # 4th Row
                     dbc.Row([
                         dbc.Col(
                             dbc.Card([
@@ -199,9 +212,10 @@ def dashboard_content(data, grade_options, region_options, combined_shs_track_df
                                 ])
                             ]),
                             width=12
-                        )
+                        ),
                     ], className="mb-4"),
 
+                    # 5th Row
                     dbc.Row([
                         dbc.Col(
                             dbc.Card([
@@ -215,17 +229,35 @@ def dashboard_content(data, grade_options, region_options, combined_shs_track_df
                             width=12
                         )
                     ], className="mb-4"),
+
+                    # 6th Row
                     dbc.Row([
                         dbc.Col(
                             dbc.Card([
                                 dbc.CardBody([
-                                    dcc.Loading(
-                                        dcc.Graph(id='coc_sector_chart'),
-                                        type='default'
-                                    )
+                                    dcc.Loading(dcc.Graph(
+                                        id='coc_sector_chart',
+                                        config={'displayModeBar': False},
+                                        style={'height': '100%'}
+                                    ))
                                 ])
-                            ]),
-                            width=12
-                        )
-                    ], className="mb-4"),
+                            ], style={'height': '400px'}),
+                            width=6,
+                            className="mb-4"
+                        ),
+                        
+                        dbc.Col(
+                            dbc.Card([
+                                dbc.CardBody([
+                                    dcc.Loading(dcc.Graph(
+                                        id='sned_sector_chart',
+                                        config={'displayModeBar': False},
+                                        style={'height': '100%'}
+                                    ))
+                                ])
+                            ], style={'height': '400px'}),
+                            width=6,
+                            className="mb-4"
+                    )
+                    ]),
 ])
