@@ -154,7 +154,6 @@ def toggle_sidebar(n_clicks, is_collapsed, current_page):
     
     return [updated_sidebar], content_style, is_collapsed
 
-# Callback to change pages
 @app.callback(
     Output("content", "children"), 
     Output("current-page", "data"), 
@@ -169,21 +168,29 @@ def toggle_sidebar(n_clicks, is_collapsed, current_page):
 def change_page(btn1, btn2, btn3, btn4, current_page, is_collapsed):
     ctx = callback_context
     if not ctx.triggered:
-        return create_content("dashboard", data, grade_options, region_options, combined_shs_track_df, school_year_options), "dashboard", create_sidebar(is_collapsed=is_collapsed, current_page="dashboard")
+        return (
+            create_content(current_page, data, grade_options, region_options, combined_shs_track_df, school_year_options),
+            current_page,
+            create_sidebar(is_collapsed=is_collapsed, current_page=current_page)
+        )
     
+    # Determine which button was clicked
     button_id = ctx.triggered[0]["prop_id"].split(".")[0]
+    button_to_page = {
+        "btn-1": PAGE_CONSTANTS[1],
+        "btn-2": PAGE_CONSTANTS[2],
+        "btn-3": PAGE_CONSTANTS[3],
+        "btn-4": PAGE_CONSTANTS[4],
+    }
     
-    if button_id == "btn-1":
-        return create_content("dashboard", data, grade_options, region_options, combined_shs_track_df, school_year_options), "dashboard", create_sidebar(is_collapsed=is_collapsed, current_page="dashboard")
-    elif button_id == "btn-2":
-        return create_content("manage_data", data, grade_options, region_options, combined_shs_track_df, school_year_options), "manage_data", create_sidebar(is_collapsed=is_collapsed, current_page="manage_data")
-    elif button_id == "btn-3":
-        return create_content("help", data, grade_options, region_options, combined_shs_track_df, school_year_options), "help", create_sidebar(is_collapsed=is_collapsed, current_page="help")
-    elif button_id == "btn-4":
-        return create_content("settings", data, grade_options, region_options, combined_shs_track_df, school_year_options), "settings", create_sidebar(is_collapsed=is_collapsed, current_page="settings")
+    # Fallback to current page if something unexpected happens
+    selected_page = button_to_page.get(button_id, current_page)
     
-    # Default to dashboard
-    return create_content(current_page, data, grade_options, region_options, combined_shs_track_df, school_year_options), "current_page", create_sidebar(is_collapsed=is_collapsed, current_page="dashboard")
+    return (
+        create_content(selected_page, data, grade_options, region_options, combined_shs_track_df, school_year_options),
+        selected_page,
+        create_sidebar(is_collapsed=is_collapsed, current_page=selected_page)
+    )
 
 # Call back for login to dashboard
 @app.callback(
