@@ -384,8 +384,7 @@ def update_charts(selected_regions, selected_grades, selected_gender):
         title_font=dict(
             size=20,  
             color="var(--gray-color)",  
-            family="Arial, sans-serif",  
-            weight="bold"  
+            family="Arial, sans-serif" 
         ),
         height=296,  # or adjust for your visual preference
         showlegend=True  # set to False if pie labels suffice
@@ -431,8 +430,7 @@ def update_charts(selected_regions, selected_grades, selected_gender):
         title_font=dict(
             size=20,  
             color="var(--gray-color)",  
-            family="Arial, sans-serif",  
-            weight="bold"  
+            family="Arial, sans-serif"
         ),
         xaxis_title='Division',
         yaxis_title='Total Enrollment'
@@ -797,8 +795,7 @@ def update_shs_track_chart(selected_year, selected_regions, selected_gender):
             title_font=dict(
                 size=20,  
                 color="var(--gray-color)",  
-                family="Arial, sans-serif",
-                weight= "bold"
+                family="Arial, sans-serif"
             ),
         )
         return fig
@@ -917,8 +914,7 @@ def update_top_schools_chart(selected_regions, selected_grades, selected_gender)
         title_font=dict(
             size=20,  
             color="var(--gray-color)",
-            family="Arial, sans-serif",
-            weight= "bold"
+            family="Arial, sans-serif"
         ),
     )
     return fig
@@ -982,8 +978,7 @@ def update_sned_sector_chart(selected_year, selected_regions, selected_gender):
         title_font=dict(
             size=20,  
             color="var(--gray-color)",  
-            family="Arial, sans-serif",  
-            weight="bold"  
+            family="Arial, sans-serif"
         )
     )
     fig.update_traces(texttemplate='%{text:,}', textposition='inside')
@@ -1057,8 +1052,7 @@ def update_transition_rate_chart(selected_sy, selected_regions, selected_gender)
         title_font=dict(
             size=20,  
             color="var(--gray-color)",  
-            family="Arial, sans-serif",  
-            weight="bold"  
+            family="Arial, sans-serif"
         )
 
         )
@@ -1149,8 +1143,7 @@ def update_k_to_12_distribution(selected_regions, selected_gender, selected_year
         title_font=dict(
             size=20,  
             color="var(--gray-color)",  
-            family="Arial, sans-serif",  
-            weight="bold"  
+            family="Arial, sans-serif"
         )
     )
 
@@ -1293,8 +1286,7 @@ def update_enrollment_choropleth(selected_sy, selected_regions, selected_grades,
         title_font=dict(
             size=20,  # Similar size to your provided H5 (adjust as needed)
             color="var(--gray-color)",  # Matches the color in your example
-            family="Arial, sans-serif",  # Default font
-            weight="bold"  # Set to normal or bold based on your preference
+            family="Arial, sans-serif"  # Default font
         ),
 
         annotations=[
@@ -1409,8 +1401,7 @@ def update_coc_sector_chart(selected_sy, selected_regions, selected_grades, sele
         title_font=dict(
             size=20,  
             color="var(--gray-color)",  
-            family="Arial, sans-serif",  
-            weight="bold"  
+            family="Arial, sans-serif"
         )
     )
 
@@ -1461,8 +1452,7 @@ def update_enrollment_trend_chart(selected_year):
             title_font=dict(
                 size=20,  
                 color="var(--gray-color)",  # Match your CSS variable for gray color
-                family="Arial, sans-serif",
-                weight="bold"
+                family="Arial, sans-serif"
             ),
             xaxis_title='School Year',
             yaxis_title='Total Enrollment',
