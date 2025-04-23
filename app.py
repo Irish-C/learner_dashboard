@@ -42,18 +42,21 @@ school_year_options = [
 region_options = [{'label': r, 'value': r} for r in correct_region_order]
 layout = manage_data_content(region_options, grade_options, school_year_options)
 
-# Sample user database
-USER_DATA = [
-    {"first_name": "Andrei", "last_name": "Cruz", "email": "andreivc@deped.com", "password": "pass123"},
-    {"first_name": "Christian", "last_name": "Luces", "email": "chrisitanml@deped.com", "password": "mypassword"}
-]
+# Path to user info CSV file
+USER_CSV_PATH = "user-info.csv"
 
+# Function to hash a password
 def hash_password(pw):
     return hashlib.sha256(pw.encode()).hexdigest()
 
-for user in USER_DATA:
-    user["password"] = hash_password(user["password"])
+# Load user data from CSV
+user_df = pd.read_csv(USER_CSV_PATH)
 
+# Hash passwords in the dataframe
+user_df['Password'] = user_df['Password'].apply(hash_password)
+
+# Convert to list of dictionaries for use in login
+USER_DATA = user_df.to_dict(orient='records')
 
 # Mapping of numeric values to page names
 PAGE_CONSTANTS = {
@@ -124,10 +127,10 @@ def verify_login(n_clicks, first_name, last_name, email, password):
 
     # Check against the user database
     for user in USER_DATA:
-        if (user["first_name"].lower() == (first_name or "").lower() and
-            user["last_name"].lower() == (last_name or "").lower() and
-            user["email"].lower() == (email or "").lower() and
-            user["password"] == pw_hash):
+        if (user["First_Name"].lower() == (first_name or "").lower() and
+            user["Last_Name"].lower() == (last_name or "").lower() and
+            user["Email"].lower() == (email or "").lower() and
+            user["Password"] == pw_hash):
             # ✅ Correct login → Clear error
             return {"logged_in": True, "user": f"{first_name} {last_name}"}, ""
 
@@ -251,7 +254,7 @@ def load_protected_page(login_data):
                                 'border': '1px solid #ccc'
                             }),
                     # Email Input
-                    dbc.Input(id="input-email", type="email", placeholder='Enter your password', className='mb-3',
+                    dbc.Input(id="input-email", type="email", placeholder='Email Address', className='mb-3',
                             style={
                                 'width': '100%',
                                 'paddingRight': '40px',
