@@ -38,9 +38,9 @@ def dashboard_content(data, grade_options, region_options, combined_shs_track_df
                                 id='school_year_filter',
                                 options=school_year_options,
                                 value='2023-2024' if any(opt['value'] == '2023-2024' for opt in school_year_options) else (school_year_options[0]['value'] if school_year_options else None),
-                                placeholder="Select School Year"
+                                placeholder="Select School Year",
+                                clearable=False  # ← important to prevent None
                             )
-
 
                         ], width=2),
 
