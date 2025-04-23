@@ -296,7 +296,7 @@ def load_protected_page(login_data):
             "height": "100vh",
             "padding": "40px",
             "paddingTop": "60px",
-            "backgroundColor": "rgba(255, 255, 255, 0.95)",
+            "backgroundColor": "rgba(255, 255, 255, 0.85)",
             "borderLeft": "5px solid #DE082C",
             "boxShadow": "0 0 15px rgba(0, 0, 0, 0.25)",
             "borderLeft": "none",
