@@ -221,13 +221,29 @@ def dashboard_content(data, grade_options, region_options, combined_shs_track_df
                             dbc.Card([
                                 dbc.CardBody([
                                     dcc.Loading(
-                                        dcc.Graph(id='transition_rate_chart'),
-                                        type='default'
-                                    )
+                                        dcc.Graph(
+                                        id='transition_rate_chart',
+                                        config={'displayModeBar': False},
+                                        style={'height': '100%'}
+                                    )),
                                 ])
-                            ]),
-                            width=12
-                        )
+                            ], style={'height': '400px'}),
+                            width=8
+                        ),
+                        dbc.Col(
+                            dbc.Card([
+                                dbc.CardBody([
+                                    dcc.Loading(
+                                        dcc.Graph(
+                                        id='enrollment_trend_line_chart',
+                                        config={'displayModeBar': False},
+                                        style={'height': '100%'}
+                                    )),
+                                ])
+                            ], style={'height': '400px'}),
+                            width=4
+                        ),
+
                     ], className="mb-4"),
 
                     # 6th Row

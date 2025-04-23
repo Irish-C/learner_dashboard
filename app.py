@@ -1036,7 +1036,7 @@ def update_transition_rate_chart(selected_sy, selected_regions, selected_gender)
         mode="gauge+number+delta",
         value=tr_elem_jhs,
         domain={'x': [0, 0.5], 'y': [0, 1]},
-        title={'text': "Elementary to JHS"},
+        title={'text': "Elementary to High School"},
         gauge={'axis': {'range': [None, 100]}, 'bar': {'color': "#1f77b4"}}
     ))
 
@@ -1044,11 +1044,21 @@ def update_transition_rate_chart(selected_sy, selected_regions, selected_gender)
         mode="gauge+number+delta",
         value=tr_jhs_shs,
         domain={'x': [0.5, 1], 'y': [0, 1]},
-        title={'text': "JHS to SHS"},
+        title={'text': "High School to Senior High"},
         gauge={'axis': {'range': [None, 100]}, 'bar': {'color': "#ff7f0e"}}
     ))
 
-    fig.update_layout(title="Transition Rates (Placeholder as there are no previous year)", height=300)
+    fig.update_layout(
+        title="Transition Rate (Placeholder as there are no previous year)", 
+        height=300,
+        title_font=dict(
+            size=20,  
+            color="var(--gray-color)",  
+            family="Arial, sans-serif",  
+            weight="bold"  
+        )
+
+        )
     return fig
 
 @app.callback(
@@ -1396,6 +1406,64 @@ def update_coc_sector_chart(selected_sy, selected_regions, selected_grades, sele
     )
 
     return fig
+
+@app.callback(
+    Output('enrollment_trend_line_chart', 'figure'),
+    Input('school_year_filter', 'value')  # Only the school year filter is used now
+)
+def update_enrollment_trend_chart(selected_year):
+    df_filtered = data.copy()  # Replace with your actual DataFrame
+
+    # 🧠 Filter by school year
+    if selected_year:
+        df_filtered = df_filtered[df_filtered['School Year'] == selected_year]
+
+    # ✅ Final protection: prevent plotly from erroring on empty or malformed data
+    if df_filtered.empty:
+        return go.Figure().update_layout(
+            title="No data available for the selected school year",
+            xaxis_title='School Year',
+            yaxis_title='Total Enrollment'
+        )
+
+    # 🧾 Group the data by 'School Year' and calculate total enrollment
+    grouped = df_filtered.groupby(['School Year'], as_index=False)['Total Enrollment'].sum()
+
+    # 🔐 Defensive: check again if grouped is empty
+    if grouped.empty:
+        return px.line(title="No data to display")
+    
+    # 📊 Plot the line chart safely
+    try:
+        fig = px.line(
+            grouped,
+            x='School Year',
+            y='Total Enrollment',
+            title='Total Enrollment Trend<br>Over the Years',
+            markers=True  # Show markers at each data point on the line
+        )
+
+        fig.update_layout(
+            title='Total Enrollment Trend<br>Over the Years',
+            font=dict(size=13),
+            plot_bgcolor='white',
+            height=350,
+            paper_bgcolor='white',
+            title_font=dict(
+                size=20,  
+                color="var(--gray-color)",  # Match your CSS variable for gray color
+                family="Arial, sans-serif",
+                weight="bold"
+            ),
+            xaxis_title='School Year',
+            yaxis_title='Total Enrollment',
+            xaxis=dict(tickmode='linear'),  # Ensure proper linear ticks on x-axis
+            yaxis=dict(title='Total Enrollment')
+        )
+        return fig
+    except Exception as e:
+        print("Error rendering Enrollment Trend chart:", e)
+        return px.line(title="Error rendering Enrollment Trend chart")
 
 @app.callback(
     Output('input_division', 'options'),
