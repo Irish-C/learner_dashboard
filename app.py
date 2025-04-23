@@ -327,10 +327,18 @@ def toggle_password_visibility(n_clicks, current_type):
      Output('most_enrolled_division_card', 'children')],
     [Input('region_filter', 'value'),
      Input('grade_filter', 'value'),
+     Input('school_year_filter', 'value'),
      Input('gender_filter', 'value')]
 )
-def update_charts(selected_regions, selected_grades, selected_gender):
-    print("update_charts triggered")
+def update_charts(selected_regions, selected_grades, selected_school_year, selected_gender):
+    if not selected_school_year:
+        raise dash.exceptions.PreventUpdate
+
+    try:
+        data, grade_columns, _, _ = load_data_for_year(selected_school_year)
+    except FileNotFoundError:
+        raise dash.exceptions.PreventUpdate
+    
     filtered_data = data.copy()
 
     if selected_regions:
