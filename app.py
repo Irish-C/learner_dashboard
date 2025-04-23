@@ -44,7 +44,11 @@ def hash_password(pw):
     return hashlib.sha256(pw.encode()).hexdigest()
 
 # Load user data from CSV
-user_df = pd.read_csv(USER_CSV_PATH)
+if os.path.exists(USER_CSV_PATH):
+    user_df = pd.read_csv(USER_CSV_PATH)
+else:
+    user_df = pd.DataFrame(columns=['First_Name', 'Last_Name', 'Email', 'Password'])  # Initialize an empty DataFrame
+    raise FileNotFoundError(f"{USER_CSV_PATH} does not exist. An empty user DataFrame has been created.")
 
 # Hash passwords in the dataframe
 user_df['Password'] = user_df['Password'].apply(hash_password)
@@ -68,14 +72,9 @@ login_page = dbc.Container([
             html.H3("Login", className="text-center mb-3"),
             dbc.Input(id="input-firstname", placeholder="First Name", type="text", className="w-100"),
             dbc.Input(id="input-lastname", placeholder="Last Name", type="text", className="w-100"),
-            dbc.Input(id="input-email", placeholder="Email Address", type="email", className="w-100"),
-            dbc.Input(id="input-password", placeholder="Password", type="password", className="w-100"),
-            dbc.Button("Login", id="login-button", color="primary", className="w-100"),
-            html.Div(id="login-message", className="text-center", style={"color": "red", "marginTop": "10px", "fontWeight": "bold", "fontSize": "16px"
-    }
-)
+            html.Div(id="login-message", className="text-center", style={"color": "red", "marginTop": "10px", "fontWeight": "bold", "fontSize": "16px"})
         ], width=4)
-    ], justify="center", style={"paddingTop": "15%"}),
+    ], justify="center", style={"paddingTop": "15%"})
 ], fluid=True)
 
 # Dash App
@@ -121,14 +120,17 @@ def verify_login(n_clicks, first_name, last_name, email, password):
 
     # Check against the user database
     for user in USER_DATA:
+    # Check against the user database
+        required_keys = {"First_Name", "Last_Name", "Email", "Password"}
+    for user in USER_DATA:
+        if not required_keys.issubset(user.keys()):
+            continue  # Skip users with missing keys
         if (user["First_Name"].lower() == (first_name or "").lower() and
             user["Last_Name"].lower() == (last_name or "").lower() and
             user["Email"].lower() == (email or "").lower() and
             user["Password"] == pw_hash):
             # ✅ Correct login → Clear error
             return {"logged_in": True, "user": f"{first_name} {last_name}"}, ""
-
-    # Invalid login → KEEP showing error
     return dash.no_update, "❌ Invalid credentials. Please try again."
 
 
@@ -182,6 +184,7 @@ def change_page(btn1, btn2, btn3, btn4, current_page, is_collapsed):
         "btn-3": PAGE_CONSTANTS[3],
         "btn-4": PAGE_CONSTANTS[4],
     }
+    selected_page = button_to_page.get(button_id, PAGE_CONSTANTS.get(1, current_page))  # Fallback to default page if button ID is unexpected
     
     # Fallback to current page if something unexpected happens
     selected_page = button_to_page.get(button_id, current_page)
@@ -1615,8 +1618,10 @@ def update_enrollment_table(school_year):
 
     df = pd.read_csv(file_path)
 
-    # Convert any N/A to 0 for numeric aggregation
-    numeric_df = df.replace("N/A", 0)
+    if "BEIS School ID" in numeric_df.columns and "BEIS School ID" in schools_df.columns:
+            numeric_df = numeric_df.merge(schools_df[["BEIS School ID", "Region", "Division"]], on="BEIS School ID", how="left")
+    else:
+            raise KeyError("The 'BEIS School ID' column is missing in one of the DataFrames.")
     numeric_df = numeric_df.apply(pd.to_numeric, errors='ignore')
 
     # Infer gendered columns
