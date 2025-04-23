@@ -1,7 +1,7 @@
 from dash import dcc, html
 import dash_bootstrap_components as dbc
 
-def dashboard_content(data, grade_options, region_options, combined_shs_track_df):
+def dashboard_content(data, grade_options, region_options, combined_shs_track_df, school_year_options):
     no_border_style = {
         "border": "none",
         "boxShadow": "0 4px 6px rgba(0, 0, 0, 0.1)",
@@ -36,9 +36,12 @@ def dashboard_content(data, grade_options, region_options, combined_shs_track_df
                             html.Label("School Year:"),
                             dcc.Dropdown(
                                 id='school_year_filter',
-                                options=[{'label': sy, 'value': sy} for sy in sorted(data['School Year'].unique(), reverse=True)],
-                                value=sorted(data['School Year'].unique(), reverse=True)[0]
+                                options=school_year_options,
+                                value='2023-2024' if any(opt['value'] == '2023-2024' for opt in school_year_options) else (school_year_options[0]['value'] if school_year_options else None),
+                                placeholder="Select School Year"
                             )
+
+
                         ], width=2),
 
                         dbc.Col([

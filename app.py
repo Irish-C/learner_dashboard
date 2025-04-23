@@ -83,7 +83,7 @@ with open('assets/index_template.html', 'r') as file:
 
 # Generate school year options
 current_year = datetime.now().year
-school_year_options = [{'label': f"{y}-{y+1}", 'value': f"{y}-{y+1}"} for y in range(current_year - 10, current_year + 2)]
+school_year_options = [{'label': y, 'value': y} for y in get_available_school_years()]
 
 # Default year to load initially
 default_school_year = "2023-2024"
@@ -1413,8 +1413,6 @@ def autofill_fields(school_name):
     prevent_initial_call=False
 )
 def refresh_school_year_options(trigger_data):
-    from app_data import get_available_school_years
-
     years = get_available_school_years()
     years.sort()  # Ascending
 
