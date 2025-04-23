@@ -10,9 +10,10 @@ def create_header():
                 dbc.Row(
                     [
                         dbc.Col(
-                            html.Img(src=temp_constants.DEPED_LOGO, height="40px"),
+                            html.Img(src=temp_constants.DEPED_LOGO, height="90px"),
                             width="auto",
                             className="d-flex align-items-center",
+                            style={'paddingTop': '10px'}
                         ),
                         dbc.Col(
                             dbc.NavbarBrand("Learners Information System", className="header-brand", style={"marginLeft": "15px"}),
