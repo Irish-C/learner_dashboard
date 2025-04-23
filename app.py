@@ -489,9 +489,11 @@ def update_charts(selected_regions, selected_grades, selected_gender):
     # KPI Cards (now with Sector card inside the 4-col row)
     card_style = {
         "height": "175px",
+        "border": "none",
         "borderRadius": "10px",
         "boxShadow": "0px 4px 6px rgba(0, 0, 0, 0.1)",
-        "padding": "10px"
+        "padding": "10px",
+        
     }
     text_style = {
         "display": "flex",
@@ -512,7 +514,7 @@ def update_charts(selected_regions, selected_grades, selected_gender):
                         html.H2(f"{total_students:,}", style={"color": "#008000", "margin": "0"})
                     ], style=text_style)
                 ]),
-                color="white",
+                color="white",#d1ffbd
                 style={**card_style, "borderBottom": "5px solid #28a745"}
             ),
             width=3, style={"marginBottom": "15px", 'padding': "0.5rem"}
@@ -526,7 +528,7 @@ def update_charts(selected_regions, selected_grades, selected_gender):
                         html.H2(f"{total_schools:,}", style={"color": "#FBC02D", "margin": "0"})
                     ], style=text_style)
                 ]),
-                color="white",
+                color="white",#ffffc5
                 style={**card_style, "borderBottom": "5px solid #ffc107"}
             ),
             width=3, style={"marginBottom": "15px", 'padding': "0.5rem"}
@@ -540,7 +542,7 @@ def update_charts(selected_regions, selected_grades, selected_gender):
                         html.H3(f"{most_enrolled_region}: {region_total/1000:.2f}k", style={"color": "#e74c3c", "margin": "0", "fontSize": "24px"})
                     ], style=text_style)
                 ]),
-                color="white",
+                color="white",#ffcccb
                 style={**card_style, "borderBottom": "5px solid #e74c3c"}
             ),
             width=3, style={"marginBottom": "15px", 'padding': "0.5rem"}
@@ -554,7 +556,7 @@ def update_charts(selected_regions, selected_grades, selected_gender):
                         html.H3(f"{public_percentage:.2f}% | {private_percentage:.2f}% | {sucs_lucs_percentage:.2f}%", style={"color": "#3498db", "margin": "0", "fontSize": "20px"})
                     ], style=text_style)
                 ]),
-                color="white",
+                color="#white",#BFDBFE
                 style={**card_style, "borderBottom": "5px solid #3498db"}
             ),
             width=3, style={"marginBottom": "15px", 'padding': "0.5rem"}
@@ -569,7 +571,7 @@ def update_charts(selected_regions, selected_grades, selected_gender):
                 html.Div([
                     html.I(className="fas fa-users-cog", style={"fontSize": "30px", "color": "#007BFF", "marginBottom": "0.5rem"}),
                     html.H5("Most Enrolled Division", style={"color": "var(--gray-color)", "textAlign": "center", "margin": "0", "lineHeight": "1.2"}),
-                    html.H2(f"{most_enrolled_division_text}", style={"color": "var(--blue-color)", "textAlign": "center", "margin": "0"})
+                    html.H2(f"{most_enrolled_division_text}", style={"color": "var(--pr-color)", "textAlign": "center", "margin": "0"})
                 ])
             ]),
             style={**card_style, "width": "100%"}
