@@ -115,28 +115,21 @@ app.layout = html.Div([
     prevent_initial_call=True
 )
 def verify_login(n_clicks, first_name, last_name, email, password):
-    # Check if fields are missing
+    if not n_clicks:
+        raise dash.exceptions.PreventUpdate
+
     if not all([first_name, last_name, email, password]):
         return dash.no_update, "⚠️ Please fill in all fields."
 
-    # Hash the password
     pw_hash = hash_password(password)
-
-    # Check against the user database
     for user in USER_DATA:
-    # Check against the user database
-        required_keys = {"First_Name", "Last_Name", "Email", "Password"}
-    for user in USER_DATA:
-        if not required_keys.issubset(user.keys()):
-            continue  # Skip users with missing keys
-        if (user["First_Name"].lower() == (first_name or "").lower() and
-            user["Last_Name"].lower() == (last_name or "").lower() and
-            user["Email"].lower() == (email or "").lower() and
+        if (user["First_Name"].lower() == first_name.lower() and
+            user["Last_Name"].lower() == last_name.lower() and
+            user["Email"].lower() == email.lower() and
             user["Password"] == pw_hash):
-            # ✅ Correct login → Clear error
             return {"logged_in": True, "user": f"{first_name} {last_name}"}, ""
-    return dash.no_update, "❌ Invalid credentials. Please try again."
 
+    return dash.no_update, "❌ Invalid credentials. Please try again."
 
 # Callback to toggle sidebar
 @app.callback(
@@ -235,70 +228,85 @@ def load_protected_page(login_data):
             ]
         )
     return html.Div(
-        style={
+    style={
+        "height": "100vh",
+        "width": "100%",
+        "backgroundImage": 'url("/assets/icons/classroom.png")',
+        "backgroundSize": "cover",
+        "backgroundPosition": "center",
+        "display": "flex",
+        "justifyContent": "flex-end",
+        "alignItems": "stretch"
+    },
+    children=[
+        html.Div([
+            # Logo and Title - CENTERED
+            html.Div([
+                html.Img(src="/assets/icons/LIST.png", style={"height": "120px", "marginBottom": "10px"}),
+                html.H4("LEARNER INFORMATION SYSTEM", style={
+                    "fontWeight": "bold",
+                    "letterSpacing": "2px",
+                    "fontSize": "16px",
+                    "fontFamily": "Roboto, sans-serif",
+                    "marginBottom": "20px"
+                })
+            ], style={"textAlign": "center"}),
+
+            # Input Fields
+            dbc.Input(id="input-firstname", placeholder="First Name", type="text", className="mb-3", style={"fontFamily": "Roboto, sans-serif"}),
+            dbc.Input(id="input-lastname", placeholder="Last Name", type="text", className="mb-3", style={"fontFamily": "Roboto, sans-serif"}),
+            dbc.Input(id="input-email", placeholder="Email Address", type="email", className="mb-3", style={"fontFamily": "Roboto, sans-serif"}),
+            html.Div([dbc.Input(id="input-password", type="password", placeholder="Password", className="w-100"),
+                html.I(
+                    id="toggle-password-visibility",
+                    className="fas fa-eye",  # starts as eye
+                    n_clicks=0,
+                    style={
+                        "position": "absolute",
+                        "right": "20px",
+                        "top": "50%",
+                        "transform": "translateY(-50%)",
+                        "cursor": "pointer",
+                        "color": "#888"
+                    }
+                )
+            ], style={"position": "relative", "marginBottom": "1rem"}),
+            # Sign-In Button
+            dbc.Button("SIGN-IN", id="login-button", color="danger", className="w-100 mb-3", style={
+                "fontWeight": "bold",
+                "letterSpacing": "2px",
+                "backgroundColor": "#DE082C",
+                "border": "none"
+            }),
+
+            # Message Display
+            html.Div(id="login-message", className="text-left", style={
+                "color": "red",
+                "fontWeight": "bold",
+                "fontSize": "16px"
+            }),
+
+            # Footer Text
+            html.Div("© 2025 LISTahan. All Right Reserved.", className="text-left mt-7", style={
+                "fontSize": "12px", "color": "#888", "textAlign": "center", "marginTop": "40px"
+            })
+        ], style={
+            "width": "100%",
+            "maxWidth": "500px",  # ← Adjust width here
             "height": "100vh",
+            "padding": "40px",
+            "paddingTop": "60px",
+            "backgroundColor": "rgba(255, 255, 255, 0.95)",
+            "borderLeft": "5px solid #DE082C",
+            "boxShadow": "0 0 15px rgba(0, 0, 0, 0.25)",
+            "borderLeft": "none",
             "display": "flex",
-            "alignItems": "center",
-            "justifyContent": "center",
-            "background": "linear-gradient(to right, #BFDBFE, #DE082C)",  # Gradient background
-            "padding": "20px"
-        },
-        children=dbc.Container([
-            dcc.Store(id="login-state", storage_type="session", data={"logged_in": False}),
-            dbc.Row([
-                dbc.Col([
-                    html.Div([
-                        html.H2("Login", className="text-center mb-4", style={"fontWeight": "bold", "color": "black"}),
+            "flexDirection": "column",
+            "justifyContent": "flex-start" 
+        })
+    ]
+)
 
-                        # First Name Input
-                        dbc.Input(id="input-firstname", type="text", placeholder="First Name", className="mb-3", style=input_style),
-                        # Last Name Input
-                        dbc.Input(id="input-lastname", type="text", placeholder="Last Name", className="mb-3", style=input_style),
-                        # Email Input
-                        dbc.Input(id="input-email", type="email", placeholder='Email Address', className='mb-3', style=input_style),
-                        # Password Input
-                        html.Div([
-                            dcc.Input(id='input-password', type='password', placeholder='Enter your password', className='mb-3', style=input_style),
-                            html.I(
-                                id='toggle-password-visibility',
-                                className='fas fa-eye',
-                                n_clicks=0,
-                                style={
-                                    'position': 'absolute',
-                                    'right': '10px',
-                                    'top': '40%',
-                                    'transform': 'translateY(-50%)',
-                                    'cursor': 'pointer',
-                                    'color': '#888'
-                                }
-                            )
-                        ], style={'position': 'relative', 'width': '100%'}),
-                        # Login Button
-                        dbc.Button("Login", id="login-button", color="primary", className="w-100", style={
-                            "background": "linear-gradient(to right, #5A5A5A, #333333)",
-                            "border": "none",
-                            "fontWeight": "bold"
-                        }),
-
-                        # Login Message
-                        html.Div(id="login-message", className="text-center", style={
-                            "color": "red",
-                            "marginTop": "15px",
-                            "fontWeight": "bold",
-                            "fontSize": "16px"
-                        })
-                    ], style={
-                        "backgroundColor": "white",
-                        "padding": "40px",
-                        "borderRadius": "15px",
-                        "boxShadow": "0px 4px 10px rgba(0,0,0,0.1)",
-                        "width": "100%",
-                        "maxWidth": "400px"
-                    })
-                ], width=12, md=6, lg=4)
-            ], justify="center")
-        ], fluid=True)
-    )
 @app.callback(
     Output('input-password', 'type'),
     Output('toggle-password-visibility', 'className'),
