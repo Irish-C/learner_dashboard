@@ -83,3 +83,12 @@ def build_combined_shs_track_df(data):
                             })
 
     return pd.DataFrame(shs_track_records)
+
+def get_available_school_years():
+    folder = "data_files"
+    pattern = re.compile(r"data_(\d{4}-\d{4})\.csv")
+    files = os.listdir(folder)
+    return sorted(
+        [match.group(1) for f in files if (match := pattern.match(f))],
+        reverse=True
+    )

@@ -1,6 +1,8 @@
 
 import dash_bootstrap_components as dbc
 from dash import html, dcc, dash_table
+from app_data import get_available_school_years
+available_years = get_available_school_years()
 
 def manage_data_content(region_options, grade_options, school_year_options):
     return dbc.Container([
@@ -103,7 +105,11 @@ def manage_data_content(region_options, grade_options, school_year_options):
         dbc.Row([
             dbc.Col([
                 dbc.Label("Select School Year to View Table"),
-                dcc.Dropdown(id='table_school_year', options=school_year_options, placeholder="Choose a Year")
+                dcc.Dropdown(
+                    id='table_school_year',
+                    options=[{'label': y, 'value': y} for y in available_years],
+                    placeholder="Select School Year"
+                )
             ])
         ], className="mb-3"),
 
