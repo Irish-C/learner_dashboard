@@ -9,18 +9,49 @@ def create_header():
             dbc.Container(
                 dbc.Row(
                     [
+                        # DepEd Logo
                         dbc.Col(
                             html.Img(src=temp_constants.DEPED_LOGO, height="90px"),
                             width="auto",
                             className="d-flex align-items-center",
                             style={'paddingTop': '10px'}
                         ),
+
+                        # Title and subtitle
                         dbc.Col(
-                            dbc.NavbarBrand("Learners Information System", className="header-brand", style={"marginLeft": "15px"}),
+                            html.Div(
+                                [
+                                    html.H4(
+                                        "Learner Information System",
+                                        className="header-brand",
+                                        style={
+                                            "paddingTop": "10px",
+                                            "marginBottom": "0",
+                                            "lineHeight": "0.75em",
+                                        }
+
+                                    ),
+                                    html.Small(
+                                        "Department of Education",
+                                        className="text-muted",
+                                        style={
+                                            "fontSize": "12px",
+                                            "marginTop": "0",
+                                            "paddingTop": "0",
+                                            "color": "blue", 
+                                        }
+                                    ),
+                                ],
+                                style={"marginLeft": "15px"},
+                            ),
                             width="auto",
-                            className="d-flex align-items-center",
+                            className="d-flex flex-column justify-content-center"
                         ),
-                        dbc.Col(width=True),  # Pushes the profile to the right
+
+                        # Spacer
+                        dbc.Col(),
+
+                        # Profile section
                         dbc.Col(
                             html.Div(
                                 [
@@ -34,9 +65,9 @@ def create_header():
                         ),
                     ],
                     align="center",
-                    className="g-0",
+                    className="g-0"
                 ),
-                fluid=True,  # Allows container to span the full width
+                fluid=True
             )
         ]
     )

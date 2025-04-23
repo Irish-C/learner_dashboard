@@ -6,7 +6,7 @@ available_years = get_available_school_years()
 
 def manage_data_content(region_options, grade_options, school_year_options):
     return dbc.Container([
-        html.H1("Manage Data Page", className="page-title mb-4"),
+        html.H1("Manage Data", className="page-title mb-4"),
         html.H3("Add New Enrollment Record", className="mb-4"),
 
         html.H4("Enrollment Information", className="mb-3"),
