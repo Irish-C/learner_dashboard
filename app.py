@@ -561,8 +561,41 @@ def update_charts(selected_regions, selected_grades, selected_gender):
 
     return pie_chart, fig_combo, kpi_cards, most_enrolled_division_card
 
+@app.callback(
+    Output('school_search', 'options'),
+    Input('school_search', 'search_value'),
+    State('school_search', 'value')
+)
+def update_school_options(search_value, current_value):
+    options = []
 
-# Dashboard Page
+    # Convert BEIS IDs to string for safety
+    data['BEIS School ID'] = data['BEIS School ID'].astype(str)
+
+    if not search_value:
+        sample = data[['BEIS School ID', 'School Name']].dropna().head(10)
+    else:
+        sample = data[
+            data['School Name'].str.contains(search_value, case=False, na=False) |
+            data['BEIS School ID'].astype(str).str.contains(search_value)
+        ].head(20)
+
+    options = [
+        {'label': f"{row['BEIS School ID']} - {row['School Name']}", 'value': row['BEIS School ID']}
+        for _, row in sample.iterrows()
+    ]
+
+    if current_value and all(opt['value'] != current_value for opt in options):
+        match = data[data['BEIS School ID'] == current_value]
+        if not match.empty:
+            row = match.iloc[0]
+            top_option = {'label': f"{row['BEIS School ID']} - {row['School Name']}", 'value': row['BEIS School ID']}
+            options.insert(0, top_option)
+
+
+    return options
+
+
 @app.callback(
     Output('school_modal', 'is_open'),
     Output('modal_school_name', 'children'),
@@ -580,19 +613,31 @@ def toggle_modal(school_id, close_click, is_open):
 
     if trigger_id == 'modal_close_btn':
         return False, "", ""
-    
+
     if school_id:
-        school = data[data['BEIS School ID'] == school_id].iloc[0]
-        return True, school['School Name'], html.Div([
-            html.P(f"Region: {school['Region']}"),
-            html.P(f"Division: {school['Division']}"),
-            html.P(f"Barangay: {school['Barangay']}"),
-            html.P(f"Total Enrollment: {school['Total Enrollment']:,.0f}"),
-            html.P(f"Male: {school['Total Male']:,.0f}"),
-            html.P(f"Female: {school['Total Female']:,.0f}")
-        ])
+        # Convert both to string for consistent comparison
+        school_id_str = str(school_id)
+        data['BEIS School ID'] = data['BEIS School ID'].astype(str)
+
+        match = data[data['BEIS School ID'] == school_id_str]
+
+        if not match.empty:
+            school = match.iloc[0]
+            return True, school['School Name'], html.Div([
+                html.P(f"Region: {school.get('Region', 'N/A')}"),
+                html.P(f"Division: {school.get('Division', 'N/A')}"),
+                html.P(f"Barangay: {school.get('Barangay', 'N/A')}"),
+                html.P(f"Total Enrollment: {school.get('Total Enrollment', 'N/A'):,}"),
+                html.P(f"Male: {school.get('Total Male', 'N/A'):,}"),
+                html.P(f"Female: {school.get('Total Female', 'N/A'):,}")
+            ])
+        else:
+            return False, "", html.Div("⚠ School not found.")
     
     return is_open, "", ""
+
+
+
 
 @app.callback(
     Output('shs_track_bar_chart', 'figure'),
@@ -665,26 +710,6 @@ def update_shs_track_chart(selected_year, selected_regions, selected_gender):
         print("SHS Chart Rendering Error:", e)
         return px.bar(title="Error rendering SHS Track chart")
     
-@app.callback(
-    Output('school_search', 'options'),
-    Input('school_search', 'search_value')
-)
-def update_school_options(search_value):
-    if not search_value:
-        # Show first 5 schools when nothing is typed
-        sample = data[['BEIS School ID', 'School Name']].dropna().head(10)
-    else:
-        sample = data[
-            data['School Name'].str.contains(search_value, case=False, na=False) |
-            data['BEIS School ID'].astype(str).str.contains(search_value)
-        ].head(20)
-
-    return [
-        {'label': f"{row['BEIS School ID']} - {row['School Name']}", 'value': row['BEIS School ID']}
-        for _, row in sample.iterrows()
-    ]
-
-
 @app.callback(
     Output('top_schools_chart', 'figure'),
     Input('region_filter', 'value'),
