@@ -964,7 +964,7 @@ def update_sned_sector_chart(selected_year, selected_regions, selected_gender):
         color='Gender',
         barmode='stack',
         text='Enrollment',
-        title='SNed Enrollment by School Sector and Gender'
+        title='Special Needs Education Enrollment by<br>School Sector and Gender'
     )
 
     fig.update_layout(
@@ -973,9 +973,15 @@ def update_sned_sector_chart(selected_year, selected_regions, selected_gender):
         plot_bgcolor='white',
         paper_bgcolor='white',
         font=dict(size=13),
-        height=300,
+        height=350,
         legend_title_text='',
-        margin=dict(l=20, r=20, t=50, b=40)
+        margin=dict(l=20, r=20, t=80, b=40),
+        title_font=dict(
+            size=20,  
+            color="var(--gray-color)",  
+            family="Arial, sans-serif",  
+            weight="bold"  
+        )
     )
     fig.update_traces(texttemplate='%{text:,}', textposition='inside')
     return fig
@@ -1375,6 +1381,7 @@ def update_coc_sector_chart(selected_sy, selected_regions, selected_grades, sele
         title='School Offerings by Certificate of Completion (COC)<br>Type and Sector',
         xaxis_title='Sector',
         yaxis_title='Number of Schools',
+        font=dict(size=13),
         plot_bgcolor='white',
         paper_bgcolor='white',
         legend_title='Sector',
