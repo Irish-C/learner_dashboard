@@ -1102,11 +1102,16 @@ grade_columns = [
         Input('gender_filter',       'value'),
     ]
 )
-def update_enrollment_choropleth(selected_sy, selected_regions, selected_grades, selected_gender):
+def update_enrollment_choropleth(selected_school_year, selected_regions, selected_grades, selected_gender):
     # 1) Copy + filter by School Year
+    if not selected_school_year:
+        raise dash.exceptions.PreventUpdate
+    try:
+        data, grade_columns, _, _ = load_data_for_year(selected_school_year)
+    except FileNotFoundError:
+        raise dash.exceptions.PreventUpdate
+    
     df = data.copy()
-    df = df[df['School Year'] == selected_sy]
-
     # 3) Build lists of grade‑gender columns
     selected_cols_male   = []
     selected_cols_female = []
