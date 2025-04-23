@@ -23,8 +23,6 @@ from app_data import (
     get_available_school_years
     )
 
-from layout.pages.manage_data import manage_data_content
-
 # Path to user info CSV file
 USER_CSV_PATH = "data_files/user-info.csv"
 
@@ -972,11 +970,16 @@ def update_transition_rate_chart(selected_sy, selected_regions, selected_gender)
     Input('gender_filter', 'value'),
     Input('school_year_filter', 'value')
 )
-def update_k_to_12_distribution(selected_regions, selected_gender, selected_year):
+def update_k_to_12_distribution(selected_regions, selected_gender, selected_school_year):
+    if not selected_school_year:
+        raise dash.exceptions.PreventUpdate
+    try:
+        data, grade_columns, _, _ = load_data_for_year(selected_school_year)
+    except FileNotFoundError:
+        raise dash.exceptions.PreventUpdate
+     
     filtered = data.copy()
 
-    if selected_year:
-        filtered = filtered[filtered['School Year'] == selected_year]
     if selected_regions:
         filtered = filtered[filtered['Region'].isin(selected_regions)]
 
