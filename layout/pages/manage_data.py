@@ -7,7 +7,7 @@ def manage_data_content(region_options, grade_options, school_year_options):
         html.H1("Manage Data Page", className="page-title mb-4"),
         html.H3("Add New Enrollment Record", className="mb-4"),
 
-        html.H4("School Location", className="mb-3"),
+        html.H4("Enrollment Information", className="mb-3"),
         dbc.Row([
             dbc.Col([
                 dbc.Label("Region"),
@@ -61,8 +61,6 @@ def manage_data_content(region_options, grade_options, school_year_options):
                 ])
             ], style={'backgroundColor': '#f8f9fa', 'borderRadius': '0.5rem'})
         ], className="mb-5"),
-
-        html.H4("Enrollment Information", className="mb-3"),
         dbc.Row([
             dbc.Col([
                 dbc.Label("School Year"),
