@@ -208,11 +208,14 @@ def load_protected_page(login_data):
     }
 
     if login_data["logged_in"]:
+        first_name = login_data.get("user").split()[0]
+        print(f"Stored first name: {first_name}")  # Debug print to ensure the first name is stored
         return html.Div(
             className="body-style",
             children=[
                 dcc.Store(id='sidebar-toggle-state', data=False),
                 dcc.Store(id='current-page', data="dashboard"),
+                dcc.Store(id='user-first-name', data=first_name),  # Store the first name
                 create_header(),
                 html.Div(
                     className="app-container",
@@ -253,6 +256,7 @@ def load_protected_page(login_data):
             ], style={"textAlign": "center"}),
 
             # Input Fields
+            dcc.Store(id="user-first-name"),
             dbc.Input(id="input-firstname", placeholder="First Name", type="text", className="mb-3", style={"fontFamily": "Roboto, sans-serif"}),
             dbc.Input(id="input-lastname", placeholder="Last Name", type="text", className="mb-3", style={"fontFamily": "Roboto, sans-serif"}),
             dbc.Input(id="input-email", placeholder="Email Address", type="email", className="mb-3", style={"fontFamily": "Roboto, sans-serif"}),
@@ -307,6 +311,7 @@ def load_protected_page(login_data):
     ]
 )
 
+
 @app.callback(
     Output('input-password', 'type'),
     Output('toggle-password-visibility', 'className'),
@@ -314,6 +319,23 @@ def load_protected_page(login_data):
     State('input-password', 'type'),
     prevent_initial_call=True
 )
+def toggle_password_visibility(n_clicks, current_type):
+    if current_type == 'password':
+        return 'text', 'fas fa-eye-slash'
+    return 'password', 'fas fa-eye'
+
+
+@app.callback(
+    Output('user-first-name', 'data'),  # Store the first name in `data`
+    Input('login-button', 'n_clicks'),
+    State('input-firstname', 'value'),
+    prevent_initial_call=True
+)
+
+def store_user_first_name(n_clicks, firstname):
+    # Assuming user logged in and `firstname` is captured
+    return {"firstname": firstname}
+
 def toggle_password_visibility(n_clicks, current_type):
     if current_type == 'password':
         return 'text', 'fas fa-eye-slash'

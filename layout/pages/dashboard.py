@@ -1,5 +1,6 @@
 from dash import dcc, html
 import dash_bootstrap_components as dbc
+from flask_login import current_user
 
 def dashboard_content(data, grade_options, region_options, combined_shs_track_df, school_year_options):
     no_border_style = {
@@ -20,7 +21,7 @@ def dashboard_content(data, grade_options, region_options, combined_shs_track_df
         fluid=True,
         children=[
             html.H1("Dashboard", className="page-title"),
-            html.P("Welcome Back, Teacher!", style={"fontSize": "1.1rem", "color": "#6c757d"}),
+            html.P(f"Welcome Back, ________ .", style={"fontSize": "1.1rem", "color": "#6c757d"}),
             html.Br(),
 
             html.Div(id='kpi_card_row', className='mb-4'),
