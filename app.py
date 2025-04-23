@@ -31,7 +31,11 @@ def hash_password(pw):
     return hashlib.sha256(pw.encode()).hexdigest()
 
 # Load user data from CSV
-user_df = pd.read_csv(USER_CSV_PATH)
+if os.path.exists(USER_CSV_PATH):
+    user_df = pd.read_csv(USER_CSV_PATH)
+else:
+    user_df = pd.DataFrame(columns=['First_Name', 'Last_Name', 'Email', 'Password'])  # Initialize an empty DataFrame
+    raise FileNotFoundError(f"{USER_CSV_PATH} does not exist. An empty user DataFrame has been created.")
 
 # Hash passwords in the dataframe
 user_df['Password'] = user_df['Password'].apply(hash_password)
@@ -55,14 +59,9 @@ login_page = dbc.Container([
             html.H3("Login", className="text-center mb-3"),
             dbc.Input(id="input-firstname", placeholder="First Name", type="text", className="w-100"),
             dbc.Input(id="input-lastname", placeholder="Last Name", type="text", className="w-100"),
-            dbc.Input(id="input-email", placeholder="Email Address", type="email", className="w-100"),
-            dbc.Input(id="input-password", placeholder="Password", type="password", className="w-100"),
-            dbc.Button("Login", id="login-button", color="primary", className="w-100"),
-            html.Div(id="login-message", className="text-center", style={"color": "red", "marginTop": "10px", "fontWeight": "bold", "fontSize": "16px"
-    }
-)
+            html.Div(id="login-message", className="text-center", style={"color": "red", "marginTop": "10px", "fontWeight": "bold", "fontSize": "16px"})
         ], width=4)
-    ], justify="center", style={"paddingTop": "15%"}),
+    ], justify="center", style={"paddingTop": "15%"})
 ], fluid=True)
 
 # Dash App
@@ -121,14 +120,17 @@ def verify_login(n_clicks, first_name, last_name, email, password):
 
     # Check against the user database
     for user in USER_DATA:
+    # Check against the user database
+        required_keys = {"First_Name", "Last_Name", "Email", "Password"}
+    for user in USER_DATA:
+        if not required_keys.issubset(user.keys()):
+            continue  # Skip users with missing keys
         if (user["First_Name"].lower() == (first_name or "").lower() and
             user["Last_Name"].lower() == (last_name or "").lower() and
             user["Email"].lower() == (email or "").lower() and
             user["Password"] == pw_hash):
             # ✅ Correct login → Clear error
             return {"logged_in": True, "user": f"{first_name} {last_name}"}, ""
-
-    # Invalid login → KEEP showing error
     return dash.no_update, "❌ Invalid credentials. Please try again."
 
 
@@ -154,7 +156,6 @@ def toggle_sidebar(n_clicks, is_collapsed, current_page):
     
     return [updated_sidebar], content_style, is_collapsed
 
-# Callback to change pages
 @app.callback(
     Output("content", "children"), 
     Output("current-page", "data"), 
@@ -169,21 +170,30 @@ def toggle_sidebar(n_clicks, is_collapsed, current_page):
 def change_page(btn1, btn2, btn3, btn4, current_page, is_collapsed):
     ctx = callback_context
     if not ctx.triggered:
-        return create_content("dashboard", data, grade_options, region_options, combined_shs_track_df, school_year_options), "dashboard", create_sidebar(is_collapsed=is_collapsed, current_page="dashboard")
+        return (
+            create_content(current_page, data, grade_options, region_options, combined_shs_track_df, school_year_options),
+            current_page,
+            create_sidebar(is_collapsed=is_collapsed, current_page=current_page)
+        )
     
+    # Determine which button was clicked
     button_id = ctx.triggered[0]["prop_id"].split(".")[0]
+    button_to_page = {
+        "btn-1": PAGE_CONSTANTS[1],
+        "btn-2": PAGE_CONSTANTS[2],
+        "btn-3": PAGE_CONSTANTS[3],
+        "btn-4": PAGE_CONSTANTS[4],
+    }
+    selected_page = button_to_page.get(button_id, PAGE_CONSTANTS.get(1, current_page))  # Fallback to default page if button ID is unexpected
     
-    if button_id == "btn-1":
-        return create_content("dashboard", data, grade_options, region_options, combined_shs_track_df, school_year_options), "dashboard", create_sidebar(is_collapsed=is_collapsed, current_page="dashboard")
-    elif button_id == "btn-2":
-        return create_content("manage_data", data, grade_options, region_options, combined_shs_track_df, school_year_options), "manage_data", create_sidebar(is_collapsed=is_collapsed, current_page="manage_data")
-    elif button_id == "btn-3":
-        return create_content("help", data, grade_options, region_options, combined_shs_track_df, school_year_options), "help", create_sidebar(is_collapsed=is_collapsed, current_page="help")
-    elif button_id == "btn-4":
-        return create_content("settings", data, grade_options, region_options, combined_shs_track_df, school_year_options), "settings", create_sidebar(is_collapsed=is_collapsed, current_page="settings")
+    # Fallback to current page if something unexpected happens
+    selected_page = button_to_page.get(button_id, current_page)
     
-    # Default to dashboard
-    return create_content(current_page, data, grade_options, region_options, combined_shs_track_df, school_year_options), "current_page", create_sidebar(is_collapsed=is_collapsed, current_page="dashboard")
+    return (
+        create_content(selected_page, data, grade_options, region_options, combined_shs_track_df, school_year_options),
+        selected_page,
+        create_sidebar(is_collapsed=is_collapsed, current_page=selected_page)
+    )
 
 # Call back for login to dashboard
 @app.callback(
@@ -477,43 +487,35 @@ def update_charts(selected_regions, selected_grades, selected_gender):
 
 
     # KPI Cards (now with Sector card inside the 4-col row)
+    card_style = {
+        "height": "175px",
+        "border": "none",
+        "borderRadius": "10px",
+        "boxShadow": "0px 4px 6px rgba(0, 0, 0, 0.1)",
+        "padding": "10px",
+        
+    }
+    text_style = {
+        "display": "flex",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "justifyContent": "center",
+        "height": "100%",
+        "color": "black"
+    }
+
     kpi_cards = dbc.Row([
         dbc.Col(
             dbc.Card(
                 dbc.CardBody([
                     html.Div([
-                        html.I(className="fas fa-user-graduate", style={
-                            "fontSize": "30px",
-                            "color": "#008000",
-                            "marginBottom": "10px",
-                            "backgroundColor": "color: var(--accent-color)",
-                        }),
-                        html.H5("Total Enrolled", style={
-                            "color": "var(--gray-color)",
-                            "margin": "0",
-                            "fontWeight": "bold"
-                        }),
-                        html.H2(f"{total_students:,}", style={
-                            "color": "#008000",
-                            "margin": "0"
-                        })
-                    ], style={
-                        "display": "flex",
-                        "flexDirection": "column",
-                        "alignItems": "center",
-                        "justifyContent": "center",
-                        "height": "100%",
-                        "color": "black"  # Changed text color to black for better contrast
-                    })
+                        html.I(className="fas fa-user-graduate", style={"fontSize": "30px", "color": "#008000", "marginBottom": "10px"}),
+                        html.H5("Total Enrolled", style={"color": "var(--gray-color)", "margin": "0", "fontWeight": "bold"}),
+                        html.H2(f"{total_students:,}", style={"color": "#008000", "margin": "0"})
+                    ], style=text_style)
                 ]),
-                color="white",  # Changed card color to white
-                style={
-                    "height": "175px",
-                    "borderRadius": "10px",
-                    "boxShadow": "0px 4px 6px rgba(0, 0, 0, 0.1)",
-                    "borderBottom": "5px solid #28a745",
-                    "padding": "10px"
-                }
+                color="white",#d1ffbd
+                style={**card_style, "borderBottom": "5px solid #28a745"}
             ),
             width=3, style={"marginBottom": "15px", 'padding': "0.5rem"}
         ),
@@ -521,37 +523,13 @@ def update_charts(selected_regions, selected_grades, selected_gender):
             dbc.Card(
                 dbc.CardBody([
                     html.Div([
-                        html.I(className="fas fa-school", style={
-                            "fontSize": "30px",
-                            "color": "#FBC02D",
-                            "marginBottom": "10px"
-                        }),
-                        html.H5("Total Schools", style={
-                            "color": "var(--gray-color)",
-                            "margin": "0",
-                            "fontWeight": "bold"
-                        }),
-                        html.H2(f"{total_schools:,}", style={
-                            "color": "#FBC02D",
-                            "margin": "0"
-                        })
-                    ], style={
-                        "display": "flex",
-                        "flexDirection": "column",
-                        "alignItems": "center",
-                        "justifyContent": "center",
-                        "height": "100%",
-                        "color": "black"  # Changed text color to black for better contrast
-                    })
+                        html.I(className="fas fa-school", style={"fontSize": "30px", "color": "#FBC02D", "marginBottom": "10px"}),
+                        html.H5("Total Schools", style={"color": "var(--gray-color)", "margin": "0", "fontWeight": "bold"}),
+                        html.H2(f"{total_schools:,}", style={"color": "#FBC02D", "margin": "0"})
+                    ], style=text_style)
                 ]),
-                color="white",  # Changed card color to white
-                style={
-                    "height": "175px",
-                    "borderRadius": "10px",
-                    "boxShadow": "0px 4px 6px rgba(0, 0, 0, 0.1)",
-                    "borderBottom": "5px solid #ffc107",
-                    "padding": "10px"
-                }
+                color="white",#ffffc5
+                style={**card_style, "borderBottom": "5px solid #ffc107"}
             ),
             width=3, style={"marginBottom": "15px", 'padding': "0.5rem"}
         ),
@@ -559,38 +537,13 @@ def update_charts(selected_regions, selected_grades, selected_gender):
             dbc.Card(
                 dbc.CardBody([
                     html.Div([
-                        html.I(className="fas fa-map-marked-alt", style={
-                            "fontSize": "35px",
-                            "color": "#e74c3c",
-                            "marginBottom": "10px"
-                        }),
-                        html.H5("Most Enrolled Region as of (school year)", style={
-                            "color": "var(--gray-color)",
-                            "margin": "0",
-                            "fontWeight": "bold"
-                        }),
-                        html.H3(f"{most_enrolled_region}: {region_total/1000:.2f}k", style={
-                            "color": "#e74c3c",
-                            "margin": "0",
-                            "fontSize": "24px"
-                        })
-                    ], style={
-                        "display": "flex",
-                        "flexDirection": "column",
-                        "alignItems": "center",
-                        "justifyContent": "center",
-                        "height": "100%",
-                        "color": "black"  # Changed text color to black for better contrast
-                    })
+                        html.I(className="fas fa-map-marked-alt", style={"fontSize": "35px", "color": "#e74c3c", "marginBottom": "10px"}),
+                        html.H5("Most Enrolled Region as of (school year)", style={"color": "var(--gray-color)", "margin": "0", "fontWeight": "bold"}),
+                        html.H3(f"{most_enrolled_region}: {region_total/1000:.2f}k", style={"color": "#e74c3c", "margin": "0", "fontSize": "24px"})
+                    ], style=text_style)
                 ]),
-                color="white",  # Changed card color to white
-                style={
-                    "height": "175px",
-                    "borderRadius": "10px",
-                    "boxShadow": "0px 4px 6px rgba(0, 0, 0, 0.1)",
-                    "borderBottom": "5px solid #e74c3c",
-                    "padding": "10px"
-                }
+                color="white",#ffcccb
+                style={**card_style, "borderBottom": "5px solid #e74c3c"}
             ),
             width=3, style={"marginBottom": "15px", 'padding': "0.5rem"}
         ),
@@ -598,71 +551,17 @@ def update_charts(selected_regions, selected_grades, selected_gender):
             dbc.Card(
                 dbc.CardBody([
                     html.Div([
-                        html.I(className="fas fa-chalkboard-teacher", style={
-                            "fontSize": "35px",
-                            "color": "#3498db",
-                            "marginBottom": "10px"
-                        }),
-                        html.H5("School Sector Ratio", style={
-                            "color": "var(--gray-color)",
-                            "margin": "0",
-                            "fontWeight": "bold"
-                        }),
-                        html.H3(f"{public_percentage:.2f}% | {private_percentage:.2f}% | {sucs_lucs_percentage:.2f}%", style={
-                            "color": "#3498db",
-                            "margin": "0",
-                            "fontSize": "20px"
-                        }),
-                        html.Div([
-                            html.P("Public", style={
-                                "color": "var(--gray-color)",
-                                "fontSize": "14px",
-                                "margin": "5px 15px",
-                                "fontWeight": "bold",
-                                "textAlign": "center"
-                            }),
-                            html.P("Private", style={
-                                "color": "var(--gray-color)",
-                                "fontSize": "14px",
-                                "margin": "5px 15px",
-                                "fontWeight": "bold",
-                                "textAlign": "center"
-                            }),
-                            html.P("SUCs/LUCs", style={
-                                "color": "var(--gray-color)",
-                                "fontSize": "14px",
-                                "margin": "5px 15px",
-                                "fontWeight": "bold",
-                                "textAlign": "center"
-                            })
-                        ], style={
-                            "display": "flex",
-                            "justifyContent": "center",
-                            "alignItems": "center",  # Align labels in the same row
-                            "width": "100%",
-                        })
-                    ], style={
-                        "display": "flex",
-                        "flexDirection": "column",
-                        "alignItems": "center",
-                        "justifyContent": "center",
-                        "height": "100%",
-                        "color": "black"  # Changed text color to black for better contrast
-                    })
+                        html.I(className="fas fa-chalkboard-teacher", style={"fontSize": "35px", "color": "#3498db", "marginBottom": "10px"}),
+                        html.H5("School Sector Ratio", style={"color": "var(--gray-color)", "margin": "0", "fontWeight": "bold"}),
+                        html.H3(f"{public_percentage:.2f}% | {private_percentage:.2f}% | {sucs_lucs_percentage:.2f}%", style={"color": "#3498db", "margin": "0", "fontSize": "20px"})
+                    ], style=text_style)
                 ]),
-                color="white",  # Changed card color to white
-                style={
-                    "height": "175px",
-                    "borderRadius": "10px",
-                    "boxShadow": "0px 4px 6px rgba(0, 0, 0, 0.1)",
-                    "borderBottom": "5px solid #3498db",
-                    "padding": "10px"
-                }
+                color="#white",#BFDBFE
+                style={**card_style, "borderBottom": "5px solid #3498db"}
             ),
             width=3, style={"marginBottom": "15px", 'padding': "0.5rem"}
         )
     ], justify="center", align="start")
-
 
     # Standalone Most Enrolled Division Card
     most_enrolled_division_text = filtered_data.groupby('Division')['Selected Grades Total'].sum().idxmax()
@@ -670,32 +569,14 @@ def update_charts(selected_regions, selected_grades, selected_gender):
         dbc.Card(
             dbc.CardBody([
                 html.Div([
-                    html.I(className="fas fa-users-cog", style={
-                        "fontSize": "30px",
-                        "color": "#007BFF",
-                        "marginBottom": "0.5rem"
-                    }),
-                    html.H5("Most Enrolled Division", style={
-                        "color": "var(--gray-color)",
-                        "textAlign": "center",
-                        "margin": "0",
-                        "lineHeight": "1.2"
-                    }),
-                    html.H2(f"{most_enrolled_division_text}", style={
-                        "color": "var(--blue-color)",
-                        "textAlign": "center",
-                        "margin": "0"
-                    })  # dynamic text
+                    html.I(className="fas fa-users-cog", style={"fontSize": "30px", "color": "#007BFF", "marginBottom": "0.5rem"}),
+                    html.H5("Most Enrolled Division", style={"color": "var(--gray-color)", "textAlign": "center", "margin": "0", "lineHeight": "1.2"}),
+                    html.H2(f"{most_enrolled_division_text}", style={"color": "var(--pr-color)", "textAlign": "center", "margin": "0"})
                 ])
             ]),
-            style={
-                "borderRadius": "10px",
-                "boxShadow": "0px 4px 6px rgba(0, 0, 0, 0.1)",
-                "width": "100%"  # ensure it fills its column
-            }
+            style={**card_style, "width": "100%"}
         )
     ])
-
 
     return pie_chart, fig_combo, kpi_cards, most_enrolled_division_card
 
@@ -1608,8 +1489,10 @@ def update_enrollment_table(school_year):
 
     df = pd.read_csv(file_path)
 
-    # Convert any N/A to 0 for numeric aggregation
-    numeric_df = df.replace("N/A", 0)
+    if "BEIS School ID" in numeric_df.columns and "BEIS School ID" in schools_df.columns:
+            numeric_df = numeric_df.merge(schools_df[["BEIS School ID", "Region", "Division"]], on="BEIS School ID", how="left")
+    else:
+            raise KeyError("The 'BEIS School ID' column is missing in one of the DataFrames.")
     numeric_df = numeric_df.apply(pd.to_numeric, errors='ignore')
 
     # Infer gendered columns
