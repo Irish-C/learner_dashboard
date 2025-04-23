@@ -83,7 +83,7 @@ with open('assets/index_template.html', 'r') as file:
 
 # Generate school year options
 current_year = datetime.now().year
-school_year_options = [{'label': f"{y}-{y+1}", 'value': f"{y}-{y+1}"} for y in range(current_year - 10, current_year + 2)]
+school_year_options = [{'label': y, 'value': y} for y in get_available_school_years()]
 
 # Default year to load initially
 default_school_year = "2023-2024"
@@ -131,66 +131,49 @@ def verify_login(n_clicks, first_name, last_name, email, password):
 
     return dash.no_update, "❌ Invalid credentials. Please try again."
 
-# Callback to toggle sidebar
 @app.callback(
-    Output("sidebar-container", "children", allow_duplicate=True), 
-    Output("content", "style"), 
-    Output("sidebar-toggle-state", "data"),
-    Input("sidebar-toggle", "n_clicks"),
-    State("sidebar-toggle-state", "data"), 
-    State("current-page", "data"),
-    prevent_initial_call=True
-)
-def toggle_sidebar(n_clicks, is_collapsed, current_page):
-    if n_clicks:
-        is_collapsed = not is_collapsed
-    
-    # Update sidebar with new collapsed state and current page
-    updated_sidebar = create_sidebar(is_collapsed=is_collapsed, current_page=current_page)
-    
-    # Update content margin
-    content_style = get_content_style(is_collapsed)
-    
-    return [updated_sidebar], content_style, is_collapsed
-
-@app.callback(
-    Output("content", "children"), 
-    Output("current-page", "data"), 
     Output("sidebar-container", "children"),
+    Output("content", "children"),
+    Output("content", "style"),
+    Output("sidebar-toggle-state", "data"),
+    Output("current-page", "data"),
+    Input("sidebar-toggle", "n_clicks"),
     Input("btn-1", "n_clicks"),
     Input("btn-2", "n_clicks"),
     Input("btn-3", "n_clicks"),
     Input("btn-4", "n_clicks"),
-    State("current-page", "data"), 
-    State("sidebar-toggle-state", "data")
+    State("sidebar-toggle-state", "data"),
+    State("current-page", "data")
 )
-def change_page(btn1, btn2, btn3, btn4, current_page, is_collapsed):
+def handle_interaction(toggle_clicks, b1, b2, b3, b4, is_collapsed, current_page):
     ctx = callback_context
-    if not ctx.triggered:
-        return (
-            create_content(current_page, data, grade_options, region_options, combined_shs_track_df, school_year_options),
-            current_page,
-            create_sidebar(is_collapsed=is_collapsed, current_page=current_page)
-        )
-    
-    # Determine which button was clicked
-    button_id = ctx.triggered[0]["prop_id"].split(".")[0]
-    button_to_page = {
-        "btn-1": PAGE_CONSTANTS[1],
-        "btn-2": PAGE_CONSTANTS[2],
-        "btn-3": PAGE_CONSTANTS[3],
-        "btn-4": PAGE_CONSTANTS[4],
-    }
-    selected_page = button_to_page.get(button_id, PAGE_CONSTANTS.get(1, current_page))  # Fallback to default page if button ID is unexpected
-    
-    # Fallback to current page if something unexpected happens
-    selected_page = button_to_page.get(button_id, current_page)
-    
-    return (
-        create_content(selected_page, data, grade_options, region_options, combined_shs_track_df, school_year_options),
-        selected_page,
-        create_sidebar(is_collapsed=is_collapsed, current_page=selected_page)
-    )
+
+    # Track updated values
+    new_collapsed = is_collapsed
+    new_page = current_page
+
+    if ctx.triggered:
+        triggered_id = ctx.triggered[0]["prop_id"].split(".")[0]
+
+        # Toggle sidebar
+        if triggered_id == "sidebar-toggle":
+            new_collapsed = not is_collapsed
+
+        # Navigation
+        button_to_page = {
+            "btn-1": PAGE_CONSTANTS[1],
+            "btn-2": PAGE_CONSTANTS[2],
+            "btn-3": PAGE_CONSTANTS[3],
+            "btn-4": PAGE_CONSTANTS[4],
+        }
+        if triggered_id in button_to_page:
+            new_page = button_to_page[triggered_id]
+
+    sidebar = create_sidebar(is_collapsed=new_collapsed, current_page=new_page)
+    content = create_content(new_page, data, grade_options, region_options, combined_shs_track_df, school_year_options)
+    content_style = get_content_style(new_collapsed)
+
+    return sidebar, content, content_style, new_collapsed, new_page
 
 # Call back for login to dashboard
 @app.callback(
@@ -256,7 +239,7 @@ def load_protected_page(login_data):
             ], style={"textAlign": "center"}),
 
             # Input Fields
-            dcc.Store(id='user-first-name', data={}),
+            dcc.Store(id="user-first-name"),
             dbc.Input(id="input-firstname", placeholder="First Name", type="text", className="mb-3", style={"fontFamily": "Roboto, sans-serif"}),
             dbc.Input(id="input-lastname", placeholder="Last Name", type="text", className="mb-3", style={"fontFamily": "Roboto, sans-serif"}),
             dbc.Input(id="input-email", placeholder="Email Address", type="email", className="mb-3", style={"fontFamily": "Roboto, sans-serif"}),
@@ -351,18 +334,10 @@ def toggle_password_visibility(n_clicks, current_type):
      Output('most_enrolled_division_card', 'children')],
     [Input('region_filter', 'value'),
      Input('grade_filter', 'value'),
-     Input('school_year_filter', 'value'),
      Input('gender_filter', 'value')]
 )
-def update_charts(selected_regions, selected_grades, selected_school_year, selected_gender):
-    if not selected_school_year:
-        raise dash.exceptions.PreventUpdate
-
-    try:
-        data, grade_columns, _, _ = load_data_for_year(selected_school_year)
-    except FileNotFoundError:
-        raise dash.exceptions.PreventUpdate
-    
+def update_charts(selected_regions, selected_grades, selected_gender):
+    print("update_charts triggered")
     filtered_data = data.copy()
 
     if selected_regions:
