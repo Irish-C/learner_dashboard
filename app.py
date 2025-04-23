@@ -1459,35 +1459,38 @@ def update_enrollment_table(school_year):
     if not school_year:
         return [], []
 
-    file_path = f"data_{school_year}.csv"
+    file_path = f"data_files/data_{school_year}.csv"
     if not os.path.exists(file_path):
         return [], []
 
     df = pd.read_csv(file_path)
 
+    # Import school metadata
+    from app_data import load_schools
+    schools_df = load_schools()
+
+    # Only after loading df, assign to numeric_df
+    numeric_df = df.copy()
+
+    # Inject Region and Division
     if "BEIS School ID" in numeric_df.columns and "BEIS School ID" in schools_df.columns:
-            numeric_df = numeric_df.merge(schools_df[["BEIS School ID", "Region", "Division"]], on="BEIS School ID", how="left")
+        numeric_df = numeric_df.merge(schools_df[["BEIS School ID", "Region", "Division"]], on="BEIS School ID", how="left")
     else:
-            raise KeyError("The 'BEIS School ID' column is missing in one of the DataFrames.")
+        raise KeyError("The 'BEIS School ID' column is missing in one of the DataFrames.")
+
     numeric_df = numeric_df.apply(pd.to_numeric, errors='ignore')
 
-    # Infer gendered columns
     male_cols = [col for col in df.columns if "Male" in col]
     female_cols = [col for col in df.columns if "Female" in col]
 
-    numeric_df["Total Male"] = numeric_df[male_cols].sum(axis=1, numeric_only=True)
-    numeric_df["Total Female"] = numeric_df[female_cols].sum(axis=1, numeric_only=True)
+    numeric_df["Total Male"] = numeric_df[male_cols].replace("N/A", 0).apply(pd.to_numeric, errors='coerce').sum(axis=1)
+    numeric_df["Total Female"] = numeric_df[female_cols].replace("N/A", 0).apply(pd.to_numeric, errors='coerce').sum(axis=1)
     numeric_df["Total Enrollment"] = numeric_df["Total Male"] + numeric_df["Total Female"]
-
-    # Inject Region and Division from school metadata if needed
-    if "Region" not in numeric_df.columns or "Division" not in numeric_df.columns:
-        from app_data import load_schools
-        schools_df = load_schools()
-        numeric_df = numeric_df.merge(schools_df[["BEIS School ID", "Region", "Division"]], on="BEIS School ID", how="left")
 
     summary = numeric_df.groupby(["Region", "Division"], as_index=False)[["Total Male", "Total Female", "Total Enrollment"]].sum()
 
     return summary.to_dict("records"), [{"name": col, "id": col} for col in summary.columns]
+
 
 if __name__ == "__main__":
     app.run(debug=True)
