@@ -487,43 +487,33 @@ def update_charts(selected_regions, selected_grades, selected_gender):
 
 
     # KPI Cards (now with Sector card inside the 4-col row)
+    card_style = {
+        "height": "175px",
+        "borderRadius": "10px",
+        "boxShadow": "0px 4px 6px rgba(0, 0, 0, 0.1)",
+        "padding": "10px"
+    }
+    text_style = {
+        "display": "flex",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "justifyContent": "center",
+        "height": "100%",
+        "color": "black"
+    }
+
     kpi_cards = dbc.Row([
         dbc.Col(
             dbc.Card(
                 dbc.CardBody([
                     html.Div([
-                        html.I(className="fas fa-user-graduate", style={
-                            "fontSize": "30px",
-                            "color": "#008000",
-                            "marginBottom": "10px",
-                            "backgroundColor": "color: var(--accent-color)",
-                        }),
-                        html.H5("Total Enrolled", style={
-                            "color": "var(--gray-color)",
-                            "margin": "0",
-                            "fontWeight": "bold"
-                        }),
-                        html.H2(f"{total_students:,}", style={
-                            "color": "#008000",
-                            "margin": "0"
-                        })
-                    ], style={
-                        "display": "flex",
-                        "flexDirection": "column",
-                        "alignItems": "center",
-                        "justifyContent": "center",
-                        "height": "100%",
-                        "color": "black"  # Changed text color to black for better contrast
-                    })
+                        html.I(className="fas fa-user-graduate", style={"fontSize": "30px", "color": "#008000", "marginBottom": "10px"}),
+                        html.H5("Total Enrolled", style={"color": "var(--gray-color)", "margin": "0", "fontWeight": "bold"}),
+                        html.H2(f"{total_students:,}", style={"color": "#008000", "margin": "0"})
+                    ], style=text_style)
                 ]),
-                color="white",  # Changed card color to white
-                style={
-                    "height": "175px",
-                    "borderRadius": "10px",
-                    "boxShadow": "0px 4px 6px rgba(0, 0, 0, 0.1)",
-                    "borderBottom": "5px solid #28a745",
-                    "padding": "10px"
-                }
+                color="white",
+                style={**card_style, "borderBottom": "5px solid #28a745"}
             ),
             width=3, style={"marginBottom": "15px", 'padding': "0.5rem"}
         ),
@@ -531,37 +521,13 @@ def update_charts(selected_regions, selected_grades, selected_gender):
             dbc.Card(
                 dbc.CardBody([
                     html.Div([
-                        html.I(className="fas fa-school", style={
-                            "fontSize": "30px",
-                            "color": "#FBC02D",
-                            "marginBottom": "10px"
-                        }),
-                        html.H5("Total Schools", style={
-                            "color": "var(--gray-color)",
-                            "margin": "0",
-                            "fontWeight": "bold"
-                        }),
-                        html.H2(f"{total_schools:,}", style={
-                            "color": "#FBC02D",
-                            "margin": "0"
-                        })
-                    ], style={
-                        "display": "flex",
-                        "flexDirection": "column",
-                        "alignItems": "center",
-                        "justifyContent": "center",
-                        "height": "100%",
-                        "color": "black"  # Changed text color to black for better contrast
-                    })
+                        html.I(className="fas fa-school", style={"fontSize": "30px", "color": "#FBC02D", "marginBottom": "10px"}),
+                        html.H5("Total Schools", style={"color": "var(--gray-color)", "margin": "0", "fontWeight": "bold"}),
+                        html.H2(f"{total_schools:,}", style={"color": "#FBC02D", "margin": "0"})
+                    ], style=text_style)
                 ]),
-                color="white",  # Changed card color to white
-                style={
-                    "height": "175px",
-                    "borderRadius": "10px",
-                    "boxShadow": "0px 4px 6px rgba(0, 0, 0, 0.1)",
-                    "borderBottom": "5px solid #ffc107",
-                    "padding": "10px"
-                }
+                color="white",
+                style={**card_style, "borderBottom": "5px solid #ffc107"}
             ),
             width=3, style={"marginBottom": "15px", 'padding': "0.5rem"}
         ),
@@ -569,38 +535,13 @@ def update_charts(selected_regions, selected_grades, selected_gender):
             dbc.Card(
                 dbc.CardBody([
                     html.Div([
-                        html.I(className="fas fa-map-marked-alt", style={
-                            "fontSize": "35px",
-                            "color": "#e74c3c",
-                            "marginBottom": "10px"
-                        }),
-                        html.H5("Most Enrolled Region as of (school year)", style={
-                            "color": "var(--gray-color)",
-                            "margin": "0",
-                            "fontWeight": "bold"
-                        }),
-                        html.H3(f"{most_enrolled_region}: {region_total/1000:.2f}k", style={
-                            "color": "#e74c3c",
-                            "margin": "0",
-                            "fontSize": "24px"
-                        })
-                    ], style={
-                        "display": "flex",
-                        "flexDirection": "column",
-                        "alignItems": "center",
-                        "justifyContent": "center",
-                        "height": "100%",
-                        "color": "black"  # Changed text color to black for better contrast
-                    })
+                        html.I(className="fas fa-map-marked-alt", style={"fontSize": "35px", "color": "#e74c3c", "marginBottom": "10px"}),
+                        html.H5("Most Enrolled Region as of (school year)", style={"color": "var(--gray-color)", "margin": "0", "fontWeight": "bold"}),
+                        html.H3(f"{most_enrolled_region}: {region_total/1000:.2f}k", style={"color": "#e74c3c", "margin": "0", "fontSize": "24px"})
+                    ], style=text_style)
                 ]),
-                color="white",  # Changed card color to white
-                style={
-                    "height": "175px",
-                    "borderRadius": "10px",
-                    "boxShadow": "0px 4px 6px rgba(0, 0, 0, 0.1)",
-                    "borderBottom": "5px solid #e74c3c",
-                    "padding": "10px"
-                }
+                color="white",
+                style={**card_style, "borderBottom": "5px solid #e74c3c"}
             ),
             width=3, style={"marginBottom": "15px", 'padding': "0.5rem"}
         ),
@@ -608,71 +549,17 @@ def update_charts(selected_regions, selected_grades, selected_gender):
             dbc.Card(
                 dbc.CardBody([
                     html.Div([
-                        html.I(className="fas fa-chalkboard-teacher", style={
-                            "fontSize": "35px",
-                            "color": "#3498db",
-                            "marginBottom": "10px"
-                        }),
-                        html.H5("School Sector Ratio", style={
-                            "color": "var(--gray-color)",
-                            "margin": "0",
-                            "fontWeight": "bold"
-                        }),
-                        html.H3(f"{public_percentage:.2f}% | {private_percentage:.2f}% | {sucs_lucs_percentage:.2f}%", style={
-                            "color": "#3498db",
-                            "margin": "0",
-                            "fontSize": "20px"
-                        }),
-                        html.Div([
-                            html.P("Public", style={
-                                "color": "var(--gray-color)",
-                                "fontSize": "14px",
-                                "margin": "5px 15px",
-                                "fontWeight": "bold",
-                                "textAlign": "center"
-                            }),
-                            html.P("Private", style={
-                                "color": "var(--gray-color)",
-                                "fontSize": "14px",
-                                "margin": "5px 15px",
-                                "fontWeight": "bold",
-                                "textAlign": "center"
-                            }),
-                            html.P("SUCs/LUCs", style={
-                                "color": "var(--gray-color)",
-                                "fontSize": "14px",
-                                "margin": "5px 15px",
-                                "fontWeight": "bold",
-                                "textAlign": "center"
-                            })
-                        ], style={
-                            "display": "flex",
-                            "justifyContent": "center",
-                            "alignItems": "center",  # Align labels in the same row
-                            "width": "100%",
-                        })
-                    ], style={
-                        "display": "flex",
-                        "flexDirection": "column",
-                        "alignItems": "center",
-                        "justifyContent": "center",
-                        "height": "100%",
-                        "color": "black"  # Changed text color to black for better contrast
-                    })
+                        html.I(className="fas fa-chalkboard-teacher", style={"fontSize": "35px", "color": "#3498db", "marginBottom": "10px"}),
+                        html.H5("School Sector Ratio", style={"color": "var(--gray-color)", "margin": "0", "fontWeight": "bold"}),
+                        html.H3(f"{public_percentage:.2f}% | {private_percentage:.2f}% | {sucs_lucs_percentage:.2f}%", style={"color": "#3498db", "margin": "0", "fontSize": "20px"})
+                    ], style=text_style)
                 ]),
-                color="white",  # Changed card color to white
-                style={
-                    "height": "175px",
-                    "borderRadius": "10px",
-                    "boxShadow": "0px 4px 6px rgba(0, 0, 0, 0.1)",
-                    "borderBottom": "5px solid #3498db",
-                    "padding": "10px"
-                }
+                color="white",
+                style={**card_style, "borderBottom": "5px solid #3498db"}
             ),
             width=3, style={"marginBottom": "15px", 'padding': "0.5rem"}
         )
     ], justify="center", align="start")
-
 
     # Standalone Most Enrolled Division Card
     most_enrolled_division_text = filtered_data.groupby('Division')['Selected Grades Total'].sum().idxmax()
@@ -680,32 +567,14 @@ def update_charts(selected_regions, selected_grades, selected_gender):
         dbc.Card(
             dbc.CardBody([
                 html.Div([
-                    html.I(className="fas fa-users-cog", style={
-                        "fontSize": "30px",
-                        "color": "#007BFF",
-                        "marginBottom": "0.5rem"
-                    }),
-                    html.H5("Most Enrolled Division", style={
-                        "color": "var(--gray-color)",
-                        "textAlign": "center",
-                        "margin": "0",
-                        "lineHeight": "1.2"
-                    }),
-                    html.H2(f"{most_enrolled_division_text}", style={
-                        "color": "var(--blue-color)",
-                        "textAlign": "center",
-                        "margin": "0"
-                    })  # dynamic text
+                    html.I(className="fas fa-users-cog", style={"fontSize": "30px", "color": "#007BFF", "marginBottom": "0.5rem"}),
+                    html.H5("Most Enrolled Division", style={"color": "var(--gray-color)", "textAlign": "center", "margin": "0", "lineHeight": "1.2"}),
+                    html.H2(f"{most_enrolled_division_text}", style={"color": "var(--blue-color)", "textAlign": "center", "margin": "0"})
                 ])
             ]),
-            style={
-                "borderRadius": "10px",
-                "boxShadow": "0px 4px 6px rgba(0, 0, 0, 0.1)",
-                "width": "100%"  # ensure it fills its column
-            }
+            style={**card_style, "width": "100%"}
         )
     ])
-
 
     return pie_chart, fig_combo, kpi_cards, most_enrolled_division_card
 
