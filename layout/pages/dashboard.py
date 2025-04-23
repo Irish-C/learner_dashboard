@@ -180,10 +180,12 @@ def dashboard_content(data, grade_options, region_options, combined_shs_track_df
                             dbc.Card([
                                 dbc.CardBody([
                                     dcc.Loading(dcc.Graph(
-                                        id='top_schools_chart'
-                                    ))
+                                        id='top_schools_chart',
+                                        config={'displayModeBar': False},
+                                        style={'height': '100%'}
+                                    )),
                             ])
-                        ]),
+                        ], style={'height': '400px'}),
                         width=6,
                         className="mb-4"
                     ),
@@ -191,10 +193,12 @@ def dashboard_content(data, grade_options, region_options, combined_shs_track_df
                             dbc.Card([
                                 dbc.CardBody([
                                     dcc.Loading(dcc.Graph(
-                                        id='shs_track_bar_chart'
-                                    ))
+                                        id='shs_track_bar_chart',
+                                        config={'displayModeBar': False},
+                                        style={'height': '100%'}
+                                    )),
                             ])
-                        ]),
+                        ], style={'height': '400px'}),
                         width=6,
                         className="mb-4"
                     )

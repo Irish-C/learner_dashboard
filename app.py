@@ -787,6 +787,8 @@ def update_shs_track_chart(selected_year, selected_regions, selected_gender):
 
         fig.update_layout(
             title='Senior High Track Enrollment Overview',
+            font=dict(size=13),
+            height=350,
             scene=dict(
                 xaxis_title='Track',
                 yaxis_title='Total Enrollment',
@@ -892,6 +894,7 @@ def update_top_schools_chart(selected_regions, selected_grades, selected_gender)
     fig.update_layout(
         title='Top 5 Most Enrolled Schools',
         barmode='stack',
+        height=350,
         showlegend=True,
         legend_title_text='',
         plot_bgcolor='white',
