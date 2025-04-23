@@ -9,35 +9,22 @@ import pandas as pd
 import json
 import os
 import hashlib
+from datetime import datetime
 
 from layout.sidebar import create_sidebar
 from layout.header import create_header
 from layout.page_router import get_content_style, create_content
-from app_data import data, grade_columns, combined_shs_track_df, correct_region_order, grade_options
 from app_data import (
     get_school_metadata,
-    load_schools
-)
-
+    load_schools,
+    load_data_for_year,
+    build_combined_shs_track_df
+    )
 
 from layout.pages.manage_data import manage_data_content
 
-# Generate school year options dynamically
-from datetime import datetime
-current_year = datetime.now().year
-school_year_options = [
-    {'label': f"{y}-{y+1}", 'value': f"{y}-{y+1}"} 
-    for y in range(current_year - 10, current_year + 2)
-]
-
-# Example layout call with all three arguments
-
-
-region_options = [{'label': r, 'value': r} for r in correct_region_order]
-layout = manage_data_content(region_options, grade_options, school_year_options)
-
 # Path to user info CSV file
-USER_CSV_PATH = "user-info.csv"
+USER_CSV_PATH = "data_files/user-info.csv"
 
 # Function to hash a password
 def hash_password(pw):
@@ -93,11 +80,24 @@ app = dash.Dash(
 with open('assets/index_template.html', 'r') as file:
     app.index_string = file.read()
 
-# Define the layout
+# Generate school year options
+current_year = datetime.now().year
+school_year_options = [{'label': f"{y}-{y+1}", 'value': f"{y}-{y+1}"} for y in range(current_year - 10, current_year + 2)]
+
+# Default year to load initially
+default_school_year = "2023-2024"
+data, grade_columns, grade_options, region_options = load_data_for_year(default_school_year)
+combined_shs_track_df = build_combined_shs_track_df(data)
+
 app.layout = html.Div([
     dcc.Location(id="url"),
     dcc.Store(id="login-state", storage_type="session", data={"logged_in": False}),
-    html.Div(id="page-content")  # placeholder that will be filled by callback
+    dcc.Store(id="stored_data", data=data.to_dict("records")),
+    dcc.Store(id="stored_grades", data=grade_columns),
+    dcc.Store(id="stored_grade_options", data=grade_options),
+    dcc.Store(id="stored_region_options", data=region_options),
+    dcc.Store(id="stored_school_year", data=default_school_year),
+    html.Div(id="page-content")
 ])
 
 # Callback for login
@@ -205,7 +205,7 @@ def load_protected_page(login_data):
                             create_sidebar(is_collapsed=False, current_page="dashboard")
                         ]),
                         html.Div(id="content", style=get_content_style(False), children=create_content(
-                            "dashboard", data, grade_options, region_options, combined_shs_track_df, school_year_options
+                            "dashboard", data, grade_options, region_options, combined_shs_track_df, school_year_options 
                         ))
                     ]
                 )
