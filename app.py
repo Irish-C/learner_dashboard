@@ -508,10 +508,11 @@ def update_charts(selected_regions, selected_grades, selected_gender):
                         "flexDirection": "column",
                         "alignItems": "center",
                         "justifyContent": "center",
-                        "height": "100%"
+                        "height": "100%",
+                        "color": "black"  # Changed text color to black for better contrast
                     })
                 ]),
-                color="light",
+                color="white",  # Changed card color to white
                 style={
                     "height": "175px",
                     "borderRadius": "10px",
@@ -545,10 +546,11 @@ def update_charts(selected_regions, selected_grades, selected_gender):
                         "flexDirection": "column",
                         "alignItems": "center",
                         "justifyContent": "center",
-                        "height": "100%"
+                        "height": "100%",
+                        "color": "black"  # Changed text color to black for better contrast
                     })
                 ]),
-                color="light",
+                color="white",  # Changed card color to white
                 style={
                     "height": "175px",
                     "borderRadius": "10px",
@@ -572,7 +574,6 @@ def update_charts(selected_regions, selected_grades, selected_gender):
                             "color": "var(--gray-color)",
                             "margin": "0",
                             "fontWeight": "bold"
-
                         }),
                         html.H3(f"{most_enrolled_region}: {region_total/1000:.2f}k", style={
                             "color": "#e74c3c",
@@ -584,10 +585,11 @@ def update_charts(selected_regions, selected_grades, selected_gender):
                         "flexDirection": "column",
                         "alignItems": "center",
                         "justifyContent": "center",
-                        "height": "100%"
+                        "height": "100%",
+                        "color": "black"  # Changed text color to black for better contrast
                     })
                 ]),
-                color="light",
+                color="white",  # Changed card color to white
                 style={
                     "height": "175px",
                     "borderRadius": "10px",
@@ -645,15 +647,16 @@ def update_charts(selected_regions, selected_grades, selected_gender):
                             "alignItems": "center",  # Align labels in the same row
                             "width": "100%",
                         })
-                            ], style={
-                                "display": "flex",
-                                "flexDirection": "column",
-                                "alignItems": "center",
-                                "justifyContent": "center",
-                                "height": "100%"
-                            })
+                    ], style={
+                        "display": "flex",
+                        "flexDirection": "column",
+                        "alignItems": "center",
+                        "justifyContent": "center",
+                        "height": "100%",
+                        "color": "black"  # Changed text color to black for better contrast
+                    })
                 ]),
-                color="light",
+                color="white",  # Changed card color to white
                 style={
                     "height": "175px",
                     "borderRadius": "10px",
