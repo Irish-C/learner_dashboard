@@ -99,7 +99,7 @@ def manage_data_content(region_options, grade_options, school_year_options):
         ),
 
         html.Div(id="submission_feedback", className="text-success mt-3"),
-
+        dcc.Store(id='refresh_school_year_trigger'),
         html.Hr(),
         html.H4("View Enrollment Table by School Year", className="mt-4 mb-2"),
         dbc.Row([

@@ -88,7 +88,10 @@ def get_available_school_years():
     folder = "data_files"
     pattern = re.compile(r"data_(\d{4}-\d{4})\.csv")
     files = os.listdir(folder)
-    return sorted(
-        [match.group(1) for f in files if (match := pattern.match(f))],
-        reverse=True
-    )
+    
+    def sort_key(year):
+        start, end = map(int, year.split('-'))
+        return -start  # Sort descending by starting year
+
+    matched = [match.group(1) for f in files if (match := pattern.match(f))]
+    return sorted(matched, key=sort_key)

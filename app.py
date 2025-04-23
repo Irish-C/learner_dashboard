@@ -10,6 +10,7 @@ import json
 import os
 import hashlib
 from datetime import datetime
+import time
 
 from layout.sidebar import create_sidebar
 from layout.header import create_header
@@ -18,7 +19,8 @@ from app_data import (
     get_school_metadata,
     load_schools,
     load_data_for_year,
-    build_combined_shs_track_df
+    build_combined_shs_track_df,
+    get_available_school_years
     )
 
 from layout.pages.manage_data import manage_data_content
@@ -1371,6 +1373,7 @@ def autofill_fields(school_name):
 
 @app.callback(
     Output("submission_feedback", "children"),
+    Output("refresh_school_year_trigger", "data"),
     Input("submit_button", "n_clicks"),
     State("input_school_name", "value"),
     State("input_school_year", "value"),
@@ -1380,7 +1383,7 @@ def autofill_fields(school_name):
 )
 def submit_data(n_clicks, school_name, year, grade, gender, count):
     if not n_clicks:
-        return ""
+        return "", dash.no_update
     if not all([school_name, year, grade, gender, count]):
         return "Please fill all fields."
 
@@ -1448,7 +1451,24 @@ def submit_data(n_clicks, school_name, year, grade, gender, count):
 
     df.to_csv(file_path, index=False, na_rep="N/A")
 
-    return f"Enrollment successfully updated for {school_name} ({grade}, {gender}) in {year}."
+    return (
+        f"Enrollment successfully updated for {school_name} ({grade}, {gender}) in {year}.",
+        time.time()  # Returns a new number to trigger Store update
+    )
+    
+@app.callback(
+    Output('table_school_year', 'options'),
+    Output('table_school_year', 'value'),
+    Input('refresh_school_year_trigger', 'data'),
+    State('input_school_year', 'value')
+)
+def refresh_school_year_options(_, submitted_year):
+    years = get_available_school_years()
+    options = [{'label': y, 'value': y} for y in years]
+    default_year = submitted_year if submitted_year in years else (years[0] if years else None)
+    return options, default_year
+
+
 
 @app.callback(
     Output('enrollment_table', 'data'),
