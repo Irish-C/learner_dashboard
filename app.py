@@ -1297,8 +1297,7 @@ def update_enrollment_choropleth(selected_sy, selected_regions, selected_grades,
             showarrow=False,
             font=dict(
                 size=14,
-                color="gray",
-                style="italic"
+                color="gray"
             ),
             align="center"
         )
