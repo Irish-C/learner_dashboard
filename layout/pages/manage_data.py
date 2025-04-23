@@ -97,19 +97,19 @@ def manage_data_content(region_options, grade_options, school_year_options):
             dbc.Button("Submit", id="submit_button", color="primary"),
             className="text-center mb-5"
         ),
-
         html.Div(id="submission_feedback", className="text-success mt-3"),
-        dcc.Store(id='refresh_school_year_trigger'),
+        dcc.Store(id='refresh_school_year_trigger', data='initial-load'),
         html.Hr(),
         html.H4("View Enrollment Table by School Year", className="mt-4 mb-2"),
         dbc.Row([
             dbc.Col([
                 dbc.Label("Select School Year to View Table"),
-                dcc.Dropdown(
-                    id='table_school_year',
-                    options=[{'label': y, 'value': y} for y in available_years],
-                    placeholder="Select School Year"
-                )
+                    dcc.Dropdown(
+                        id='table_school_year',
+                        placeholder="Select School Year",
+                        value="2023-2024",
+                        options=[{'label': y, 'value': y} for y in available_years],
+                    )
             ])
         ], className="mb-3"),
 
