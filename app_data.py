@@ -86,12 +86,17 @@ def build_combined_shs_track_df(data):
 
 def get_available_school_years():
     folder = "data_files"
-    pattern = re.compile(r"data_(\d{4}-\d{4})\.csv")
-    files = os.listdir(folder)
-    
-    def sort_key(year):
-        start, end = map(int, year.split('-'))
-        return -start  # Sort descending by starting year
+    pattern = re.compile(r"data_(\d{4})-(\d{4})\.csv")
+    years = []
 
-    matched = [match.group(1) for f in files if (match := pattern.match(f))]
-    return sorted(matched, key=sort_key)
+    for filename in os.listdir(folder):
+        match = pattern.match(filename)
+        if match:
+            start_year = int(match.group(1))
+            full_year = f"{match.group(1)}-{match.group(2)}"
+            years.append((start_year, full_year))
+
+    years.sort()  # Sort ascending by start year
+    return [y for _, y in years]
+
+

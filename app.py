@@ -98,6 +98,8 @@ app.layout = html.Div([
     dcc.Store(id="stored_grade_options", data=grade_options),
     dcc.Store(id="stored_region_options", data=region_options),
     dcc.Store(id="stored_school_year", data=default_school_year),
+    dcc.Store(id='trigger_enrollment_table_reload'),
+    dcc.Store(id='refresh_school_year_trigger', data='initial-load'),
     html.Div(id="page-content")
 ])
 
@@ -1372,6 +1374,28 @@ def autofill_fields(school_name):
     )
 
 @app.callback(
+    Output('table_school_year', 'options'),
+    Output('table_school_year', 'value'),
+    Input('refresh_school_year_trigger', 'data'),
+    prevent_initial_call=False
+)
+def refresh_school_year_options(trigger_data):
+    from app_data import get_available_school_years
+
+    years = get_available_school_years()
+    years.sort()  # Ascending
+
+    options = [{'label': y, 'value': y} for y in years]
+
+    if trigger_data == "initial-load":
+        default_year = "2023-2024" if "2023-2024" in years else (years[0] if years else None)
+    else:
+        default_year = trigger_data if trigger_data in years else (years[0] if years else None)
+
+    return options, default_year
+
+
+@app.callback(
     Output("submission_feedback", "children"),
     Output("refresh_school_year_trigger", "data"),
     Input("submit_button", "n_clicks"),
@@ -1455,29 +1479,16 @@ def submit_data(n_clicks, school_name, year, grade, gender, count):
         f"Enrollment successfully updated for {school_name} ({grade}, {gender}) in {year}.",
         time.time()  # Returns a new number to trigger Store update
     )
-    
-@app.callback(
-    Output('table_school_year', 'options'),
-    Output('table_school_year', 'value'),
-    Input('refresh_school_year_trigger', 'data'),
-    State('input_school_year', 'value')
-)
-def refresh_school_year_options(_, submitted_year):
-    years = get_available_school_years()
-    options = [{'label': y, 'value': y} for y in years]
-    default_year = submitted_year if submitted_year in years else (years[0] if years else None)
-    return options, default_year
-
-
 
 @app.callback(
     Output('enrollment_table', 'data'),
     Output('enrollment_table', 'columns'),
-    Input('table_school_year', 'value')
+    Input('table_school_year', 'value'),
+    State('refresh_school_year_trigger', 'data')  # Get the store value too
 )
-def update_enrollment_table(school_year):
-    if not school_year:
-        return [], []
+def update_enrollment_table(school_year_from_dropdown, school_year_from_trigger):
+    # Determine the effective school year
+    school_year = school_year_from_dropdown or school_year_from_trigger or "2023-2024"
 
     file_path = f"data_files/data_{school_year}.csv"
     if not os.path.exists(file_path):
@@ -1485,14 +1496,11 @@ def update_enrollment_table(school_year):
 
     df = pd.read_csv(file_path)
 
-    # Import school metadata
+    # Inject Region and Division
     from app_data import load_schools
     schools_df = load_schools()
 
-    # Only after loading df, assign to numeric_df
     numeric_df = df.copy()
-
-    # Inject Region and Division
     if "BEIS School ID" in numeric_df.columns and "BEIS School ID" in schools_df.columns:
         numeric_df = numeric_df.merge(schools_df[["BEIS School ID", "Region", "Division"]], on="BEIS School ID", how="left")
     else:
@@ -1510,7 +1518,6 @@ def update_enrollment_table(school_year):
     summary = numeric_df.groupby(["Region", "Division"], as_index=False)[["Total Male", "Total Female", "Total Enrollment"]].sum()
 
     return summary.to_dict("records"), [{"name": col, "id": col} for col in summary.columns]
-
 
 if __name__ == "__main__":
     app.run(debug=True)
