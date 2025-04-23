@@ -1,3 +1,5 @@
+# layout/sidebar.py
+# This module defines the sidebar layout for a Dash application.
 from dash import html
 from dash_iconify import DashIconify
 
@@ -16,7 +18,11 @@ def create_sidebar(is_collapsed=False, current_page=None):
         "textAlign": "left" if not is_collapsed else "center",
     }
 
-    toggle_icon = html.Span("\u2630", style={"marginTop": "0px", "marginBottom": "50px"}) if is_collapsed else html.Span("\u00AB", style={"marginTop": "50px"})
+    toggle_icon = DashIconify(
+        icon="mdi:menu-open" if is_collapsed else "mdi:menu-close",
+        width=24,
+        style={"margin": "10px 0", "marginLeft": "5px"}
+    )
 
     toggle_button = html.Button(
         html.Span(toggle_icon, style={"fontSize": "1.2rem"}),

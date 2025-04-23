@@ -183,7 +183,7 @@ def change_page(btn1, btn2, btn3, btn4, current_page, is_collapsed):
         return create_content("settings", data, grade_options, region_options, combined_shs_track_df, school_year_options), "settings", create_sidebar(is_collapsed=is_collapsed, current_page="settings")
     
     # Default to dashboard
-    return create_content("dashboard", data, grade_options, region_options, combined_shs_track_df, school_year_options), "dashboard", create_sidebar(is_collapsed=is_collapsed, current_page="dashboard")
+    return create_content(current_page, data, grade_options, region_options, combined_shs_track_df, school_year_options), "current_page", create_sidebar(is_collapsed=is_collapsed, current_page="dashboard")
 
 # Call back for login to dashboard
 @app.callback(
