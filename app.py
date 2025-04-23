@@ -479,8 +479,8 @@ def update_charts(selected_regions, selected_grades, selected_school_year, selec
 
     # Calculate the sector counts and percentages
     sector_counts = data['Sector'].value_counts()
-    total_schools = sector_counts.sum()
-    sector_percentage = (sector_counts / total_schools) * 100
+    sector_total_schools = sector_counts.sum()
+    sector_percentage = (sector_counts / sector_total_schools) * 100
 
     # Format percentages for each sector
     public_percentage = sector_percentage.get('Public', 0)
