@@ -6,7 +6,6 @@ import plotly.express as px
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 import pandas as pd
-import re
 import json
 import os
 import hashlib
@@ -14,15 +13,10 @@ import hashlib
 from layout.sidebar import create_sidebar
 from layout.header import create_header
 from layout.page_router import get_content_style, create_content
-from layout.cards import create_metric_card
 from app_data import data, grade_columns, combined_shs_track_df, correct_region_order, grade_options
 from app_data import (
-    get_dropdown_options,
     get_school_metadata,
-    load_schools,
-    load_enrollment_data,
-    sanitize_enrollment_data,
-    save_enrollment_data
+    load_schools
 )
 
 
