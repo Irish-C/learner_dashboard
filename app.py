@@ -1392,9 +1392,6 @@ def autofill_fields(school_name):
         school["Modified COC"]
     )
 
-import os
-import pandas as pd
-
 @app.callback(
     Output("submission_feedback", "children"),
     Input("submit_button", "n_clicks"),
@@ -1417,11 +1414,14 @@ def submit_data(n_clicks, school_name, year, grade, gender, count):
     except (ValueError, TypeError):
         return "Please enter a valid enrollment number."
 
+    import os
+    import pandas as pd
+
     meta = get_school_metadata(school_name)
     school_id = meta["BEIS School ID"]
     filename = f"data_{year}.csv"
+    file_path = os.path.join("data_files", filename)
 
-    # Define the correct column order
     correct_columns = [
         "School Year", "BEIS School ID", "K Male", "K Female", "G1 Male", "G1 Female",
         "G2 Male", "G2 Female", "G3 Male", "G3 Female", "G4 Male", "G4 Female",
@@ -1438,18 +1438,18 @@ def submit_data(n_clicks, school_name, year, grade, gender, count):
         "G12 SPORTS Male", "G12 SPORTS Female", "G12 ARTS Male", "G12 ARTS Female"
     ]
 
-    # Load or initialize the DataFrame
-    if os.path.exists(filename):
-        df = pd.read_csv(filename)
-        # Ensure all required columns exist
-        for col in correct_columns:
-            if col not in df.columns:
-                df[col] = "N/A"
-        df = df[correct_columns]  # Reorder columns
+    if os.path.exists(file_path):
+        df = pd.read_csv(file_path)
     else:
         df = pd.DataFrame(columns=correct_columns)
 
-    # Locate or create the row
+    # Ensure all columns are initialized
+    for col in correct_columns:
+        if col not in df.columns:
+            df[col] = "N/A"
+    df = df[correct_columns]
+
+    # Locate or insert row
     match = (df['School Year'] == year) & (df['BEIS School ID'] == school_id)
     if not match.any():
         new_row = {col: "N/A" for col in correct_columns}
@@ -1460,17 +1460,16 @@ def submit_data(n_clicks, school_name, year, grade, gender, count):
     else:
         row_idx = df[match].index[0]
 
-    # Add to current value
+    # Update the relevant column
     column_name = f"{grade} {gender}"
-    if column_name in df.columns:
-        existing = df.at[row_idx, column_name]
-        existing = 0 if pd.isna(existing) or existing == "N/A" else int(existing)
-        df.at[row_idx, column_name] = existing + count
-    else:
-        return f"Column '{column_name}' does not exist in the data."
+    if column_name not in df.columns:
+        df[column_name] = "N/A"
 
-    # Save the updated DataFrame
-    df.to_csv(filename, index=False, na_rep="N/A")
+    existing = df.at[row_idx, column_name]
+    existing = 0 if pd.isna(existing) or existing == "N/A" else int(existing)
+    df.at[row_idx, column_name] = existing + count
+
+    df.to_csv(file_path, index=False, na_rep="N/A")
 
     return f"Enrollment successfully updated for {school_name} ({grade}, {gender}) in {year}."
 
