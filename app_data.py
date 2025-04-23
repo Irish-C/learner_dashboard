@@ -68,16 +68,6 @@ def load_schools():
 def load_enrollment_data():
     return pd.read_csv(ENROLLMENT_PATH)
 
-def get_dropdown_options():
-    schools_df = load_schools()
-
-    region_options = [{'label': r, 'value': r} for r in sorted(schools_df['Region'].dropna().unique())]
-    division_options = [{'label': d, 'value': d} for d in sorted(schools_df['Division'].dropna().unique())]
-    school_options = [{'label': s, 'value': s} for s in sorted(schools_df['School Name'].dropna().unique())]
-    barangay_options = [{'label': b, 'value': b} for b in sorted(schools_df['Barangay'].dropna().unique())]
-
-    return region_options, division_options, school_options, barangay_options
-
 def get_school_metadata(school_name):
     schools_df = load_schools()
     return schools_df[schools_df['School Name'] == school_name].iloc[0]
