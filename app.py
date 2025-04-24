@@ -1590,14 +1590,14 @@ def submit_data(n_clicks, school_name, year, grade, gender, count):
     if not n_clicks:
         return "", dash.no_update
     if not all([school_name, year, grade, gender, count]):
-        return "Please fill all fields."
+        return "Please fill all fields.", dash.no_update
 
     try:
         count = int(count)
         if count < 0:
-            return "Enrollment count cannot be negative."
+            return "Enrollment count cannot be negative.", dash.no_update
     except (ValueError, TypeError):
-        return "Please enter a valid enrollment number."
+        return "Please enter a valid enrollment number.", dash.no_update
 
     import os
     import pandas as pd
@@ -1643,6 +1643,59 @@ def submit_data(n_clicks, school_name, year, grade, gender, count):
         f"Enrollment successfully updated for {school_name} ({grade}, {gender}) in {year}.",
         time.time()  # Returns a new number to trigger Store update
     )
+
+@app.callback(
+    Output("upload-feedback", "children"),
+    Input("upload-data", "contents"),
+    State("upload-data", "filename"),
+    State("upload_school_year_dropdown", "value")
+)
+def handle_uploaded_csv(contents, filename, school_year):
+    if contents and school_year:
+        try:
+            content_type, content_string = contents.split(',')
+            decoded = base64.b64decode(content_string)
+            df = pd.read_csv(io.StringIO(decoded.decode('utf-8')))
+
+            df['School Year'] = school_year
+
+            for col in correct_columns:
+                if col not in df.columns:
+                    df[col] = "N/A"
+            df = df[correct_columns]
+
+            output_filename = f"data_{school_year}.csv"
+            output_path = os.path.join("data_files", output_filename)
+            df = df.fillna("N/A")
+            df = df.replace(0, "N/A")
+            df.to_csv(output_path, index=False, na_rep="N/A")
+            # Append new BEIS School IDs to schools.csv if needed
+            schools_path = os.path.join("data_files", "schools.csv")
+            existing_schools_df = pd.read_csv(schools_path)
+            existing_ids = set(existing_schools_df["BEIS School ID"].astype(str))
+
+            uploaded_ids = df["BEIS School ID"].astype(str)
+            new_ids = [sid for sid in uploaded_ids.unique() if sid not in existing_ids]
+
+            if new_ids:
+                # Filter uploaded rows with those new IDs and match the schools.csv format
+                school_cols = existing_schools_df.columns
+                new_school_rows = df[df["BEIS School ID"].astype(str).isin(new_ids)][school_cols.intersection(df.columns)]
+                
+                # Make sure all required columns exist and are aligned
+                for col in school_cols:
+                    if col not in new_school_rows.columns:
+                        new_school_rows[col] = "N/A"
+                new_school_rows = new_school_rows[school_cols]
+                new_school_rows = new_school_rows.fillna("N/A")
+                # Append and save updated schools.csv
+                updated_schools_df = pd.concat([existing_schools_df, new_school_rows], ignore_index=True)
+                updated_schools_df.to_csv(schools_path, index=False, na_rep="N/A")
+            return (f"✅ Upload successful! Data saved as {output_filename}", school_year,
+            time.time())
+        except Exception as e:
+            return f"❌ Upload failed: {str(e)}"
+    return "⚠️ Please select a school year and upload a file."
 
 @app.callback(
     Output('enrollment_table', 'data'),
@@ -1693,58 +1746,6 @@ def toggle_upload_modal(open_click, close_click, is_open):
     if open_click or close_click:
         return not is_open
     return is_open
-
-@app.callback(
-    Output("upload-feedback", "children"),
-    Input("upload-data", "contents"),
-    State("upload-data", "filename"),
-    State("upload_school_year_dropdown", "value")
-)
-def handle_uploaded_csv(contents, filename, school_year):
-    if contents and school_year:
-        try:
-            content_type, content_string = contents.split(',')
-            decoded = base64.b64decode(content_string)
-            df = pd.read_csv(io.StringIO(decoded.decode('utf-8')))
-
-            df['School Year'] = school_year
-
-            for col in correct_columns:
-                if col not in df.columns:
-                    df[col] = "N/A"
-            df = df[correct_columns]
-
-            output_filename = f"data_{school_year}.csv"
-            output_path = os.path.join("data_files", output_filename)
-            df = df.fillna("N/A")
-            df = df.replace(0, "N/A")
-            df.to_csv(output_path, index=False, na_rep="N/A")
-            # Append new BEIS School IDs to schools.csv if needed
-            schools_path = os.path.join("data_files", "schools.csv")
-            existing_schools_df = pd.read_csv(schools_path)
-            existing_ids = set(existing_schools_df["BEIS School ID"].astype(str))
-
-            uploaded_ids = df["BEIS School ID"].astype(str)
-            new_ids = [sid for sid in uploaded_ids.unique() if sid not in existing_ids]
-
-            if new_ids:
-                # Filter uploaded rows with those new IDs and match the schools.csv format
-                school_cols = existing_schools_df.columns
-                new_school_rows = df[df["BEIS School ID"].astype(str).isin(new_ids)][school_cols.intersection(df.columns)]
-                
-                # Make sure all required columns exist and are aligned
-                for col in school_cols:
-                    if col not in new_school_rows.columns:
-                        new_school_rows[col] = "N/A"
-                new_school_rows = new_school_rows[school_cols]
-                new_school_rows = new_school_rows.fillna("N/A")
-                # Append and save updated schools.csv
-                updated_schools_df = pd.concat([existing_schools_df, new_school_rows], ignore_index=True)
-                updated_schools_df.to_csv(schools_path, index=False, na_rep="N/A")
-            return f"✅ Upload successful! Data saved as {output_filename}"
-        except Exception as e:
-            return f"❌ Upload failed: {str(e)}"
-    return "⚠️ Please select a school year and upload a file."
 
 if __name__ == "__main__":
     app.run(debug=True)
