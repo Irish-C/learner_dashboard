@@ -1716,9 +1716,10 @@ def handle_uploaded_csv(contents, filename, school_year):
 
             output_filename = f"data_{school_year}.csv"
             output_path = os.path.join("data_files", output_filename)
+            df = df.fillna("N/A")
             df.to_csv(output_path, index=False, na_rep="N/A")
             # Append new BEIS School IDs to schools.csv if needed
-            schools_path = os.path.join("app", "data_files", "schools.csv")
+            schools_path = os.path.join("data_files", "schools.csv")
             existing_schools_df = pd.read_csv(schools_path)
             existing_ids = set(existing_schools_df["BEIS School ID"].astype(str))
 
@@ -1735,7 +1736,7 @@ def handle_uploaded_csv(contents, filename, school_year):
                     if col not in new_school_rows.columns:
                         new_school_rows[col] = "N/A"
                 new_school_rows = new_school_rows[school_cols]
-
+                new_school_rows = new_school_rows.fillna("N/A")
                 # Append and save updated schools.csv
                 updated_schools_df = pd.concat([existing_schools_df, new_school_rows], ignore_index=True)
                 updated_schools_df.to_csv(schools_path, index=False)
