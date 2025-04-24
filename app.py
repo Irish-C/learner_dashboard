@@ -193,46 +193,58 @@ def load_protected_page(login_data):
         first_name = login_data.get("user").split()[0]
         print(f"Stored first name: {first_name}")  # Debug print to ensure the first name is stored
         return html.Div(
-            className="body-style",
+    className="body-style",
+    children=[
+        # Welcome Modal
+        dbc.Modal(
+            id="welcome-modal",
+            is_open=True,
+            size="lg",
+            centered=True,
             children=[
-                
-                dbc.Modal(
-                    [
-                        dbc.ModalHeader(
-                            dbc.ModalTitle("Welcome!"),
-                            close_button=True,
-                            style={"backgroundColor": "#337ab7", "color": "white"}
-                        ),
-                        dbc.ModalBody([
-                            html.P(f"Hi {first_name}, Hi po arigathanks"),
-                            html.P("sana gumana ka na plsplspls"),
-                            html.P("hehe ivantill")
-                        ]),
-                    ],
-                    id="welcome-modal",
-                    is_open=True,
-                    size="lg",
-                    centered=True,
-                    style={"maxWidth": "500px", "margin": "auto"}
+                dbc.ModalHeader(
+                    html.H2([
+                        "WELCOME ",
+                        html.Span(first_name.upper(), style={"color": "gold", "fontWeight": "bold"}),
+                        "!"
+                    ]),
+                    close_button=True,
+                    style={"backgroundColor": "#0d3c74", "color": "white", "borderRadius": "10px 10px 0 0"}
                 ),
+                dbc.ModalBody([
+                    html.P([
+                        "This is ",
+                        html.Span("LIS", style={"color": "#0d3c74", "fontWeight": "bold"}),
+                        html.Span("tahan", style={"color": "red", "fontWeight": "bold"}),
+                        ": Organize Today. Empower Tomorrow"
+                    ], style={"fontSize": "18px"}),
 
-                dcc.Store(id='sidebar-toggle-state', data=False),
-                dcc.Store(id='current-page', data="dashboard"),
-                dcc.Store(id='user-first-name', data=first_name),  # Store the first name
-                create_header(),
-                html.Div(
-                    className="app-container",
-                    children=[
-                        html.Div(id="sidebar-container", children=[
-                            create_sidebar(is_collapsed=False, current_page="dashboard")
-                        ]),
-                        html.Div(id="content", style=get_content_style(False), children=create_content(
-                            "dashboard", data, grade_options, region_options, combined_shs_track_df, school_year_options 
-                        ))
-                    ]
-                )
+                    html.P("A DepEd Learner Information System built just for you."),
+                    html.P("Click around, discover features, and make learning seamless!", style={"fontStyle": "italic"}),
+                    html.Img(src="/assets/icons/LIST.png", style={"height": "40px", "float": "right"})
+                ], style={"padding": "1rem"})
+            ],
+            style={"borderRadius": "12px", "boxShadow": "0 4px 12px rgba(0,0,0,0.2)"}
+        ),
+
+        dcc.Store(id='sidebar-toggle-state', data=False),
+        dcc.Store(id='current-page', data="dashboard"),
+        dcc.Store(id='user-first-name', data=first_name),
+        create_header(),
+        html.Div(
+            className="app-container",
+            children=[
+                html.Div(id="sidebar-container", children=[
+                    create_sidebar(is_collapsed=False, current_page="dashboard")
+                ]),
+                html.Div(id="content", style=get_content_style(False), children=create_content(
+                    "dashboard", data, grade_options, region_options, combined_shs_track_df, school_year_options
+                ))
             ]
         )
+    ]
+)
+
     return html.Div(
     style={
         "height": "100vh",
@@ -507,16 +519,14 @@ def update_charts(selected_regions, selected_grades, selected_school_year, selec
     fig_combo.add_trace(go.Bar(
         x=agg_division['Division'],
         y=agg_division['Selected Grades Total'],
-        name='Total Enrollment',
-        marker_color='#BFDBFE'  # Bar color
+        name='Total Enrollment'
     ), secondary_y=False)
 
     fig_combo.add_trace(go.Scatter(
         x=agg_division['Division'],
         y=agg_division['Number of Schools'],
         name='Number of Schools',
-        mode='lines+markers',
-        line=dict(color='#0a4485')  # Line color
+        mode='lines+markers'
     ), secondary_y=True)
 
     fig_combo.update_layout(
@@ -571,7 +581,7 @@ def update_charts(selected_regions, selected_grades, selected_school_year, selec
 
     # KPI Cards (now with Sector card inside the 4-col row)
     card_style = {
-        "minHeight": "178px",
+        "minHeight": "175px",
         "border": "none",
         "borderRadius": "0.625rem",
         "boxShadow": "0px 4px 6px rgba(0, 0, 0, 0.1)",
@@ -830,22 +840,20 @@ def update_shs_track_chart(selected_year, selected_regions, selected_gender):
             color='Grade Level',
             orientation='h',
             text='Total Enrollment',
-            color_discrete_map={'G11': '#DE082C', 'G12': '#0a4485'},  # Dark blue and dark red
-            title='Senior High Track Enrollment Overview',
+            title='Senior High Track Enrollment Overview'
         )
 
         fig.update_layout(
             title='Senior High Track Enrollment Overview',
             font=dict(size=13),
             height=350,
-            xaxis_title='Total Enrollment',
-            yaxis_title='Track',
+            scene=dict(
+                xaxis_title='Track',
+                yaxis_title='Total Enrollment',
+                zaxis_title='Grade Level'
+            ),
             title_font=PLOT_TITLE,
         )
-        return fig
-    except Exception as e:
-        print("SHS Chart Rendering Error:", e)
-        return px.bar(title="Error rendering SHS Track chart")
         return fig
     except Exception as e:
         print("SHS Chart Rendering Error:", e)
@@ -987,7 +995,7 @@ def update_sned_sector_chart(selected_year, selected_regions, selected_gender):
         color='Gender',
         barmode='stack',
         text='Enrollment',
-        title='<b>SNed Enrollment:</b> School Sector Vs Gender',  # Make the title bold
+        title='Special Needs Education Enrollment by<br>School Sector and Gender',
         color_discrete_map={'Male': '#0a4485', 'Female': '#DE082C'}
     )
 
@@ -1407,7 +1415,7 @@ def update_coc_sector_chart(selected_sy, selected_regions, selected_grades, sele
 
     # Update the chart layout 
     fig.update_layout(
-        title='School Offerings by Certificate of Completion (COC)',
+        title='School Offerings by Certificate of Completion (COC)<br>Type and Sector',
         xaxis_title='Type',
         yaxis_title='Number of Schools',
         font=dict(size=13),
@@ -1424,9 +1432,9 @@ def update_coc_sector_chart(selected_sy, selected_regions, selected_grades, sele
         if trace.name == 'Public':
             trace.marker.color = '#0a4485'
         elif trace.name == 'Private':
-            trace.marker.color = '#DE082C'
-        elif trace.name == 'SUCsLUCs':
             trace.marker.color = '#BFDBFE'
+        elif trace.name == 'SUCsLUCs':
+            trace.marker.color = '#DE082C'
 
     return fig
 
@@ -1462,13 +1470,12 @@ def update_enrollment_trend_chart(selected_year):
             grouped,
             x='School Year',
             y='Total Enrollment',
+            title='Total Enrollment Trend<br>Over the Years',
             markers=True  # Show markers at each data point on the line
         )
 
-        fig.update_traces(marker=dict(color='#0a4485'), line=dict(color='#0a4485'))
-
         fig.update_layout(
-            title='Enrollment Growth Over Time',
+            title='Total Enrollment Trend<br>Over the Years',
             font=dict(size=13),
             plot_bgcolor='white',
             height=350,
