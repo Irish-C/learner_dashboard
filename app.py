@@ -225,44 +225,51 @@ def load_protected_page(login_data):
         html.Div([
             # Logo and Title - CENTERED
             html.Div([
-                html.Img(src="/assets/icons/LIST.png", style={"height": "120px", "marginBottom": "10px"}),
+                html.Img(src="/assets/icons/LIST.png", style={"height": "140px", "marginBottom": "10px"}),
                 html.H4("LEARNER INFORMATION SYSTEM", style={
                     "fontWeight": "bold",
                     "letterSpacing": "2px",
                     "fontSize": "16px",
+                    "letterSpacing": "0.30em",
                     "fontFamily": "Roboto, sans-serif",
+                    "marginTop": "20px",
                     "marginBottom": "20px"
                 })
-            ], style={"textAlign": "center"}),
+            ], style={"textAlign": "center",
+                      "marginBottom": "20px"}),
 
             # Input Fields
             dcc.Store(id="user-first-name"),
             dbc.Input(id="input-firstname", placeholder="F I R S T   N A M E", type="text", className="mb-3", style={"fontFamily": "Roboto, sans-serif",
-            "boxShadow": "4px 4px 8px rgba(30,144,255,0.3)",
+            "boxShadow": "4px 4px 8px rgba(30,144,255,0.4)",
             "border": "none",
             "borderRadius": "10px",
             "fontSize": "15px",
-            "lineHeight": "2.5"}),
+            "lineHeight": "2.5",
+            "paddingLeft": "2rem"}),
             
             dbc.Input(id="input-lastname", placeholder="L A S T   N A M E", type="text", className="mb-3", style={"fontFamily": "Roboto, sans-serif",
-            "boxShadow": "4px 4px 8px rgba(30,144,255,0.3)",
+            "boxShadow": "4px 4px 8px rgba(30,144,255,0.4)",
             "border": "none",
             "borderRadius": "10px",
             "fontSize": "15px",
-            "lineHeight": "2.5"}),
+            "lineHeight": "2.5",
+            "paddingLeft": "2rem"}),
             dbc.Input(id="input-email", placeholder="E M A I L   A D D R E S S", type="email", className="mb-3", style={"fontFamily": "Roboto, sans-serif",
-            "boxShadow": "4px 4px 8px rgba(30,144,255,0.3)",
+            "boxShadow": "4px 4px 8px rgba(30,144,255,0.4)",
             "border": "none",
             "borderRadius": "10px",
             "fontSize": "15px",
-            "lineHeight": "2.5"}),
+            "lineHeight": "2.5",
+            "paddingLeft": "2rem"}),
             html.Div([dbc.Input(id="input-password", type="password", placeholder="P A S S W O R D", className="w-100", style={
                 "fontFamily": "Roboto, sans-serif",
-                "boxShadow": "4px 4px 8px rgba(30,144,255,0.3)",
+                "boxShadow": "4px 4px 8px rgba(30,144,255,0.4)",
                 "border": "none",
                 "borderRadius": "10px",
                 "fontSize": "15px",
-                "lineHeight": "2.5"
+                "lineHeight": "2.5",
+                "paddingLeft": "2rem"
             }),
                 html.I(
                     id="toggle-password-visibility",
@@ -309,7 +316,15 @@ def load_protected_page(login_data):
             "borderLeft": "none",
             "display": "flex",
             "flexDirection": "column",
-            "justifyContent": "flex-start" 
+            "justifyContent": "flex-start",
+            "backgroundImage": "url('/assets/your-bg.jpg')",
+            "backgroundSize": "cover",
+            "backgroundPosition": "center",
+            "backdropFilter": "blur(8px)",
+            "WebkitBackdropFilter": "blur(8px)", 
+            "width": "100%",
+            "minHeight": "100vh",
+            "backgroundColor": "rgba(255,255,255,0.75)",   
         })
     ]
 )
