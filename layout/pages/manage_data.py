@@ -133,7 +133,8 @@ def manage_data_content(region_options, grade_options, school_year_options):
                     multiple=False
                 ),
 
-                html.Div(id='upload-feedback', style={'fontWeight': 'bold'})
+                html.Div(id='upload-feedback', style={'fontWeight': 'bold'}),
+                dcc.Store(id='refresh_school_year_trigger', data='initial-load')
             ]),
             dbc.ModalFooter([
                 dbc.Button("Close", id="close-upload-modal", className="ms-auto", color="secondary")

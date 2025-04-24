@@ -1508,6 +1508,8 @@ def update_enrollment_trend_chart(selected_year):
         print("Error rendering Enrollment Trend chart:", e)
         return px.line(title="Error rendering Enrollment Trend chart")
 
+# Manual Data Page
+
 @app.callback(
     Output('input_division', 'options'),
     Output('input_division', 'disabled'),
@@ -1555,26 +1557,6 @@ def autofill_fields(school_name):
         school["School Type"],
         school["Modified COC"]
     )
-
-@app.callback(
-    Output('table_school_year', 'options'),
-    Output('table_school_year', 'value'),
-    Input('refresh_school_year_trigger', 'data'),
-    prevent_initial_call=False
-)
-def refresh_school_year_options(trigger_data):
-    years = get_available_school_years()
-    years.sort()  # Ascending
-
-    options = [{'label': y, 'value': y} for y in years]
-
-    if trigger_data == "initial-load":
-        default_year = "2023-2024" if "2023-2024" in years else (years[0] if years else None)
-    else:
-        default_year = trigger_data if trigger_data in years else (years[0] if years else None)
-
-    return options, default_year
-
 
 @app.callback(
     Output("submission_feedback", "children"),
@@ -1646,9 +1628,11 @@ def submit_data(n_clicks, school_name, year, grade, gender, count):
 
 @app.callback(
     Output("upload-feedback", "children"),
+    Output("refresh_school_year_trigger", "data", allow_duplicate=True),
     Input("upload-data", "contents"),
     State("upload-data", "filename"),
-    State("upload_school_year_dropdown", "value")
+    State("upload_school_year_dropdown", "value"),
+    prevent_initial_call=True
 )
 def handle_uploaded_csv(contents, filename, school_year):
     if contents and school_year:
@@ -1691,29 +1675,44 @@ def handle_uploaded_csv(contents, filename, school_year):
                 # Append and save updated schools.csv
                 updated_schools_df = pd.concat([existing_schools_df, new_school_rows], ignore_index=True)
                 updated_schools_df.to_csv(schools_path, index=False, na_rep="N/A")
-            return (f"✅ Upload successful! Data saved as {output_filename}", school_year,
+            return (f"✅ Upload successful! Data saved as {output_filename}, {school_year}",
             time.time())
         except Exception as e:
             return f"❌ Upload failed: {str(e)}"
     return "⚠️ Please select a school year and upload a file."
 
 @app.callback(
+    Output('table_school_year', 'options'),
+    Output('table_school_year', 'value'),
+    Input('refresh_school_year_trigger', 'data'),
+    prevent_initial_call=False
+)
+def refresh_school_year_options(trigger_data):
+    years = get_available_school_years()
+    years.sort()
+
+    options = [{'label': y, 'value': y} for y in years]
+
+    if not years:
+        return [], None
+
+    # 👇 Use triggered year if available and valid
+    default_year = trigger_data if trigger_data in years else years[-1]
+
+    return options, default_year
+
+@app.callback(
     Output('enrollment_table', 'data'),
     Output('enrollment_table', 'columns'),
-    Input('table_school_year', 'value'),
-    State('refresh_school_year_trigger', 'data')  # Get the store value too
+    Input('table_school_year', 'value')  # <- ONLY input needed
 )
-def update_enrollment_table(school_year_from_dropdown, school_year_from_trigger):
-    # Determine the effective school year
-    school_year = school_year_from_dropdown or school_year_from_trigger or "2023-2024"
-
+def update_enrollment_table(school_year):
     file_path = f"data_files/data_{school_year}.csv"
     if not os.path.exists(file_path):
         return [], []
 
     df = pd.read_csv(file_path)
 
-    # Inject Region and Division
     from app_data import load_schools
     schools_df = load_schools()
 
@@ -1735,6 +1734,7 @@ def update_enrollment_table(school_year_from_dropdown, school_year_from_trigger)
     summary = numeric_df.groupby(["Region", "Division"], as_index=False)[["Total Male", "Total Female", "Total Enrollment"]].sum()
 
     return summary.to_dict("records"), [{"name": col, "id": col} for col in summary.columns]
+
 
 @app.callback(
     Output("upload-modal", "is_open"),
