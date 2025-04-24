@@ -3,7 +3,6 @@ import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
 from flask_login import current_user
 from app_data import get_available_school_years
-available_years = get_available_school_years()
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
@@ -43,8 +42,8 @@ def dashboard_content(data, grade_options, region_options):
                             html.Label("School Year:"),
                             dcc.Dropdown(
                                 id='school_year_filter',
-                                value="2023-2024" if "2023-2024" in available_years else (available_years[0] if available_years else None),
-                                options=[{'label': y, 'value': y} for y in available_years],
+                                value="2023-2024",
+                                options=[],
                                 placeholder="Select School Year",
                                 clearable=False  # ← important to prevent None
                             )

@@ -442,6 +442,25 @@ PLOT_TITLE=dict(        # Create consistent title style for all plots
 ) 
 
 @app.callback(
+    Output('school_year_filter', 'options'),
+    Output('school_year_filter', 'value'),
+    Input('refresh_school_year_trigger', 'data'),
+    prevent_initial_call=False
+)
+def refresh_dashboard_year_options(trigger_data):
+    years = get_available_school_years()
+    years.sort()
+
+    options = [{'label': y, 'value': y} for y in years]
+
+    if not years:
+        return [], None
+
+    default_year = trigger_data if trigger_data in years else years[-1]
+    return options, default_year
+
+
+@app.callback(
     [Output('gender_pie_chart', 'figure'),
      Output('enrollment_vs_schools_chart', 'figure'),
      Output('kpi_card_row', 'children'),
