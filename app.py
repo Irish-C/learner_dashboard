@@ -944,7 +944,7 @@ def update_sned_sector_chart(selected_year, selected_regions, selected_gender):
         color='Gender',
         barmode='stack',
         text='Enrollment',
-        title=' SNed Enrollment: School Sector Vs Gender',
+        title='<b>SNed Enrollment:</b> School Sector Vs Gender',  # Make the title bold
         color_discrete_map={'Male': '#0a4485', 'Female': '#DE082C'}
     )
 
