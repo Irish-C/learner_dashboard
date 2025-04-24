@@ -375,7 +375,7 @@ h4.chart-title { /* For card title */
 /* KPI Card Styles - Enhanced */
 .kpi-card {
   background: #ffffff;
-  border-left: 6px solid var(--primary-color);
+  /* border-left: 6px solid var(--primary-color); */
   border-radius: 12px;
   padding: 1.5rem;
   min-height: 150px;

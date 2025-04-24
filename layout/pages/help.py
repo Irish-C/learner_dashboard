@@ -117,4 +117,4 @@ def help_content():
         )
     ])
 
-print("help_content loaded")
+print("Help Page loaded")

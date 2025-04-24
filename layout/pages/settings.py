@@ -6,4 +6,4 @@ def settings_content():
         html.Div("Content for Settings Page goes here.", style={"fontSize": "1.2rem"})
     ])
 
-print("Settings loaded...")
+print("Settings Page loaded")

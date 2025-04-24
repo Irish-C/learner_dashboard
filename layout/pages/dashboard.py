@@ -212,3 +212,5 @@ def update_greeting(user_data):
         first_name = user_data.get('firstname')  # Access the first name stored in the 'data' of dcc.Store
         return f"Welcome Back, {first_name}."  # Update greeting text
     return "Welcome Back, Guest."  # Default message
+
+print("Dashboard Page loaded")
