@@ -172,6 +172,8 @@ def handle_interaction(toggle_clicks, b1, b2, b3, b4, is_collapsed, current_page
 
     return sidebar, content, content_style, new_collapsed, new_page
 
+
+
 # Call back for login to dashboard
 @app.callback(
     Output("page-content", "children"),
@@ -193,6 +195,27 @@ def load_protected_page(login_data):
         return html.Div(
             className="body-style",
             children=[
+                
+                dbc.Modal(
+                    [
+                        dbc.ModalHeader(
+                            dbc.ModalTitle("Welcome!"),
+                            close_button=True,
+                            style={"backgroundColor": "#337ab7", "color": "white"}
+                        ),
+                        dbc.ModalBody([
+                            html.P(f"Hi {first_name}, Hi po arigathanks"),
+                            html.P("sana gumana ka na plsplspls"),
+                            html.P("hehe ivantill")
+                        ]),
+                    ],
+                    id="welcome-modal",
+                    is_open=True,
+                    size="lg",
+                    centered=True,
+                    style={"maxWidth": "500px", "margin": "auto"}
+                ),
+
                 dcc.Store(id='sidebar-toggle-state', data=False),
                 dcc.Store(id='current-page', data="dashboard"),
                 dcc.Store(id='user-first-name', data=first_name),  # Store the first name
@@ -328,6 +351,26 @@ def load_protected_page(login_data):
         })
     ]
 )
+@app.callback(
+    Output("welcome-modal", "is_open"),
+    Output("welcome-modal-body", "children"),
+    Input("login-state", "data"),
+    Input("close-welcome-modal", "n_clicks"),
+    State("welcome-modal", "is_open"),
+    prevent_initial_call=True
+)
+def toggle_welcome_modal(login_data, close_clicks, is_open):
+    ctx = callback_context
+    if not ctx.triggered:
+        raise dash.exceptions.PreventUpdate
+
+    trigger = ctx.triggered[0]["prop_id"].split(".")[0]
+    if trigger == "login-state" and login_data.get("logged_in"):
+        return True, f"Welcome, {login_data.get('user', 'User')}! 🎉"
+    elif trigger == "close-welcome-modal":
+        return False, dash.no_update
+
+    return is_open, dash.no_update
 
 
 @app.callback(
