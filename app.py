@@ -1717,7 +1717,28 @@ def handle_uploaded_csv(contents, filename, school_year):
             output_filename = f"data_{school_year}.csv"
             output_path = os.path.join("data_files", output_filename)
             df.to_csv(output_path, index=False, na_rep="N/A")
+            # Append new BEIS School IDs to schools.csv if needed
+            schools_path = os.path.join("app", "data_files", "schools.csv")
+            existing_schools_df = pd.read_csv(schools_path)
+            existing_ids = set(existing_schools_df["BEIS School ID"].astype(str))
 
+            uploaded_ids = df["BEIS School ID"].astype(str)
+            new_ids = [sid for sid in uploaded_ids.unique() if sid not in existing_ids]
+
+            if new_ids:
+                # Filter uploaded rows with those new IDs and match the schools.csv format
+                school_cols = existing_schools_df.columns
+                new_school_rows = df[df["BEIS School ID"].astype(str).isin(new_ids)][school_cols.intersection(df.columns)]
+                
+                # Make sure all required columns exist and are aligned
+                for col in school_cols:
+                    if col not in new_school_rows.columns:
+                        new_school_rows[col] = "N/A"
+                new_school_rows = new_school_rows[school_cols]
+
+                # Append and save updated schools.csv
+                updated_schools_df = pd.concat([existing_schools_df, new_school_rows], ignore_index=True)
+                updated_schools_df.to_csv(schools_path, index=False)
             return f"✅ Upload successful! Data saved as {output_filename}"
         except Exception as e:
             return f"❌ Upload failed: {str(e)}"
