@@ -238,7 +238,7 @@ def load_protected_page(login_data):
 
                     html.P("A DepEd Learner Information System built just for you.",style={"fontFamily": "Roboto, sans-serif","letterSpacing": "2.5px","fontSize": "16px"}),
                     html.P("Click around, discover features, and make learning seamless!", style={"fontStyle": "italic","fontFamily": "Roboto, sans-serif","marginTop": "30px","letterSpacing": "2.5px", "marginBottom": "0","fontSize": "16px"}),
-                    html.Img(src="/assets/icons/LIST.png", style={"height": "60px", "float": "right","marginTop": "-60px","marginBottom": "10px" })
+                    html.Img(src="/assets/icons/LIST.png", style={"height": "45px", "float": "right","marginTop": "-40px","marginBottom": "10px" })
                 ], style={"padding": "1.5rem"})
             ],
             style={"borderRadius": "12px", "boxShadow": "0 4px 12px rgba(0,0,0,0.2)",}
