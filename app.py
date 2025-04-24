@@ -167,7 +167,7 @@ def handle_interaction(toggle_clicks, b1, b2, b3, b4, is_collapsed, current_page
             new_page = button_to_page[triggered_id]
 
     sidebar = create_sidebar(is_collapsed=new_collapsed, current_page=new_page)
-    content = create_content(new_page, data, grade_options, region_options, combined_shs_track_df, school_year_options)
+    content = create_content(new_page, data, grade_options, region_options, school_year_options)
     content_style = get_content_style(new_collapsed)
 
     return sidebar, content, content_style, new_collapsed, new_page
@@ -238,7 +238,7 @@ def load_protected_page(login_data):
                     create_sidebar(is_collapsed=False, current_page="dashboard")
                 ]),
                 html.Div(id="content", style=get_content_style(False), children=create_content(
-                    "dashboard", data, grade_options, region_options, combined_shs_track_df, school_year_options
+                    "dashboard", data, grade_options, region_options, school_year_options
                 ))
             ]
         )
