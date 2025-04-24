@@ -184,7 +184,7 @@ def load_protected_page(login_data):
         'padding': '10px',
         'fontSize': '16px',
         'borderRadius': '5px',
-        'border': '1px solid #ccc'
+        'border': '1px solid #5A5A5A'
     }
 
     if login_data["logged_in"]:
@@ -251,7 +251,7 @@ def load_protected_page(login_data):
                         "top": "50%",
                         "transform": "translateY(-50%)",
                         "cursor": "pointer",
-                        "color": "#888"
+                        "color": "#5A5A5A"
                     }
                 )
             ], style={"position": "relative", "marginBottom": "1rem"}),
@@ -324,6 +324,13 @@ def toggle_password_visibility(n_clicks, current_type):
     return 'password', 'fas fa-eye'
 
 # Dashboard Page
+
+PLOT_TITLE=dict(        # Create consistent title style for all plots
+    size=22,
+    color="#0a4485",
+    family="Roboto, sans-serif",
+) 
+
 @app.callback(
     [Output('gender_pie_chart', 'figure'),
      Output('enrollment_vs_schools_chart', 'figure'),
@@ -334,6 +341,7 @@ def toggle_password_visibility(n_clicks, current_type):
      Input('school_year_filter', 'value'),
      Input('gender_filter', 'value')]
 )
+
 def update_charts(selected_regions, selected_grades, selected_school_year, selected_gender):
     if not selected_school_year:
         raise dash.exceptions.PreventUpdate
@@ -381,18 +389,14 @@ def update_charts(selected_regions, selected_grades, selected_school_year, selec
         values=[total_male, total_female],
         title='Gender Distribution',
         hole=0.6,
-        color_discrete_sequence=['#b0cfff', '#f9c9e2']
+        color_discrete_sequence=['#0a4485', '#DE082C']
     )
 
     pie_chart.update_traces(textinfo='percent')
 
     pie_chart.update_layout(
         margin=dict(t=30, b=0, l=0, r=0),
-        title_font=dict(
-            size=20,  
-            color="var(--gray-color)",  
-            family="Arial, sans-serif" 
-        ),
+        title_font=PLOT_TITLE,
         height=296,  # or adjust for your visual preference
         showlegend=True  # set to False if pie labels suffice
     )
@@ -434,11 +438,7 @@ def update_charts(selected_regions, selected_grades, selected_school_year, selec
 
     fig_combo.update_layout(
         title='Top 15 Divisions: Total Enrollment and Number of Schools',
-        title_font=dict(
-            size=20,  
-            color="var(--gray-color)",  
-            family="Arial, sans-serif"
-        ),
+        title_font=PLOT_TITLE,
         xaxis_title='Division',
         yaxis_title='Total Enrollment'
     )
@@ -610,7 +610,7 @@ def update_charts(selected_regions, selected_grades, selected_school_year, selec
         dbc.Card(
             dbc.CardBody([
                 html.Div([
-                    html.I(className="fas fa-users-cog", style={"fontSize": "30px", "color": "#007BFF", "marginBottom": "0.5rem"}),
+                    html.I(className="fas fa-users-cog", style={"fontSize": "30px", "color": "#0a4485", "marginBottom": "0.5rem"}),
                     html.H5("Most Enrolled Division", style={"color": "var(--gray-color)", "textAlign": "center", "margin": "0", "lineHeight": "1.2"}),
                     html.H2(f"{most_enrolled_division_text}", style={"color": "var(--pr-color)", "textAlign": "center", "margin": "0"})
                 ])
@@ -759,11 +759,7 @@ def update_shs_track_chart(selected_year, selected_regions, selected_gender):
                 yaxis_title='Total Enrollment',
                 zaxis_title='Grade Level'
             ),
-            title_font=dict(
-                size=20,  
-                color="var(--gray-color)",  
-                family="Arial, sans-serif"
-            ),
+            title_font=PLOT_TITLE,
         )
         return fig
     except Exception as e:
@@ -814,9 +810,9 @@ def update_top_schools_chart(selected_regions, selected_grades, selected_gender)
 
     # Color scheme
     colors = {
-        'Public': '#3498db',
-        'Private': '#e74c3c',
-        'SUCsLUCs': '#f1c40f'
+        'Public': '#0a4485',
+        'Private': 'BFDBFE',
+        'SUCsLUCs': '#007BFF'
     }
 
     # Create sector-based traces
@@ -858,11 +854,7 @@ def update_top_schools_chart(selected_regions, selected_grades, selected_gender)
 
         font=dict(size=13),
         legend=dict(orientation='h', y=-0.25, x=0.5, xanchor='center'),
-        title_font=dict(
-            size=20,  
-            color="var(--gray-color)",
-            family="Arial, sans-serif"
-        ),
+        title_font=PLOT_TITLE,
     )
     return fig
 
@@ -910,7 +902,8 @@ def update_sned_sector_chart(selected_year, selected_regions, selected_gender):
         color='Gender',
         barmode='stack',
         text='Enrollment',
-        title='Special Needs Education Enrollment by<br>School Sector and Gender'
+        title='Special Needs Education Enrollment by<br>School Sector and Gender',
+        color_discrete_map={'Male': '#0a4485', 'Female': '#DE082C'}
     )
 
     fig.update_layout(
@@ -922,11 +915,7 @@ def update_sned_sector_chart(selected_year, selected_regions, selected_gender):
         height=350,
         legend_title_text='Gender',
         margin=dict(l=20, r=20, t=80, b=40),
-        title_font=dict(
-            size=20,  
-            color="var(--gray-color)",  
-            family="Arial, sans-serif"
-        )
+        title_font=PLOT_TITLE,
     )
     fig.update_traces(texttemplate='%{text:,}', textposition='inside')
     return fig
@@ -982,7 +971,7 @@ def update_transition_rate_chart(selected_sy, selected_regions, selected_gender)
         value=tr_elem_jhs,
         domain={'x': [0, 0.5], 'y': [0, 1]},
         title={'text': "Elementary to High School"},
-        gauge={'axis': {'range': [None, 100]}, 'bar': {'color': "#1f77b4"}}
+        gauge={'axis': {'range': [None, 100]}, 'bar': {'color': "var(--primary-color)"}}
     ))
 
     fig.add_trace(go.Indicator(
@@ -990,18 +979,13 @@ def update_transition_rate_chart(selected_sy, selected_regions, selected_gender)
         value=tr_jhs_shs,
         domain={'x': [0.5, 1], 'y': [0, 1]},
         title={'text': "High School to Senior High"},
-        gauge={'axis': {'range': [None, 100]}, 'bar': {'color': "#ff7f0e"}}
+        gauge={'axis': {'range': [None, 100]}, 'bar': {'color': "var(--secondary-color)"}}
     ))
 
     fig.update_layout(
         title="Transition Rate (Placeholder as there are no previous year)", 
         height=300,
-        title_font=dict(
-            size=20,  
-            color="var(--gray-color)",  
-            family="Arial, sans-serif"
-        )
-
+        title_font=PLOT_TITLE,
         )
     return fig
 
@@ -1011,6 +995,7 @@ def update_transition_rate_chart(selected_sy, selected_regions, selected_gender)
     Input('gender_filter', 'value'),
     Input('school_year_filter', 'value')
 )
+
 def update_k_to_12_distribution(selected_regions, selected_gender, selected_school_year):
     if not selected_school_year:
         raise dash.exceptions.PreventUpdate
@@ -1072,7 +1057,7 @@ def update_k_to_12_distribution(selected_regions, selected_gender, selected_scho
         y='Enrollment',
         color='Group',
         category_orders={'Level': list(level_labels.values())},
-        color_discrete_map={'ES': '#a3c4f3', 'JHS': '#2a6fdb', 'SHS': '#071952'},
+        color_discrete_map={'ES': '#0a4485', 'JHS': '#BFDBFE', 'SHS': '#DE082C'},
         title='Enrollment Across Grade and Non Grade Levels',
         text='Enrollment'
     )
@@ -1086,17 +1071,13 @@ def update_k_to_12_distribution(selected_regions, selected_gender, selected_scho
     fig.update_layout(
         xaxis_title='',
         yaxis_title='Enrollment',
-        font=dict(size=13),  # Set font size here
+        font=dict(size=13),
         plot_bgcolor='white',
         paper_bgcolor='white',
         margin=dict(l=20, r=20, t=70, b=20),
         legend=dict(orientation='h', y=-0.2, x=0.5, xanchor='center'),
         bargap=0.2,
-        title_font=dict(
-            size=20,  
-            color="var(--gray-color)",  
-            family="Arial, sans-serif"
-        )
+        title_font=PLOT_TITLE,
     )
 
     return fig
@@ -1240,11 +1221,7 @@ def update_enrollment_choropleth(selected_school_year, selected_regions, selecte
         margin={"r":0,"t":50,"l":0,"b":0},
         dragmode=False,
 
-        title_font=dict(
-            size=20,  # Similar size to your provided H5 (adjust as needed)
-            color="var(--gray-color)",  # Matches the color in your example
-            family="Arial, sans-serif"  # Default font
-        ),
+        title_font=PLOT_TITLE,
 
         annotations=[
         dict(
@@ -1354,12 +1331,17 @@ def update_coc_sector_chart(selected_sy, selected_regions, selected_grades, sele
         legend_title='Sector',
         margin=dict(l=40, r=20, t=80, b=40),
         height=350,
-        title_font=dict(
-            size=20,  
-            color="var(--gray-color)",  
-            family="Arial, sans-serif"
-        )
+        title_font=PLOT_TITLE,
     )
+
+    # Add custom colors for each sector
+    for trace in fig.data:
+        if trace.name == 'Public':
+            trace.marker.color = '#0a4485'
+        elif trace.name == 'Private':
+            trace.marker.color = '#BFDBFE'
+        elif trace.name == 'SUCsLUCs':
+            trace.marker.color = '#DE082C'
 
     return fig
 
@@ -1405,11 +1387,7 @@ def update_enrollment_trend_chart(selected_year):
             plot_bgcolor='white',
             height=350,
             paper_bgcolor='white',
-            title_font=dict(
-                size=20,  
-                color="var(--gray-color)",  # Match your CSS variable for gray color
-                family="Arial, sans-serif"
-            ),
+            title_font=PLOT_TITLE,
             xaxis_title='School Year',
             yaxis_title='Total Enrollment',
             xaxis=dict(tickmode='linear'),  # Ensure proper linear ticks on x-axis
