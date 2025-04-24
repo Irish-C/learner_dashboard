@@ -237,10 +237,33 @@ def load_protected_page(login_data):
 
             # Input Fields
             dcc.Store(id="user-first-name"),
-            dbc.Input(id="input-firstname", placeholder="First Name", type="text", className="mb-3", style={"fontFamily": "Roboto, sans-serif"}),
-            dbc.Input(id="input-lastname", placeholder="Last Name", type="text", className="mb-3", style={"fontFamily": "Roboto, sans-serif"}),
-            dbc.Input(id="input-email", placeholder="Email Address", type="email", className="mb-3", style={"fontFamily": "Roboto, sans-serif"}),
-            html.Div([dbc.Input(id="input-password", type="password", placeholder="Password", className="w-100"),
+            dbc.Input(id="input-firstname", placeholder="F I R S T   N A M E", type="text", className="mb-3", style={"fontFamily": "Roboto, sans-serif",
+            "boxShadow": "4px 4px 8px rgba(30,144,255,0.3)",
+            "border": "none",
+            "borderRadius": "10px",
+            "fontSize": "15px",
+            "lineHeight": "2.5"}),
+            
+            dbc.Input(id="input-lastname", placeholder="L A S T   N A M E", type="text", className="mb-3", style={"fontFamily": "Roboto, sans-serif",
+            "boxShadow": "4px 4px 8px rgba(30,144,255,0.3)",
+            "border": "none",
+            "borderRadius": "10px",
+            "fontSize": "15px",
+            "lineHeight": "2.5"}),
+            dbc.Input(id="input-email", placeholder="E M A I L   A D D R E S S", type="email", className="mb-3", style={"fontFamily": "Roboto, sans-serif",
+            "boxShadow": "4px 4px 8px rgba(30,144,255,0.3)",
+            "border": "none",
+            "borderRadius": "10px",
+            "fontSize": "15px",
+            "lineHeight": "2.5"}),
+            html.Div([dbc.Input(id="input-password", type="password", placeholder="P A S S W O R D", className="w-100", style={
+                "fontFamily": "Roboto, sans-serif",
+                "boxShadow": "4px 4px 8px rgba(30,144,255,0.3)",
+                "border": "none",
+                "borderRadius": "10px",
+                "fontSize": "15px",
+                "lineHeight": "2.5"
+            }),
                 html.I(
                     id="toggle-password-visibility",
                     className="fas fa-eye",  # starts as eye
