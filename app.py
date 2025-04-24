@@ -221,27 +221,27 @@ def load_protected_page(login_data):
             children=[
                 dbc.ModalHeader(
                     html.H2([
-                        "WELCOME ",
-                        html.Span(first_name.upper(), style={"color": "gold", "fontWeight": "bold"}),
-                        "!"
+                        "W E L C O M E    ",
+                        html.Span(first_name.upper(), style={"color": "gold", "fontWeight": "bold","letterSpacing": "5px","fontFamily": "Roboto, sans-serif"}),
+                        "!",
                     ]),
                     close_button=True,
                     style={"backgroundColor": "#0d3c74", "color": "white", "borderRadius": "10px 10px 0 0"}
-                ),
+                ), 
                 dbc.ModalBody([
                     html.P([
                         "This is ",
-                        html.Span("LIS", style={"color": "#0d3c74", "fontWeight": "bold"}),
-                        html.Span("tahan", style={"color": "red", "fontWeight": "bold"}),
-                        ": Organize Today. Empower Tomorrow"
-                    ], style={"fontSize": "18px"}),
+                        html.Span("LIS", style={"color": "#0d3c74","fontweight":"bold","fontFamily": "Roboto, sans-serif","letterSpacing": "2.5px","fontSize": "16px"}),
+                        html.Span("tahan", style={"color": "red", "fontWeight": "bold","fontFamily": "Roboto, sans-serif","letterSpacing": "2.5px","fontSize": "16px"}),
+                        html.Span(": Organize Today. Empower Tomorrow",style={"color": "#0d3c74","fontSize": "17px", "fontFamily": "Roboto, sans-serif","letterSpacing": "2.5px"})
+                    ], style={"fontSize": "18px", "fontFamily": "Roboto, sans-serif","letterSpacing": "2px","marginTop": "10px","fontSize": "16px"}),
 
-                    html.P("A DepEd Learner Information System built just for you."),
-                    html.P("Click around, discover features, and make learning seamless!", style={"fontStyle": "italic"}),
-                    html.Img(src="/assets/icons/LIST.png", style={"height": "40px", "float": "right"})
-                ], style={"padding": "1rem"})
+                    html.P("A DepEd Learner Information System built just for you.",style={"fontFamily": "Roboto, sans-serif","letterSpacing": "2.5px","fontSize": "16px"}),
+                    html.P("Click around, discover features, and make learning seamless!", style={"fontStyle": "italic","fontFamily": "Roboto, sans-serif","marginTop": "30px","letterSpacing": "2.5px", "marginBottom": "0","fontSize": "16px"}),
+                    html.Img(src="/assets/icons/LIST.png", style={"height": "60px", "float": "right","marginTop": "-60px","marginBottom": "10px" })
+                ], style={"padding": "1.5rem"})
             ],
-            style={"borderRadius": "12px", "boxShadow": "0 4px 12px rgba(0,0,0,0.2)"}
+            style={"borderRadius": "12px", "boxShadow": "0 4px 12px rgba(0,0,0,0.2)",}
         ),
 
         dcc.Store(id='sidebar-toggle-state', data=False),
