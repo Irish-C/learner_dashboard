@@ -528,7 +528,7 @@ def update_charts(selected_regions, selected_grades, selected_school_year, selec
 
     # KPI Cards (now with Sector card inside the 4-col row)
     card_style = {
-        "minHeight": "175px",
+        "minHeight": "178px",
         "border": "none",
         "borderRadius": "0.625rem",
         "boxShadow": "0px 4px 6px rgba(0, 0, 0, 0.1)",
