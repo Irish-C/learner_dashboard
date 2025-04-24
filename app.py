@@ -1740,7 +1740,7 @@ def handle_uploaded_csv(contents, filename, school_year):
                 new_school_rows = new_school_rows.fillna("N/A")
                 # Append and save updated schools.csv
                 updated_schools_df = pd.concat([existing_schools_df, new_school_rows], ignore_index=True)
-                updated_schools_df.to_csv(schools_path, index=False)
+                updated_schools_df.to_csv(schools_path, index=False, na_rep="N/A")
             return f"✅ Upload successful! Data saved as {output_filename}"
         except Exception as e:
             return f"❌ Upload failed: {str(e)}"
