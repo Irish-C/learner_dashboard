@@ -1683,5 +1683,17 @@ def update_enrollment_table(school_year_from_dropdown, school_year_from_trigger)
 
     return summary.to_dict("records"), [{"name": col, "id": col} for col in summary.columns]
 
+@app.callback(
+    Output("upload-modal", "is_open"),
+    [Input("open-upload-modal", "n_clicks"),
+     Input("close-upload-modal", "n_clicks")],
+    [State("upload-modal", "is_open")]
+)
+def toggle_upload_modal(open_click, close_click, is_open):
+    if open_click or close_click:
+        return not is_open
+    return is_open
+
+
 if __name__ == "__main__":
     app.run(debug=True)
