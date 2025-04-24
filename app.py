@@ -225,15 +225,18 @@ def load_protected_page(login_data):
         html.Div([
             # Logo and Title - CENTERED
             html.Div([
-                html.Img(src="/assets/icons/LIST.png", style={"height": "120px", "marginBottom": "10px"}),
+                html.Img(src="/assets/icons/LIST.png", style={"height": "140px", "marginBottom": "10px"}),
                 html.H4("LEARNER INFORMATION SYSTEM", style={
                     "fontWeight": "bold",
                     "letterSpacing": "2px",
                     "fontSize": "16px",
+                    "letterSpacing": "0.30em",
                     "fontFamily": "Roboto, sans-serif",
+                    "marginTop": "20px",
                     "marginBottom": "20px"
                 })
-            ], style={"textAlign": "center"}),
+            ], style={"textAlign": "center",
+                      "marginBottom": "20px"}),
 
             # Input Fields
             dcc.Store(id="user-first-name"),
