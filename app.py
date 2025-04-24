@@ -7,7 +7,7 @@ from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 import pandas as pd
 import json
-import os
+import os, io, base64
 import hashlib
 from datetime import datetime
 import time
@@ -63,6 +63,23 @@ login_page = dbc.Container([
         ], width=4)
     ], justify="center", style={"paddingTop": "15%"})
 ], fluid=True)
+
+# Upload Format
+correct_columns = [
+    "School Year", "BEIS School ID", "K Male", "K Female", "G1 Male", "G1 Female",
+    "G2 Male", "G2 Female", "G3 Male", "G3 Female", "G4 Male", "G4 Female",
+    "G5 Male", "G5 Female", "G6 Male", "G6 Female", "Elem NG Male", "Elem NG Female",
+    "G7 Male", "G7 Female", "G8 Male", "G8 Female", "G9 Male", "G9 Female",
+    "G10 Male", "G10 Female", "JHS NG Male", "JHS NG Female",
+    "G11 ACAD - ABM Male", "G11 ACAD - ABM Female", "G11 ACAD - HUMSS Male", "G11 ACAD - HUMSS Female",
+    "G11 ACAD STEM Male", "G11 ACAD STEM Female", "G11 ACAD GAS Male", "G11 ACAD GAS Female",
+    "G11 ACAD PBM Male", "G11 ACAD PBM Female", "G11 TVL Male", "G11 TVL Female",
+    "G11 SPORTS Male", "G11 SPORTS Female", "G11 ARTS Male", "G11 ARTS Female",
+    "G12 ACAD - ABM Male", "G12 ACAD - ABM Female", "G12 ACAD - HUMSS Male", "G12 ACAD - HUMSS Female",
+    "G12 ACAD STEM Male", "G12 ACAD STEM Female", "G12 ACAD GAS Male", "G12 ACAD GAS Female",
+    "G12 ACAD PBM Male", "G12 ACAD PBM Female", "G12 TVL Male", "G12 TVL Female",
+    "G12 SPORTS Male", "G12 SPORTS Female", "G12 ARTS Male", "G12 ARTS Female"
+]
 
 # Dash App
 app = dash.Dash(
@@ -1589,23 +1606,6 @@ def submit_data(n_clicks, school_name, year, grade, gender, count):
     school_id = meta["BEIS School ID"]
     filename = f"data_{year}.csv"
     file_path = os.path.join("data_files", filename)
-
-    correct_columns = [
-        "School Year", "BEIS School ID", "K Male", "K Female", "G1 Male", "G1 Female",
-        "G2 Male", "G2 Female", "G3 Male", "G3 Female", "G4 Male", "G4 Female",
-        "G5 Male", "G5 Female", "G6 Male", "G6 Female", "Elem NG Male", "Elem NG Female",
-        "G7 Male", "G7 Female", "G8 Male", "G8 Female", "G9 Male", "G9 Female",
-        "G10 Male", "G10 Female", "JHS NG Male", "JHS NG Female",
-        "G11 ACAD - ABM Male", "G11 ACAD - ABM Female", "G11 ACAD - HUMSS Male", "G11 ACAD - HUMSS Female",
-        "G11 ACAD STEM Male", "G11 ACAD STEM Female", "G11 ACAD GAS Male", "G11 ACAD GAS Female",
-        "G11 ACAD PBM Male", "G11 ACAD PBM Female", "G11 TVL Male", "G11 TVL Female",
-        "G11 SPORTS Male", "G11 SPORTS Female", "G11 ARTS Male", "G11 ARTS Female",
-        "G12 ACAD - ABM Male", "G12 ACAD - ABM Female", "G12 ACAD - HUMSS Male", "G12 ACAD - HUMSS Female",
-        "G12 ACAD STEM Male", "G12 ACAD STEM Female", "G12 ACAD GAS Male", "G12 ACAD GAS Female",
-        "G12 ACAD PBM Male", "G12 ACAD PBM Female", "G12 TVL Male", "G12 TVL Female",
-        "G12 SPORTS Male", "G12 SPORTS Female", "G12 ARTS Male", "G12 ARTS Female"
-    ]
-
     if os.path.exists(file_path):
         df = pd.read_csv(file_path)
     else:
@@ -1694,6 +1694,34 @@ def toggle_upload_modal(open_click, close_click, is_open):
         return not is_open
     return is_open
 
+@app.callback(
+    Output("upload-feedback", "children"),
+    Input("upload-data", "contents"),
+    State("upload-data", "filename"),
+    State("upload_school_year_dropdown", "value")
+)
+def handle_uploaded_csv(contents, filename, school_year):
+    if contents and school_year:
+        try:
+            content_type, content_string = contents.split(',')
+            decoded = base64.b64decode(content_string)
+            df = pd.read_csv(io.StringIO(decoded.decode('utf-8')))
+
+            df['School Year'] = school_year
+
+            for col in correct_columns:
+                if col not in df.columns:
+                    df[col] = "N/A"
+            df = df[correct_columns]
+
+            output_filename = f"data_{school_year}.csv"
+            output_path = os.path.join("data_files", output_filename)
+            df.to_csv(output_path, index=False, na_rep="N/A")
+
+            return f"✅ Upload successful! Data saved as {output_filename}"
+        except Exception as e:
+            return f"❌ Upload failed: {str(e)}"
+    return "⚠️ Please select a school year and upload a file."
 
 if __name__ == "__main__":
     app.run(debug=True)
