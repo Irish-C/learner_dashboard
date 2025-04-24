@@ -95,10 +95,52 @@ def manage_data_content(region_options, grade_options, school_year_options):
 
         html.Div(
             dbc.Button("Submit", id="submit_button", color="primary"),
-            className="text-center mb-5"
+            className="text-center mb-5",
+            
         ),
         html.Div(id="submission_feedback", className="text-success mt-3"),
         dcc.Store(id='refresh_school_year_trigger', data='initial-load'),
+        # Upload CSV Button and Modal
+        dbc.Button("📤 Upload CSV", id="open-upload-modal", color="primary", className="mb-4"), 
+        dbc.Modal([
+            dbc.ModalHeader("Upload Enrollment Data CSV"),
+            dbc.ModalBody([
+                dbc.Row([
+                    dbc.Col([
+                        html.Label("Select School Year"),
+                        dcc.Dropdown(
+                            id='upload_school_year_dropdown',
+                            options=[{'label': f"{y}-{y+1}", 'value': f"{y}-{y+1}"} for y in range(2015, 2031)],
+                            placeholder="Select School Year",
+                            value="2023-2024"
+                        )
+                    ])
+                ], className="mb-3"),
+
+                dcc.Upload(
+                    id='upload-data',
+                    children=html.Div(['📁 Drag and Drop or ', html.A('Click to Select File')]),
+                    style={
+                        'width': '100%',
+                        'height': '60px',
+                        'lineHeight': '60px',
+                        'borderWidth': '1px',
+                        'borderStyle': 'dashed',
+                        'borderRadius': '5px',
+                        'textAlign': 'center',
+                        'marginBottom': '15px'
+                    },
+                    multiple=False
+                ),
+
+                html.Div(id='upload-feedback', style={'fontWeight': 'bold'})
+            ]),
+            dbc.ModalFooter([
+                dbc.Button("Close", id="close-upload-modal", className="ms-auto", color="secondary")
+            ])
+        ], id="upload-modal", is_open=False),
+
+        # Enrollment Table
         html.Hr(),
         html.H4("View Enrollment Table by School Year", className="mt-4 mb-2"),
         dbc.Row([
