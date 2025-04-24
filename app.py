@@ -1717,6 +1717,7 @@ def handle_uploaded_csv(contents, filename, school_year):
             output_filename = f"data_{school_year}.csv"
             output_path = os.path.join("data_files", output_filename)
             df = df.fillna("N/A")
+            df = df.replace(0, "N/A")
             df.to_csv(output_path, index=False, na_rep="N/A")
             # Append new BEIS School IDs to schools.csv if needed
             schools_path = os.path.join("data_files", "schools.csv")
