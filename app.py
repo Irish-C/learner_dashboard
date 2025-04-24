@@ -449,14 +449,16 @@ def update_charts(selected_regions, selected_grades, selected_school_year, selec
     fig_combo.add_trace(go.Bar(
         x=agg_division['Division'],
         y=agg_division['Selected Grades Total'],
-        name='Total Enrollment'
+        name='Total Enrollment',
+        marker_color='#BFDBFE'  # Bar color
     ), secondary_y=False)
 
     fig_combo.add_trace(go.Scatter(
         x=agg_division['Division'],
         y=agg_division['Number of Schools'],
         name='Number of Schools',
-        mode='lines+markers'
+        mode='lines+markers',
+        line=dict(color='#0a4485')  # Line color
     ), secondary_y=True)
 
     fig_combo.update_layout(
@@ -770,20 +772,22 @@ def update_shs_track_chart(selected_year, selected_regions, selected_gender):
             color='Grade Level',
             orientation='h',
             text='Total Enrollment',
-            title='Senior High Track Enrollment Overview'
+            color_discrete_map={'G11': '#DE082C', 'G12': '#0a4485'},  # Dark blue and dark red
+            title='Senior High Track Enrollment Overview',
         )
 
         fig.update_layout(
             title='Senior High Track Enrollment Overview',
             font=dict(size=13),
             height=350,
-            scene=dict(
-                xaxis_title='Track',
-                yaxis_title='Total Enrollment',
-                zaxis_title='Grade Level'
-            ),
+            xaxis_title='Total Enrollment',
+            yaxis_title='Track',
             title_font=PLOT_TITLE,
         )
+        return fig
+    except Exception as e:
+        print("SHS Chart Rendering Error:", e)
+        return px.bar(title="Error rendering SHS Track chart")
         return fig
     except Exception as e:
         print("SHS Chart Rendering Error:", e)
@@ -925,7 +929,7 @@ def update_sned_sector_chart(selected_year, selected_regions, selected_gender):
         color='Gender',
         barmode='stack',
         text='Enrollment',
-        title='Special Needs Education Enrollment by<br>School Sector and Gender',
+        title=' SNed Enrollment: School Sector Vs Gender',
         color_discrete_map={'Male': '#0a4485', 'Female': '#DE082C'}
     )
 
@@ -1345,7 +1349,7 @@ def update_coc_sector_chart(selected_sy, selected_regions, selected_grades, sele
 
     # Update the chart layout 
     fig.update_layout(
-        title='School Offerings by Certificate of Completion (COC)<br>Type and Sector',
+        title='School Offerings by Certificate of Completion (COC)',
         xaxis_title='Type',
         yaxis_title='Number of Schools',
         font=dict(size=13),
@@ -1362,9 +1366,9 @@ def update_coc_sector_chart(selected_sy, selected_regions, selected_grades, sele
         if trace.name == 'Public':
             trace.marker.color = '#0a4485'
         elif trace.name == 'Private':
-            trace.marker.color = '#BFDBFE'
-        elif trace.name == 'SUCsLUCs':
             trace.marker.color = '#DE082C'
+        elif trace.name == 'SUCsLUCs':
+            trace.marker.color = '#BFDBFE'
 
     return fig
 
@@ -1400,12 +1404,13 @@ def update_enrollment_trend_chart(selected_year):
             grouped,
             x='School Year',
             y='Total Enrollment',
-            title='Total Enrollment Trend<br>Over the Years',
             markers=True  # Show markers at each data point on the line
         )
 
+        fig.update_traces(marker=dict(color='#0a4485'), line=dict(color='#0a4485'))
+
         fig.update_layout(
-            title='Total Enrollment Trend<br>Over the Years',
+            title='Enrollment Growth Over Time',
             font=dict(size=13),
             plot_bgcolor='white',
             height=350,
