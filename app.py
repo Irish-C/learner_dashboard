@@ -98,7 +98,7 @@ with open('assets/index_template.html', 'r') as file:
 
 # Generate school year options
 current_year = datetime.now().year
-school_year_options = [{'label': f"{y}-{y+1}", 'value': f"{y}-{y+1}"} for y in range(current_year - 10, current_year + 2)]
+school_year_options = [{'label': f"{y}-{y+1}", 'value': f"{y}-{y+1}"} for y in range(current_year - 20, current_year + 5)]
 # Default year to load initially
 default_school_year = "2023-2024"
 data, grade_columns, grade_options, region_options = load_data_for_year(default_school_year)
