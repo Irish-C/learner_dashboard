@@ -155,6 +155,21 @@ def manage_data_content(region_options, grade_options, school_year_options):
                     )
             ])
         ], className="mb-3"),
+        dbc.Modal([
+            dbc.ModalHeader("Confirm Submission"),
+            dbc.ModalBody([
+                html.Div(id="confirm-message"),
+                dbc.Checkbox(
+                    id="confirm-checkbox",
+                    label="Yes, I confirm this data is correct.",
+                    className="mt-3"
+                )
+            ]),
+            dbc.ModalFooter([
+                dbc.Button("Cancel", id="close-confirm-modal", className="me-2", color="secondary"),
+                dbc.Button("Finalize", id="finalize-submit", color="success", disabled=True)
+            ])
+        ], id="confirm-modal", is_open=False),
 
         dash_table.DataTable(
             id='enrollment_table',

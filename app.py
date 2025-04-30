@@ -1579,126 +1579,164 @@ def autofill_fields(school_name):
 
 @app.callback(
     Output("submission_feedback", "children"),
-    Output("refresh_school_year_trigger", "data"),
-    Input("submit_button", "n_clicks"),
+    Output("upload-feedback", "children"),
+    Output("refresh_school_year_trigger", "data", allow_duplicate=True),
+    Input("finalize-submit", "n_clicks"),
     State("input_school_name", "value"),
     State("input_school_year", "value"),
     State("input_grade", "value"),
     State("input_gender", "value"),
-    State("input_enrollment", "value")
-)
-def submit_data(n_clicks, school_name, year, grade, gender, count):
-    if not n_clicks:
-        return "", dash.no_update
-    if not all([school_name, year, grade, gender, count]):
-        return "Please fill all fields.", dash.no_update
-
-    try:
-        count = int(count)
-        if count < 0:
-            return "Enrollment count cannot be negative.", dash.no_update
-    except (ValueError, TypeError):
-        return "Please enter a valid enrollment number.", dash.no_update
-
-    import os
-    import pandas as pd
-
-    meta = get_school_metadata(school_name)
-    school_id = meta["BEIS School ID"]
-    filename = f"data_{year}.csv"
-    file_path = os.path.join("data_files", filename)
-    if os.path.exists(file_path):
-        df = pd.read_csv(file_path)
-    else:
-        df = pd.DataFrame(columns=correct_columns)
-
-    # Ensure all columns are initialized
-    for col in correct_columns:
-        if col not in df.columns:
-            df[col] = "N/A"
-    df = df[correct_columns]
-
-    # Locate or insert row
-    match = (df['School Year'] == year) & (df['BEIS School ID'] == school_id)
-    if not match.any():
-        new_row = {col: "N/A" for col in correct_columns}
-        new_row["School Year"] = year
-        new_row["BEIS School ID"] = school_id
-        df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
-        row_idx = df.index[-1]
-    else:
-        row_idx = df[match].index[0]
-
-    # Update the relevant column
-    column_name = f"{grade} {gender}"
-    if column_name not in df.columns:
-        df[column_name] = "N/A"
-
-    existing = df.at[row_idx, column_name]
-    existing = 0 if pd.isna(existing) or existing == "N/A" else int(existing)
-    df.at[row_idx, column_name] = existing + count
-
-    df.to_csv(file_path, index=False, na_rep="N/A")
-
-    return (
-        f"Enrollment successfully updated for {school_name} ({grade}, {gender}) in {year}.",
-        time.time()  # Returns a new number to trigger Store update
-    )
-
-@app.callback(
-    Output("upload-feedback", "children"),
-    Output("refresh_school_year_trigger", "data", allow_duplicate=True),
-    Input("upload-data", "contents"),
+    State("input_enrollment", "value"),
+    State("upload-data", "contents"),
     State("upload-data", "filename"),
     State("upload_school_year_dropdown", "value"),
     prevent_initial_call=True
 )
-def handle_uploaded_csv(contents, filename, school_year):
-    if contents and school_year:
+def finalize_submission(
+    n_clicks, school_name, manual_year, grade, gender, count,
+    upload_contents, upload_filename, upload_year
+):
+    import os, base64, io, pandas as pd, time
+
+    # Decide mode: Upload or Manual
+    if upload_contents and upload_year:
+        # Upload Mode Logic (based on your current `handle_uploaded_csv`)
         try:
-            content_type, content_string = contents.split(',')
+            content_type, content_string = upload_contents.split(',')
             decoded = base64.b64decode(content_string)
             df = pd.read_csv(io.StringIO(decoded.decode('utf-8')))
 
-            df['School Year'] = school_year
+            df['School Year'] = upload_year
 
             for col in correct_columns:
                 if col not in df.columns:
                     df[col] = "N/A"
             df = df[correct_columns]
+            df = df.fillna("N/A").replace(0, "N/A")
 
-            output_filename = f"data_{school_year}.csv"
+            output_filename = f"data_{upload_year}.csv"
             output_path = os.path.join("data_files", output_filename)
-            df = df.fillna("N/A")
-            df = df.replace(0, "N/A")
             df.to_csv(output_path, index=False, na_rep="N/A")
-            # Append new BEIS School IDs to schools.csv if needed
+
+            # School append logic
             schools_path = os.path.join("data_files", "schools.csv")
             existing_schools_df = pd.read_csv(schools_path)
             existing_ids = set(existing_schools_df["BEIS School ID"].astype(str))
 
             uploaded_ids = df["BEIS School ID"].astype(str)
             new_ids = [sid for sid in uploaded_ids.unique() if sid not in existing_ids]
-
             if new_ids:
-                # Filter uploaded rows with those new IDs and match the schools.csv format
                 school_cols = existing_schools_df.columns
                 new_school_rows = df[df["BEIS School ID"].astype(str).isin(new_ids)][school_cols.intersection(df.columns)]
-                
-                # Make sure all required columns exist and are aligned
                 for col in school_cols:
                     if col not in new_school_rows.columns:
                         new_school_rows[col] = "N/A"
-                new_school_rows = new_school_rows[school_cols]
-                new_school_rows = new_school_rows.fillna("N/A")
-                # Append and save updated schools.csv
+                new_school_rows = new_school_rows[school_cols].fillna("N/A").replace(0, "N/A")
                 updated_schools_df = pd.concat([existing_schools_df, new_school_rows], ignore_index=True)
                 updated_schools_df.to_csv(schools_path, index=False, na_rep="N/A")
-            return (f"✅ Upload successful! Data saved as {output_filename}, {school_year}",
-            time.time())
+
+            return "", f"✅ Upload finalized for {upload_year}.", upload_year
+
         except Exception as e:
-            return f"❌ Upload failed: {str(e)}"
-    return "⚠️ Please select a school year and upload a file."
+            return "", f"❌ Upload failed: {str(e)}", dash.no_update
+
+    elif all([school_name, manual_year, grade, gender, count]):
+        try:
+            count = int(count)
+            if count < 0:
+                return "Enrollment count cannot be negative.", "", dash.no_update
+        except (ValueError, TypeError):
+            return "Please enter a valid enrollment number.", "", dash.no_update
+
+        meta = get_school_metadata(school_name)
+        school_id = meta["BEIS School ID"]
+        filename = f"data_{manual_year}.csv"
+        file_path = os.path.join("data_files", filename)
+        df = pd.read_csv(file_path) if os.path.exists(file_path) else pd.DataFrame(columns=correct_columns)
+
+        for col in correct_columns:
+            if col not in df.columns:
+                df[col] = "N/A"
+        df = df[correct_columns]
+
+        match = (df['School Year'] == manual_year) & (df['BEIS School ID'] == school_id)
+        if not match.any():
+            new_row = {col: "N/A" for col in correct_columns}
+            new_row["School Year"] = manual_year
+            new_row["BEIS School ID"] = school_id
+            df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
+            row_idx = df.index[-1]
+        else:
+            row_idx = df[match].index[0]
+
+        column_name = f"{grade} {gender}"
+        if column_name not in df.columns:
+            df[column_name] = "N/A"
+        existing = df.at[row_idx, column_name]
+        existing = 0 if pd.isna(existing) or existing == "N/A" else int(existing)
+        df.at[row_idx, column_name] = existing + count
+
+        df.to_csv(file_path, index=False, na_rep="N/A")
+
+        return f"✅ Enrollment saved for {manual_year}.", "", manual_year
+
+    else:
+        return "⚠️ Incomplete manual input.", "", dash.no_update
+
+
+# === CALLBACK: Open modal from manual Submit button ===
+@app.callback(
+    Output("confirm-modal", "is_open"),
+    Output("confirm-message", "children"),
+    Output("confirm-checkbox", "value"),
+    Input("submit_button", "n_clicks"),
+    State("input_school_name", "value"),
+    State("input_school_year", "value"),
+    State("input_grade", "value"),
+    State("input_gender", "value"),
+    State("input_enrollment", "value"),
+    prevent_initial_call=True
+)
+def open_modal_manual_submit(n_clicks, name, year, grade, gender, count):
+    if not all([name, year, grade, gender, count]):
+        return False, "⚠️ Please fill in all fields before submitting.", False
+    return True, f"Are you sure you want to submit data for {year}?", False
+
+# === CALLBACK: Open modal from Upload ===
+@app.callback(
+    Output("confirm-modal", "is_open", allow_duplicate=True),
+    Output("confirm-message", "children", allow_duplicate=True),
+    Output("confirm-checkbox", "value", allow_duplicate=True),
+    Input("upload-data", "contents"),
+    State("upload_school_year_dropdown", "value"),
+    prevent_initial_call=True
+)
+def open_modal_upload(contents, upload_year):
+    if contents and upload_year:
+        return True, f"Are you sure you want to upload data for {upload_year}?", False
+    return False, "", False
+
+# === CALLBACK: Close modal from Cancel ===
+@app.callback(
+    Output("confirm-modal", "is_open", allow_duplicate=True),
+    Input("close-confirm-modal", "n_clicks"),
+    State("confirm-modal", "is_open"),
+    prevent_initial_call=True
+)
+def close_modal(n_clicks, is_open):
+    if n_clicks:
+        return False
+    return is_open
+
+# === CALLBACK: Enable/disable Finalize button ===
+@app.callback(
+    Output("finalize-submit", "disabled"),
+    Input("confirm-checkbox", "value"),
+    prevent_initial_call=True
+)
+def toggle_finalize_button(checked):
+    return not checked
+
 
 @app.callback(
     Output('table_school_year', 'options'),
