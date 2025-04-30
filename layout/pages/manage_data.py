@@ -100,6 +100,16 @@ def manage_data_content(region_options, grade_options, school_year_options):
         ),
         html.Div(id="submission_feedback", className="text-success mt-3"),
         dcc.Store(id='refresh_school_year_trigger', data='initial-load'),
+        dbc.Modal([
+            dbc.ModalHeader("Missing Fields"),
+            dbc.ModalBody([
+                html.Div(id="missing-fields-message"),
+            ]),
+            dbc.ModalFooter([
+                dbc.Button("Close", id="close-missing-fields-modal", className="ms-auto", color="secondary")
+            ])
+        ], id="missing-fields-modal", is_open=False),
+
         # Upload CSV Button and Modal
         dbc.Button("📤 Upload CSV", id="open-upload-modal", color="primary", className="mb-4"), 
         dbc.Modal([

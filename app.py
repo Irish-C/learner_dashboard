@@ -1598,9 +1598,8 @@ def finalize_submission(
 ):
     import os, base64, io, pandas as pd, time
 
-    # Decide mode: Upload or Manual
+    # Handle Upload Mode
     if upload_contents and upload_year:
-        # Upload Mode Logic (based on your current `handle_uploaded_csv`)
         try:
             content_type, content_string = upload_contents.split(',')
             decoded = base64.b64decode(content_string)
@@ -1608,6 +1607,7 @@ def finalize_submission(
 
             df['School Year'] = upload_year
 
+            # Add missing columns
             for col in correct_columns:
                 if col not in df.columns:
                     df[col] = "N/A"
@@ -1618,7 +1618,7 @@ def finalize_submission(
             output_path = os.path.join("data_files", output_filename)
             df.to_csv(output_path, index=False, na_rep="N/A")
 
-            # School append logic
+            # Handle new schools
             schools_path = os.path.join("data_files", "schools.csv")
             existing_schools_df = pd.read_csv(schools_path)
             existing_ids = set(existing_schools_df["BEIS School ID"].astype(str))
@@ -1640,6 +1640,7 @@ def finalize_submission(
         except Exception as e:
             return "", f"❌ Upload failed: {str(e)}", dash.no_update
 
+    # Handle Manual Mode
     elif all([school_name, manual_year, grade, gender, count]):
         try:
             count = int(count)
@@ -1648,6 +1649,7 @@ def finalize_submission(
         except (ValueError, TypeError):
             return "Please enter a valid enrollment number.", "", dash.no_update
 
+        # Process the manual entry
         meta = get_school_metadata(school_name)
         school_id = meta["BEIS School ID"]
         filename = f"data_{manual_year}.csv"
@@ -1681,14 +1683,46 @@ def finalize_submission(
         return f"✅ Enrollment saved for {manual_year}.", "", manual_year
 
     else:
-        return "⚠️ Incomplete manual input.", "", dash.no_update
+        return "⚠️ Incomplete manual input. Please ensure all fields are filled out correctly.", "", dash.no_update
 
 
-# === CALLBACK: Open modal from manual Submit button ===
 @app.callback(
-    Output("confirm-modal", "is_open"),
-    Output("confirm-message", "children"),
-    Output("confirm-checkbox", "value"),
+    Output("missing-fields-modal", "is_open", allow_duplicate=True),
+    Output("missing-fields-message", "children", allow_duplicate=True),
+    Input("submit_button", "n_clicks"),
+    State("input_school_name", "value"),
+    State("input_school_year", "value"),
+    State("input_grade", "value"),
+    State("input_gender", "value"),
+    State("input_enrollment", "value"),
+    prevent_initial_call=True
+)
+def check_missing_fields(n_clicks, name, year, grade, gender, count):
+    if n_clicks:
+        # Check if any required fields are missing
+        missing_fields = []
+        if not name:
+            missing_fields.append("School Name")
+        if not year:
+            missing_fields.append("School Year")
+        if not grade:
+            missing_fields.append("Grade Level")
+        if not gender:
+            missing_fields.append("Gender")
+        if not count:
+            missing_fields.append("Enrollment Count")
+        
+        if missing_fields:
+            missing_message = "⚠️ The following fields are missing: " + ", ".join(missing_fields) + ".<br><br>Please fill them in."
+            return True, dcc.Markdown(missing_message, dangerously_allow_html=True)  # Use Markdown to allow HTML
+        else:
+            return False, ""  # No missing fields, modal remains closed
+    return False, ""
+
+@app.callback(
+    Output("confirm-modal", "is_open", allow_duplicate=True),
+    Output("confirm-message", "children", allow_duplicate=True),
+    Output("confirm-checkbox", "value", allow_duplicate=True),
     Input("submit_button", "n_clicks"),
     State("input_school_name", "value"),
     State("input_school_year", "value"),
@@ -1698,9 +1732,24 @@ def finalize_submission(
     prevent_initial_call=True
 )
 def open_modal_manual_submit(n_clicks, name, year, grade, gender, count):
-    if not all([name, year, grade, gender, count]):
-        return False, "⚠️ Please fill in all fields before submitting.", False
-    return True, f"Are you sure you want to submit data for {year}?", False
+    if n_clicks:
+        # Check if all fields are filled
+        if not all([name, year, grade, gender, count]):
+            return False, "⚠️ Please fill in all fields before submitting.", False  # Don't open the confirmation modal
+        return True, f"Are you sure you want to submit data for {year}?", False  # Open the confirmation modal
+    return False, "", False
+
+
+@app.callback(
+    Output("missing-fields-modal", "is_open"),
+    Input("close-missing-fields-modal", "n_clicks"),
+    prevent_initial_call=True
+)
+def close_missing_fields_modal(n_clicks):
+    if n_clicks:
+        return False  # Close the modal
+    return True  # Keep it open if the button isn't clicked
+
 
 # === CALLBACK: Open modal from Upload ===
 @app.callback(
@@ -1719,14 +1768,17 @@ def open_modal_upload(contents, upload_year):
 # === CALLBACK: Close modal from Cancel ===
 @app.callback(
     Output("confirm-modal", "is_open", allow_duplicate=True),
+    Output("confirm-message", "children", allow_duplicate=True),
+    Output("confirm-checkbox", "value", allow_duplicate=True),
     Input("close-confirm-modal", "n_clicks"),
     State("confirm-modal", "is_open"),
     prevent_initial_call=True
 )
 def close_modal(n_clicks, is_open):
     if n_clicks:
-        return False
-    return is_open
+        return False, "", False
+    return is_open, "", False
+
 
 # === CALLBACK: Enable/disable Finalize button ===
 @app.callback(
