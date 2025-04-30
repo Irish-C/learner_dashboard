@@ -116,15 +116,14 @@ def manage_data_content(region_options, grade_options, school_year_options):
             dbc.ModalHeader("Upload Enrollment Data CSV"),
             dbc.ModalBody([
                 dbc.Row([
-                    dbc.Col([
-                        html.Label("Select School Year"),
+                    dbc.Col([html.Label("Select School Year"),
                         dcc.Dropdown(
-                            id='upload_school_year_dropdown',
+                            id='upload-school-year-dropdown',
                             options=[{'label': f"{y}-{y+1}", 'value': f"{y}-{y+1}"} for y in range(2015, 2031)],
                             placeholder="Select School Year",
                             value="2023-2024"
-                        )
-                    ])
+                        )]
+                    )
                 ], className="mb-3"),
 
                 dcc.Upload(
@@ -142,15 +141,19 @@ def manage_data_content(region_options, grade_options, school_year_options):
                     },
                     multiple=False
                 ),
+                
+                # Display filename after upload
+                html.Div(id="upload-filename", style={'fontSize': 18, 'fontWeight': 'bold'}),
 
                 html.Div(id='upload-feedback', style={'fontWeight': 'bold'}),
                 dcc.Store(id='refresh_school_year_trigger', data='initial-load')
             ]),
+
             dbc.ModalFooter([
-                dbc.Button("Close", id="close-upload-modal", className="ms-auto", color="secondary")
+                dbc.Button("Cancel", id="close-upload-modal", className="ms-auto", color="secondary"),
+                dbc.Button("Submit", id="submit-upload", color="primary")
             ])
         ], id="upload-modal", is_open=False),
-
         # Enrollment Table
         html.Hr(),
         html.H4("View Enrollment Table by School Year", className="mt-4 mb-2"),

@@ -1577,6 +1577,7 @@ def autofill_fields(school_name):
         school["Modified COC"]
     )
 
+# === CALLBACK: Finalize Submission ===
 @app.callback(
     Output("submission_feedback", "children"),
     Output("upload-feedback", "children"),
@@ -1589,7 +1590,7 @@ def autofill_fields(school_name):
     State("input_enrollment", "value"),
     State("upload-data", "contents"),
     State("upload-data", "filename"),
-    State("upload_school_year_dropdown", "value"),
+    State("upload-school-year-dropdown", "value"),  # Corrected ID
     prevent_initial_call=True
 )
 def finalize_submission(
@@ -1604,7 +1605,6 @@ def finalize_submission(
             content_type, content_string = upload_contents.split(',')
             decoded = base64.b64decode(content_string)
             df = pd.read_csv(io.StringIO(decoded.decode('utf-8')))
-
             df['School Year'] = upload_year
 
             # Add missing columns
@@ -1686,6 +1686,8 @@ def finalize_submission(
         return "⚠️ Incomplete manual input. Please ensure all fields are filled out correctly.", "", dash.no_update
 
 
+
+# === CALLBACK: Check Missing Fields ===
 @app.callback(
     Output("missing-fields-modal", "is_open", allow_duplicate=True),
     Output("missing-fields-message", "children", allow_duplicate=True),
@@ -1699,7 +1701,6 @@ def finalize_submission(
 )
 def check_missing_fields(n_clicks, name, year, grade, gender, count):
     if n_clicks:
-        # Check if any required fields are missing
         missing_fields = []
         if not name:
             missing_fields.append("School Name")
@@ -1711,14 +1712,27 @@ def check_missing_fields(n_clicks, name, year, grade, gender, count):
             missing_fields.append("Gender")
         if not count:
             missing_fields.append("Enrollment Count")
-        
+
         if missing_fields:
             missing_message = "⚠️ The following fields are missing: " + ", ".join(missing_fields) + ".<br><br>Please fill them in."
-            return True, dcc.Markdown(missing_message, dangerously_allow_html=True)  # Use Markdown to allow HTML
+            return True, dcc.Markdown(missing_message, dangerously_allow_html=True)
         else:
             return False, ""  # No missing fields, modal remains closed
     return False, ""
 
+
+@app.callback(
+    Output("missing-fields-modal", "is_open"),
+    Input("close-missing-fields-modal", "n_clicks"),
+    prevent_initial_call=True
+)
+def close_missing_fields_modal(n_clicks):
+    if n_clicks:
+        return False  # Close the modal
+    return True  # Keep it open if the button isn't clicked
+
+
+# === CALLBACK: Open Confirm Modal on Submit ===
 @app.callback(
     Output("confirm-modal", "is_open", allow_duplicate=True),
     Output("confirm-message", "children", allow_duplicate=True),
@@ -1733,39 +1747,44 @@ def check_missing_fields(n_clicks, name, year, grade, gender, count):
 )
 def open_modal_manual_submit(n_clicks, name, year, grade, gender, count):
     if n_clicks:
-        # Check if all fields are filled
         if not all([name, year, grade, gender, count]):
             return False, "⚠️ Please fill in all fields before submitting.", False  # Don't open the confirmation modal
         return True, f"Are you sure you want to submit data for {year}?", False  # Open the confirmation modal
     return False, "", False
 
 
+# === CALLBACK: Handle File Upload Modal ===
 @app.callback(
-    Output("missing-fields-modal", "is_open"),
-    Input("close-missing-fields-modal", "n_clicks"),
-    prevent_initial_call=True
-)
-def close_missing_fields_modal(n_clicks):
-    if n_clicks:
-        return False  # Close the modal
-    return True  # Keep it open if the button isn't clicked
-
-
-# === CALLBACK: Open modal from Upload ===
-@app.callback(
-    Output("confirm-modal", "is_open", allow_duplicate=True),
-    Output("confirm-message", "children", allow_duplicate=True),
-    Output("confirm-checkbox", "value", allow_duplicate=True),
+    Output("upload-modal", "is_open", allow_duplicate=True),
+    Output("upload-feedback", "children", allow_duplicate=True),
+    Output("finalize-submit", "disabled", allow_duplicate=True),  # Re-enable Finalize button
     Input("upload-data", "contents"),
-    State("upload_school_year_dropdown", "value"),
+    State("upload-school-year-dropdown", "value"),
     prevent_initial_call=True
 )
 def open_modal_upload(contents, upload_year):
     if contents and upload_year:
-        return True, f"Are you sure you want to upload data for {upload_year}?", False
+        # You can simply remove the filename from being returned in the feedback
+        return True, "File uploaded successfully", False  # Enable Finalize button
+    return False, "", False  # Keep Finalize button disabled initially
+
+
+# === CALLBACK: Handle Submit Button in Upload Modal ===
+@app.callback(
+    Output("confirm-modal", "is_open", allow_duplicate=True),
+    Output("confirm-message", "children", allow_duplicate=True),
+    Output("confirm-checkbox", "value", allow_duplicate=True),
+    Input("submit-upload", "n_clicks"),
+    State("upload-filename", "children"),
+    prevent_initial_call=True
+)
+def handle_upload_submit(n_clicks, filename):
+    if n_clicks:
+        return True, f"Are you sure you want to upload the CSV file?", False
     return False, "", False
 
-# === CALLBACK: Close modal from Cancel ===
+
+# === CALLBACK: Close Modal from Cancel in Confirm Modal ===
 @app.callback(
     Output("confirm-modal", "is_open", allow_duplicate=True),
     Output("confirm-message", "children", allow_duplicate=True),
@@ -1776,19 +1795,47 @@ def open_modal_upload(contents, upload_year):
 )
 def close_modal(n_clicks, is_open):
     if n_clicks:
-        return False, "", False
-    return is_open, "", False
+        return False, "", False  # Close modal when cancel is clicked
+    return is_open, "", False  # Keep modal open if cancel is not clicked
+
+
+# === CALLBACK: Close Modal from Cancel (including file reset) ===
+@app.callback(
+    Output("confirm-modal", "is_open", allow_duplicate=True),
+    Output("confirm-message", "children", allow_duplicate=True),
+    Output("confirm-checkbox", "value", allow_duplicate=True),
+    Output("upload-data", "contents", allow_duplicate=True),  # Reset file input
+    Input("close-upload-modal", "n_clicks"),
+    prevent_initial_call=True
+)
+def close_upload_modal(n_clicks):
+    if n_clicks:
+        return False, "", False, None  # Close the modal and reset the file input
+    return True, "", False, None  # Keep the modal open if the button isn't clicked
 
 
 # === CALLBACK: Enable/disable Finalize button ===
 @app.callback(
-    Output("finalize-submit", "disabled"),
+    Output("finalize-submit", "disabled", allow_duplicate=True),
     Input("confirm-checkbox", "value"),
     prevent_initial_call=True
 )
 def toggle_finalize_button(checked):
     return not checked
 
+
+# === CALLBACK: Finalize Button to Close Modals ===
+@app.callback(
+    Output("confirm-modal", "is_open", allow_duplicate=True),
+    Output("upload-modal", "is_open", allow_duplicate=True),
+    Output("finalize-submit", "disabled", allow_duplicate=True),
+    Input("finalize-submit", "n_clicks"),
+    prevent_initial_call=True
+)
+def finalize_submission(n_clicks):
+    if n_clicks:
+        return False, False, True  # Close both modals and disable finalize button after submission
+    return True, True, False  # Keep modals open if finalize hasn't been clicked
 
 @app.callback(
     Output('table_school_year', 'options'),
