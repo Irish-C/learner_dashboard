@@ -92,11 +92,16 @@ def dashboard_content(data, grade_options, region_options):
                                 ]
                             )
                         ], width=4),
-                    ], className="g-3")
+                    ])
                 )],
-                style=sticky_card_style,
+                style={**sticky_card_style, 
+                       "boxShadow": "none", 
+                       "transition": "none", 
+                       "transform": "none",
+                       "paddingBottom": "0px"},  # Remove padding at the bottom
                 className="mb-4 shadow-sm"
             ),
+
 
             dbc.Row([
                 dbc.Col(
