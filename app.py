@@ -1586,15 +1586,15 @@ def autofill_fields(school_name):
     State("input_school_name", "value"),
     State("input_school_year", "value"),
     State("input_grade", "value"),
-    State("input_gender", "value"),
-    State("input_enrollment", "value"),
+    State("input_enrollment_male", "value"),  # Male enrollment count
+    State("input_enrollment_female", "value"),  # Female enrollment count
     State("upload-data", "contents"),
     State("upload-data", "filename"),
-    State("upload-school-year-dropdown", "value"),  # Corrected ID
+    State("upload-school-year-dropdown", "value"),
     prevent_initial_call=True
 )
 def finalize_submission(
-    n_clicks, school_name, manual_year, grade, gender, count,
+    n_clicks, school_name, manual_year, grade, male_count, female_count,
     upload_contents, upload_filename, upload_year
 ):
     import os, base64, io, pandas as pd, time
@@ -1641,49 +1641,56 @@ def finalize_submission(
             return "", f"❌ Upload failed: {str(e)}", dash.no_update
 
     # Handle Manual Mode
-    elif all([school_name, manual_year, grade, gender, count]):
+    elif school_name and manual_year and grade and (male_count or female_count):  # Check if at least one count is provided
         try:
-            count = int(count)
-            if count < 0:
-                return "Enrollment count cannot be negative.", "", dash.no_update
-        except (ValueError, TypeError):
-            return "Please enter a valid enrollment number.", "", dash.no_update
+            # Process the manual entry
+            meta = get_school_metadata(school_name)
+            school_id = meta["BEIS School ID"]
+            filename = f"data_{manual_year}.csv"
+            file_path = os.path.join("data_files", filename)
+            df = pd.read_csv(file_path) if os.path.exists(file_path) else pd.DataFrame(columns=correct_columns)
 
-        # Process the manual entry
-        meta = get_school_metadata(school_name)
-        school_id = meta["BEIS School ID"]
-        filename = f"data_{manual_year}.csv"
-        file_path = os.path.join("data_files", filename)
-        df = pd.read_csv(file_path) if os.path.exists(file_path) else pd.DataFrame(columns=correct_columns)
+            for col in correct_columns:
+                if col not in df.columns:
+                    df[col] = "N/A"
+            df = df[correct_columns]
 
-        for col in correct_columns:
-            if col not in df.columns:
-                df[col] = "N/A"
-        df = df[correct_columns]
+            match = (df['School Year'] == manual_year) & (df['BEIS School ID'] == school_id)
+            if not match.any():
+                new_row = {col: "N/A" for col in correct_columns}
+                new_row["School Year"] = manual_year
+                new_row["BEIS School ID"] = school_id
+                df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
+                row_idx = df.index[-1]
+            else:
+                row_idx = df[match].index[0]
 
-        match = (df['School Year'] == manual_year) & (df['BEIS School ID'] == school_id)
-        if not match.any():
-            new_row = {col: "N/A" for col in correct_columns}
-            new_row["School Year"] = manual_year
-            new_row["BEIS School ID"] = school_id
-            df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
-            row_idx = df.index[-1]
-        else:
-            row_idx = df[match].index[0]
+            if male_count:
+                column_name = f"{grade} Male"
+                if column_name not in df.columns:
+                    df[column_name] = "N/A"
+                existing = df.at[row_idx, column_name]
+                existing = 0 if pd.isna(existing) or existing == "N/A" else int(existing)
+                df.at[row_idx, column_name] = existing + male_count
 
-        column_name = f"{grade} {gender}"
-        if column_name not in df.columns:
-            df[column_name] = "N/A"
-        existing = df.at[row_idx, column_name]
-        existing = 0 if pd.isna(existing) or existing == "N/A" else int(existing)
-        df.at[row_idx, column_name] = existing + count
+            if female_count:
+                column_name = f"{grade} Female"
+                if column_name not in df.columns:
+                    df[column_name] = "N/A"
+                existing = df.at[row_idx, column_name]
+                existing = 0 if pd.isna(existing) or existing == "N/A" else int(existing)
+                df.at[row_idx, column_name] = existing + female_count
 
-        df.to_csv(file_path, index=False, na_rep="N/A")
+            df.to_csv(file_path, index=False, na_rep="N/A")
 
-        return f"✅ Enrollment saved for {manual_year}.", "", manual_year
+            return f"✅ Enrollment saved for {manual_year}.", "", manual_year
+
+        except Exception as e:
+            return f"❌ Error: {str(e)}", "", dash.no_update
 
     else:
-        return "⚠️ Incomplete manual input. Please ensure all fields are filled out correctly.", "", dash.no_update
+        return "⚠️ Incomplete manual input. Please ensure at least one enrollment field (Male or Female) is filled.", "", dash.no_update
+
 
 
 
@@ -1695,12 +1702,13 @@ def finalize_submission(
     State("input_school_name", "value"),
     State("input_school_year", "value"),
     State("input_grade", "value"),
-    State("input_gender", "value"),
-    State("input_enrollment", "value"),
+    State("input_enrollment_male", "value"),  # Male enrollment
+    State("input_enrollment_female", "value"),  # Female enrollment
     prevent_initial_call=True
 )
-def check_missing_fields(n_clicks, name, year, grade, gender, count):
+def check_missing_fields(n_clicks, name, year, grade, male_count, female_count):
     if n_clicks:
+        # Check if any required fields are missing
         missing_fields = []
         if not name:
             missing_fields.append("School Name")
@@ -1708,14 +1716,14 @@ def check_missing_fields(n_clicks, name, year, grade, gender, count):
             missing_fields.append("School Year")
         if not grade:
             missing_fields.append("Grade Level")
-        if not gender:
-            missing_fields.append("Gender")
-        if not count:
-            missing_fields.append("Enrollment Count")
+        
+        # Check if both male and female enrollment counts are missing
+        if not male_count and not female_count:
+            missing_fields.append("Male and/or Female Enrollment Count")
 
         if missing_fields:
             missing_message = "⚠️ The following fields are missing: " + ", ".join(missing_fields) + ".<br><br>Please fill them in."
-            return True, dcc.Markdown(missing_message, dangerously_allow_html=True)
+            return True, dcc.Markdown(missing_message, dangerously_allow_html=True)  # Show in Missing Fields Modal
         else:
             return False, ""  # No missing fields, modal remains closed
     return False, ""
@@ -1741,14 +1749,20 @@ def close_missing_fields_modal(n_clicks):
     State("input_school_name", "value"),
     State("input_school_year", "value"),
     State("input_grade", "value"),
-    State("input_gender", "value"),
-    State("input_enrollment", "value"),
+    State("input_enrollment_male", "value"),  # Male enrollment
+    State("input_enrollment_female", "value"),  # Female enrollment
     prevent_initial_call=True
 )
-def open_modal_manual_submit(n_clicks, name, year, grade, gender, count):
+def open_modal_manual_submit(n_clicks, name, year, grade, male_count, female_count):
     if n_clicks:
-        if not all([name, year, grade, gender, count]):
+        # Check if all fields are filled and that one of the gender counts is entered
+        if not all([name, year, grade]):
             return False, "⚠️ Please fill in all fields before submitting.", False  # Don't open the confirmation modal
+
+        # If neither male nor female enrollment count is filled
+        if not male_count and not female_count:
+            return False, "⚠️ Please fill in the Male or Female enrollment count.", False  # Don't open the confirmation modal
+
         return True, f"Are you sure you want to submit data for {year}?", False  # Open the confirmation modal
     return False, "", False
 
@@ -1823,7 +1837,6 @@ def close_upload_modal(n_clicks):
 def toggle_finalize_button(checked):
     return not checked
 
-
 # === CALLBACK: Finalize Button to Close Modals ===
 @app.callback(
     Output("confirm-modal", "is_open", allow_duplicate=True),
@@ -1834,7 +1847,7 @@ def toggle_finalize_button(checked):
 )
 def finalize_submission(n_clicks):
     if n_clicks:
-        return False, False, True  # Close both modals and disable finalize button after submission
+        return False, False, True  # Close both modals and disable finalize button
     return True, True, False  # Keep modals open if finalize hasn't been clicked
 
 @app.callback(

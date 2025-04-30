@@ -118,22 +118,15 @@ def manage_data_content(region_options, grade_options, school_year_options):
 
         dbc.Row([
             dbc.Col([
-                dbc.Label("Gender"),
-                dcc.RadioItems(
-                    id='input_gender',
-                    options=[
-                        {'label': 'Male', 'value': 'Male'},
-                        {'label': 'Female', 'value': 'Female'}
-                    ],
-                    labelStyle={'margin-right': '20px'},
-                    inline=True
-                )
+                dbc.Label("Male Enrollment Count"),
+                dcc.Input(id='input_enrollment_male', type='number', placeholder="Enter Male Enrollment Count", className="form-control")
             ], width=6),
             dbc.Col([
-                dbc.Label("Enrollment Count"),
-                dcc.Input(id='input_enrollment', type='number', placeholder="Enter Enrollment Count", className="form-control")
+                dbc.Label("Female Enrollment Count"),
+                dcc.Input(id='input_enrollment_female', type='number', placeholder="Enter Female Enrollment Count", className="form-control")
             ], width=6)
         ], className="mb-5"),
+
 
         html.Div(
             dbc.Button("Submit", id="submit_button", color="primary"),
