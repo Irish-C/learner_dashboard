@@ -444,20 +444,26 @@ PLOT_TITLE=dict(        # Create consistent title style for all plots
 @app.callback(
     Output('school_year_filter', 'options'),
     Output('school_year_filter', 'value'),
-    Input('refresh_school_year_trigger', 'data'),
+    Input('upload-data', 'contents'),
+    Input('input_school_year', 'value'),  # Input from manual entry
     prevent_initial_call=False
 )
-def refresh_dashboard_year_options(trigger_data):
-    years = get_available_school_years()
-    years.sort()
+def update_school_year_dropdown(upload_contents, manual_year):
+    # Get the updated school years
+    school_years = get_available_school_years()  # This could be updated when file is uploaded or a new year is manually entered
 
-    options = [{'label': y, 'value': y} for y in years]
+    # Sort the years
+    school_years.sort()
 
-    if not years:
-        return [], None
+    # Set default value
+    default_year = manual_year if manual_year in school_years else school_years[-1]  # Use the manually entered year if valid
 
-    default_year = trigger_data if trigger_data in years else years[-1]
+    # Create the options for the dropdown
+    options = [{'label': year, 'value': year} for year in school_years]
+
     return options, default_year
+
+
 
 
 @app.callback(

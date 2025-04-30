@@ -5,6 +5,7 @@ from flask_login import current_user
 from app_data import get_available_school_years
 available_years=get_available_school_years()
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+dcc.Store(id="stored_school_years", data=get_available_school_years())  # Store available years
 
 def dashboard_content(data, grade_options, region_options):
     first_name = data.get('user-first-name', '') 
@@ -43,7 +44,7 @@ def dashboard_content(data, grade_options, region_options):
                             dcc.Dropdown(
                                 id='school_year_filter',
                                 value="2023-2024",
-                                options=[{'label': y, 'value': y} for y in available_years],
+                                options=[{'label': y, 'value': y} for y in get_available_school_years()],
                                 placeholder="Select School Year",
                                 clearable=False  # ← important to prevent None
                             )
