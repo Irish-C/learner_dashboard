@@ -966,6 +966,17 @@ def update_top_schools_chart(selected_regions, selected_grades, selected_gender)
                 hovertemplate='<b>%{y}</b><br>Enrollment: %{x:,}<extra></extra>'
             ))
 
+    # Wrap the school names by inserting a line break between the first and second parts
+    wrapped_labels = []
+    for name in top_schools_df['School Name']:
+        parts = name.split(' ', 2)  # Split into the first two parts
+        if len(parts) > 2:
+            # Join the first two words and the rest with <br> between them
+            wrapped_labels.append(parts[0] + ' ' + parts[1] + '<br>' + parts[2])
+        else:
+            # If there are only two parts, simply join them
+            wrapped_labels.append(parts[0] + ' ' + parts[1])
+
     fig.update_layout(
         title='Top 5 Most Enrolled Schools',
         barmode='stack',
@@ -984,7 +995,10 @@ def update_top_schools_chart(selected_regions, selected_grades, selected_gender)
             automargin=True,
             ticklabelposition="outside left",
             tickfont=dict(size=13, family="Arial"),
-            ticksuffix='  '
+            ticksuffix='  ',
+            ticktext=wrapped_labels,  # Use wrapped labels with <br> breaks
+            tickmode='array',  # Ensure ticktext is an array
+            tickvals=top_schools_df['School Name'].tolist()[::-1]  # Ensure tickvals correspond to wrapped labels
         ),
 
         font=dict(size=13),
