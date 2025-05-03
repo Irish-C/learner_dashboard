@@ -527,7 +527,9 @@ def update_charts(selected_regions, selected_grades, selected_school_year, selec
         color_discrete_sequence=['#0a4485', '#DE082C']
     )
 
-    pie_chart.update_traces(textinfo='percent')
+    pie_chart.update_traces(
+        textinfo='percent',
+        hovertemplate='%{label}: %{value:,} students<extra></extra>')
 
     pie_chart.update_layout(
         margin=dict(t=50, b=0, l=0, r=0),
