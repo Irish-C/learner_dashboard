@@ -887,7 +887,18 @@ def update_shs_track_chart(selected_year, selected_regions, selected_gender):
             color='Grade Level',
             orientation='h',
             text='Total Enrollment',
-            title='Senior High Track Enrollment Overview'
+            title='Senior High Track Enrollment Overview',
+            custom_data=['Grade Level']  # ✅ Pass Grade Level for hovertemplate
+        )
+
+        fig.update_traces(
+            hovertemplate=(
+                "Grade Level: %{customdata[0]}<br>" +
+                "Track: %{y}<br>" +
+                "Enrollment: %{x:,} students<extra></extra>"
+            ),
+            texttemplate='%{x:,}',  # 👈 Adds commas to in-bar text
+            textposition='auto'     # 👈 Keeps the text readable
         )
 
         fig.update_layout(
