@@ -563,13 +563,15 @@ def update_charts(selected_regions, selected_grades, selected_school_year, selec
     fig_combo.add_trace(go.Bar(
         x=agg_division['Division'],
         y=agg_division['Selected Grades Total'],
-        name='Total Enrollment'
+        name='Total Enrollment',
+        hovertemplate='<b>%{x}</b><br>Students: %{y:,}<extra></extra>',
     ), secondary_y=False)
 
     fig_combo.add_trace(go.Scatter(
         x=agg_division['Division'],
         y=agg_division['Number of Schools'],
         name='Number of Schools',
+        hovertemplate='<b>%{x}</b><br>Schools: %{y:,}<extra></extra>',
         mode='lines+markers'
     ), secondary_y=True)
 
