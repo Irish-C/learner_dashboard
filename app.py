@@ -1333,6 +1333,18 @@ def update_enrollment_choropleth(selected_school_year, selected_regions, selecte
     else:
         region_enrollment = full_enrollment.copy()
 
+    # First, get the original region codes from your dataset
+    region_enrollment['Region Code'] = region_enrollment['Region'].map(
+        {v: k for k, v in region_mapping.items()}
+    )
+
+    # Then build the hover label
+    region_enrollment['Region Hover Label'] = region_enrollment.apply(
+        lambda row: f"{row['Region Code']} ({row['Region']})" 
+        if pd.notnull(row['Region Code']) else row['Region'],
+        axis=1
+    )
+
     # 8) Build layered choropleth
     fig = go.Figure()
 
@@ -1346,8 +1358,14 @@ def update_enrollment_choropleth(selected_school_year, selected_regions, selecte
         showscale=False,
         marker_line_width=0.5,
         marker_line_color='white',
-        hoverinfo='none'
+        hoverinfo='skip',   # prevents hover box
+        name=''             # removes "trace 1"
     )
+
+    # Build dynamic description
+    hover_title = f"{selected_gender if selected_gender else 'All'} - " \
+              f"{', '.join(selected_grades) if selected_grades else 'All Grades'}" \
+              f"<br>SY: {selected_school_year}"
 
     # overlay with actual totals
     fig.add_choropleth(
@@ -1356,7 +1374,9 @@ def update_enrollment_choropleth(selected_school_year, selected_regions, selecte
         z=region_enrollment['Total Enrollment'],
         featureidkey='properties.name',
         colorbar_title="Total Enrollment",
-        coloraxis="coloraxis"
+        coloraxis="coloraxis",
+        customdata=region_enrollment[['Region Hover Label']].values,
+        hovertemplate="%{customdata[0]}<br>%{z:,} Students<extra></extra>"
     )
 
     fig.update_layout(
