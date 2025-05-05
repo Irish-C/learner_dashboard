@@ -529,7 +529,7 @@ def update_charts(selected_regions, selected_grades, selected_school_year, selec
 
     pie_chart.update_traces(
         textinfo='percent',
-        hovertemplate='%{label}: %{value:,} students<extra></extra>')
+        hovertemplate='%{label} students: %{value:,}<extra></extra>')
 
     pie_chart.update_layout(
         margin=dict(t=50, b=0, l=0, r=0),
@@ -560,10 +560,12 @@ def update_charts(selected_regions, selected_grades, selected_school_year, selec
 
     # Create the figure
     fig_combo = make_subplots(specs=[[{"secondary_y": True}]])
+
     fig_combo.add_trace(go.Bar(
         x=agg_division['Division'],
         y=agg_division['Selected Grades Total'],
         name='Total Enrollment',
+        marker_color='#0a4485',  # Blue
         hovertemplate='<b>%{x}</b><br>Students: %{y:,}<extra></extra>',
     ), secondary_y=False)
 
@@ -571,6 +573,7 @@ def update_charts(selected_regions, selected_grades, selected_school_year, selec
         x=agg_division['Division'],
         y=agg_division['Number of Schools'],
         name='Number of Schools',
+        line=dict(color='#DE082C'),  # Red
         hovertemplate='<b>%{x}</b><br>Schools: %{y:,}<extra></extra>',
         mode='lines+markers'
     ), secondary_y=True)
@@ -878,38 +881,41 @@ def update_shs_track_chart(selected_year, selected_regions, selected_gender):
     # Sort the grouped data by 'Total Enrollment' in ascending order
     grouped = grouped.sort_values(by='Total Enrollment', ascending=True)
 
+    grouped['Display Enrollment'] = grouped['Total Enrollment'] + 30000
+
     # 📊 Plot the chart safely
     try:
         fig = px.bar(
             grouped,
-            x='Total Enrollment',
+            x='Display Enrollment',
             y='Track',
             color='Grade Level',
             orientation='h',
             text='Total Enrollment',
             title='Senior High Track Enrollment Overview',
-            custom_data=['Grade Level']  # ✅ Pass Grade Level for hovertemplate
+            custom_data=['Grade Level', 'Total Enrollment'],  # ✅ Pass Grade Level for hovertemplate
+            color_discrete_map={
+                'G12': '#0a4485',   # Blue
+                'G11': '#DE082C'    # Red
+            }
         )
 
         fig.update_traces(
             hovertemplate=(
                 "Grade Level: %{customdata[0]}<br>" +
                 "Track: %{y}<br>" +
-                "Enrollment: %{x:,} students<extra></extra>"
+                "Enrollment: %{customdata[1]:,} students<extra></extra>"
             ),
-            texttemplate='%{x:,}',  # 👈 Adds commas to in-bar text
-            textposition='auto'     # 👈 Keeps the text readable
+            texttemplate='%{customdata[1]:,}',
+            textposition='none'
         )
 
         fig.update_layout(
             title='Senior High Track Enrollment Overview',
             font=dict(size=13),
             height=350,
-            scene=dict(
-                xaxis_title='Track',
-                yaxis_title='Total Enrollment',
-                zaxis_title='Grade Level'
-            ),
+            xaxis_title='Enrollment',
+            yaxis_title='Track',
             title_font=PLOT_TITLE,
         )
         return fig
@@ -1216,13 +1222,26 @@ def update_k_to_12_distribution(selected_regions, selected_gender, selected_scho
 
     dist_df = pd.DataFrame(records)
 
+    group_map = {
+        'ES': 'Elementary School',
+        'JHS': 'Junior High School',
+        'SHS': 'Senior High School'
+    }
+
+    dist_df['Group Label'] = dist_df['Group'].map(group_map)
+
+    dist_df['Display Enrollment'] = dist_df['Enrollment'].apply(
+    lambda x: x + 30000 if x < 100000 else x
+    )
+
     fig = px.bar(
         dist_df,
         x='Level',
-        y='Enrollment',
+        y='Display Enrollment',
         color='Group',
         category_orders={'Level': list(level_labels.values())},
         color_discrete_map={'ES': '#0a4485', 'JHS': '#BFDBFE', 'SHS': '#DE082C'},
+        custom_data=['Group Label', 'Level', 'Enrollment'],  
         title='Enrollment Across Grade and Non Grade Levels',
         text='Enrollment'
     )
@@ -1230,7 +1249,12 @@ def update_k_to_12_distribution(selected_regions, selected_gender, selected_scho
     fig.update_traces(
         texttemplate='%{text:,}',
         textposition='outside',
-        marker_line_width=0
+        marker_line_width=0,
+        hovertemplate=(
+        "Group: %{customdata[0]}<br>" +
+        "Level: %{customdata[1]}<br>" +
+        "Enrollment: %{customdata[2]:,}<extra></extra>"
+        )
     )
 
     fig.update_layout(
@@ -1377,11 +1401,6 @@ def update_enrollment_choropleth(selected_school_year, selected_regions, selecte
         name=''             # removes "trace 1"
     )
 
-    # Build dynamic description
-    hover_title = f"{selected_gender if selected_gender else 'All'} - " \
-              f"{', '.join(selected_grades) if selected_grades else 'All Grades'}" \
-              f"<br>SY: {selected_school_year}"
-
     # overlay with actual totals
     fig.add_choropleth(
         geojson=geojson_data,
@@ -1391,7 +1410,7 @@ def update_enrollment_choropleth(selected_school_year, selected_regions, selecte
         colorbar_title="Total Enrollment",
         coloraxis="coloraxis",
         customdata=region_enrollment[['Region Hover Label']].values,
-        hovertemplate="%{customdata[0]}<br>%{z:,} Students<extra></extra>"
+        hovertemplate = "%{customdata[0]}<br>Students: %{z:,} <extra></extra>"
     )
 
     fig.update_layout(
