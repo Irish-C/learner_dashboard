@@ -200,7 +200,17 @@ def dashboard_content(data, grade_options, region_options):
                     ], style={**no_border_style, "height": "400px"}),
                     width=6, className="mb-4"
                 )
-            ])
+            ]),
+            dbc.Row([
+                dbc.Col(
+                    dbc.Card([
+                        dbc.CardBody([
+                            dcc.Loading(dcc.Graph(id='up_sned_sector_chart', config={'displayModeBar': False}, style={'height': '100%'}))
+                        ])
+                    ], style=no_border_style),
+                    width=12
+                )
+            ], className="mb-4"),
         ]
     )
 

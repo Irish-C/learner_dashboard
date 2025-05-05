@@ -1601,6 +1601,73 @@ def update_enrollment_trend_chart(selected_year):
     except Exception as e:
         print("Error rendering Enrollment Trend chart:", e)
         return px.line(title="Error rendering Enrollment Trend chart")
+    
+@app.callback(
+    Output('up_sned_sector_chart', 'figure'),
+    Input('school_year_filter', 'value'),
+    Input('region_filter', 'value')
+)
+def update_sned_sector_chart(selected_year, selected_regions):
+    filtered_df = data.copy()
+
+    if selected_year:
+        filtered_df = filtered_df[filtered_df['School Year'] == selected_year]
+    if selected_regions:
+        filtered_df = filtered_df[filtered_df['Region'].isin(selected_regions)]
+
+    # Ensure 'School Name' column does not contain NaN before applying string methods
+    filtered_df = filtered_df.dropna(subset=['School Name'])
+
+    # Filter the DataFrame for schools with "SPED Center" in the name
+    sped_centers = filtered_df[filtered_df['School Name'].str.lower().str.contains('sped center')]
+
+    # Select the relevant columns for male and female enrollments
+    male_cols = [col for col in sped_centers.columns if 'Male' in col]
+    female_cols = [col for col in sped_centers.columns if 'Female' in col]
+
+    # Fill NaN values with 0 for the male and female enrollment columns before summing
+    sped_centers[male_cols] = sped_centers[male_cols].fillna(0)
+    sped_centers[female_cols] = sped_centers[female_cols].fillna(0)
+
+    # Calculate SNed_Male and SNed_Female by summing the relevant columns
+    sped_centers['SNed_Male'] = sped_centers[male_cols].sum(axis=1)
+    sped_centers['SNed_Female'] = sped_centers[female_cols].sum(axis=1)
+
+    # Calculate total enrollment by school
+    sped_centers['Total_Enrollment'] = sped_centers[['SNed_Male', 'SNed_Female']].sum(axis=1)
+
+    # Group by region and school name and get the top 5 schools with SPED Center in their name
+    top_5_sped_centers = sped_centers.groupby(['Region', 'School Name'])['Total_Enrollment'].sum().reset_index()
+
+    # Get the top 5 schools by total enrollment per region
+    top_5_sped_centers = top_5_sped_centers.groupby('Region').apply(lambda x: x.nlargest(5, 'Total_Enrollment')).reset_index(drop=True)
+
+    # Create the bar chart showing the top 5 schools per region
+    fig = px.bar(
+        top_5_sped_centers,
+        x='Region',
+        y='Total_Enrollment',
+        color='Region',
+        text='School Name',
+        title='Top 5 SPED Centers per Region by Total Enrollment'
+    )
+
+    # Customizing layout for better clarity
+    fig.update_layout(
+        xaxis_title='Region',
+        yaxis_title='Total Enrollment',
+        plot_bgcolor='white',
+        paper_bgcolor='white',
+        font=dict(size=13),
+        height=600,
+        margin=dict(l=20, r=20, t=80, b=40),
+        title_font=PLOT_TITLE,
+    )
+    
+    # Show the school names inside the bars
+    fig.update_traces(texttemplate='%{text}', textposition='inside')
+
+    return fig
 
 # Manual Data Page
 
