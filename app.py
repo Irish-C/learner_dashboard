@@ -1091,6 +1091,8 @@ def update_sned_sector_chart(selected_year, selected_regions, selected_gender):
     fig.update_traces(texttemplate='%{text:,}', textposition='inside')
     return fig
 
+from plotly.subplots import make_subplots
+
 @app.callback(
     Output('transition_rate_chart', 'figure'),
     Input('school_year_filter', 'value'),
@@ -1137,27 +1139,64 @@ def update_transition_rate_chart(selected_sy, selected_regions, selected_gender)
 
     fig = go.Figure()
 
-    fig.add_trace(go.Indicator(
-        mode="gauge+number+delta",
-        value=tr_elem_jhs,
-        domain={'x': [0, 0.5], 'y': [0, 1]},
-        title={'text': "Elementary to High School"},
-        gauge={'axis': {'range': [None, 100]}, 'bar': {'color': "var(--primary-color)"}}
-    ))
+    # build a 1×2 grid of indicators
+    fig = make_subplots(
+        rows=1, cols=2,
+        specs=[[{"type":"indicator"}, {"type":"indicator"}]],
+        horizontal_spacing=0.15  # increase gap between gauges
+    )
 
-    fig.add_trace(go.Indicator(
-        mode="gauge+number+delta",
-        value=tr_jhs_shs,
-        domain={'x': [0.5, 1], 'y': [0, 1]},
-        title={'text': "High School to Senior High"},
-        gauge={'axis': {'range': [None, 100]}, 'bar': {'color': "var(--secondary-color)"}}
-    ))
+    # left gauge
+    fig.add_trace(
+        go.Indicator(
+            mode="gauge+number+delta",
+            value=tr_elem_jhs,
+            gauge={"axis": {"range": [0, 100]}, "bar": {"color": "var(--primary-color)"}},
+        ),
+        row=1, col=1
+    )
+
+    # right gauge
+    fig.add_trace(
+        go.Indicator(
+            mode="gauge+number+delta",
+            value=tr_jhs_shs,
+            gauge={"axis": {"range": [0, 100]}, "bar": {"color": "var(--secondary-color)"}},
+        ),
+        row=1, col=2
+    )
 
     fig.update_layout(
-        title="Transition Rate (Placeholder as there are no previous year)", 
-        height=300,
-        title_font=PLOT_TITLE,
-        )
+        annotations=[
+            dict(
+                text="Elementary<br>to High School",
+                x=0.07, y=0.12,           # 25% across, just above bottom
+                xref="paper", yref="paper",
+                showarrow=False,
+                font={"size": 14}
+            ),
+            dict(
+                text="High School<br>to Senior High",
+                x=0.95, y=0.12,
+                xref="paper", yref="paper",
+                showarrow=False,
+                font={"size": 14}
+            ),
+        ],
+        # pull the main title closer, center it
+        title={
+            "text": "Transition Rate",
+            "x": 0.5,
+            "xanchor": "center",
+            "y": 0.98,
+            "yanchor": "top"
+        },
+        margin={"t": 20, "b": 30, "l": 20, "r": 30},
+        height=360,
+        autosize=True,
+        title_font=PLOT_TITLE
+    )
+
     return fig
 
 @app.callback(

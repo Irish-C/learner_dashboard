@@ -176,7 +176,7 @@ def dashboard_content(data, grade_options, region_options):
                 dbc.Col(
                     dbc.Card([
                         dbc.CardBody([
-                            dcc.Loading(dcc.Graph(id='transition_rate_chart', config={'displayModeBar': False}, style={'height': '100%'}))
+                            dcc.Loading(dcc.Graph(id='transition_rate_chart', config={'displayModeBar': False}, style={'height': '100%', 'width':'100%'}))
                         ])
                     ], style={**no_border_style, "height": "400px"}),
                     width=5
