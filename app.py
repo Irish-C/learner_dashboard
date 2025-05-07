@@ -266,7 +266,7 @@ def load_protected_page(login_data):
     style={
         "height": "100vh",
         "width": "100%",
-        "backgroundImage": 'url("/assets/icons/classroom.png")',
+        "backgroundImage": 'url("/assets/icons/class.png")',
         "backgroundSize": "cover",
         "backgroundPosition": "center",
         "display": "flex",
