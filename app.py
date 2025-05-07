@@ -1463,6 +1463,7 @@ def update_enrollment_choropleth(selected_school_year, selected_regions, selecte
         geo=dict(fitbounds="locations", visible=False),
         margin={"r":0,"t":50,"l":0,"b":0},
         dragmode=False,
+        autosize=True,
 
         title_font=PLOT_TITLE,
 
