@@ -12,6 +12,7 @@ import hashlib
 from datetime import datetime
 import time
 
+from layout.pages.settings import settings_content
 from layout.sidebar import create_sidebar
 from layout.header import create_header
 from layout.page_router import get_content_style, create_content
@@ -145,6 +146,7 @@ def verify_login(n_clicks, first_name, last_name, email, password):
 
     return dash.no_update, "❌ Invalid credentials. Please try again."
 
+
 @app.callback(
     Output("sidebar-container", "children"),
     Output("content", "children"),
@@ -162,18 +164,15 @@ def verify_login(n_clicks, first_name, last_name, email, password):
 def handle_interaction(toggle_clicks, b1, b2, b3, b4, is_collapsed, current_page):
     ctx = callback_context
 
-    # Track updated values
     new_collapsed = is_collapsed
     new_page = current_page
 
     if ctx.triggered:
         triggered_id = ctx.triggered[0]["prop_id"].split(".")[0]
 
-        # Toggle sidebar
         if triggered_id == "sidebar-toggle":
             new_collapsed = not is_collapsed
 
-        # Navigation
         button_to_page = {
             "btn-1": PAGE_CONSTANTS[1],
             "btn-2": PAGE_CONSTANTS[2],
@@ -184,10 +183,16 @@ def handle_interaction(toggle_clicks, b1, b2, b3, b4, is_collapsed, current_page
             new_page = button_to_page[triggered_id]
 
     sidebar = create_sidebar(is_collapsed=new_collapsed, current_page=new_page)
-    content = create_content(new_page, data, grade_options, region_options, school_year_options)
+
+    if new_page == "settings":
+        content = settings_content()
+    else:
+        content = create_content(new_page, data, grade_options, region_options, school_year_options)
+
     content_style = get_content_style(new_collapsed)
 
     return sidebar, content, content_style, new_collapsed, new_page
+
 
 
 
