@@ -142,7 +142,8 @@ def verify_login(n_clicks, first_name, last_name, email, password):
             user["Last_Name"].lower() == last_name.lower() and
             user["Email"].lower() == email.lower() and
             user["Password"] == pw_hash):
-            return {"logged_in": True, "user": f"{first_name} {last_name}"}, ""
+            return {"logged_in": True, "user": f"{first_name} {last_name}","avatar": user["avatar"]
+                    },""
 
     return dash.no_update, "❌ Invalid credentials. Please try again."
 
@@ -195,8 +196,24 @@ def handle_interaction(toggle_clicks, b1, b2, b3, b4, is_collapsed, current_page
 
     return sidebar, content, content_style, new_collapsed, new_page
 
+# Call back for same profile pic
+@app.callback(
+    Output("user-avatar", "src"),
+    Output("user-name", "children"),
+    Input("login-state", "data")
+)
+def update_user_profile(login_data):
+    if login_data and login_data.get("logged_in"):
+        avatar_filename = login_data.get("avatar", "")
+        avatar_path = (
+            f"/assets/avatars/{avatar_filename}"
+            if pd.notna(avatar_filename) and os.path.isfile(f"assets/avatars/{avatar_filename}")
+            else "/assets/avatars/default.jpg"
+        )
+        username = login_data.get("username", login_data.get("user", "User"))
+        return avatar_path, username
 
-
+    return "/assets/avatars/default.jpg", "Guest"
 
 # Call back for login to dashboard
 @app.callback(
