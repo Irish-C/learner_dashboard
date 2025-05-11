@@ -3,7 +3,7 @@ import dash_bootstrap_components as dbc
 import pandas as pd
 import os
 
-# Load user data CSV (assuming the CSV is at data_files/users.csv)
+# Load user data CSV
 user_df = pd.read_csv("data_files/user-info.csv")
 
 def settings_content(current_user):
@@ -59,38 +59,63 @@ def settings_content(current_user):
                     "padding": "10px",
                     "borderRadius": "5px"
                 }),
+
                 dbc.Card([
                     dbc.CardHeader("About"),
                     dbc.CardBody([
-                        html.P(user_data.get("about", "No bio available.")),
+                        dbc.Textarea(
+                            placeholder="Tell us about yourself...",
+                            value=user_data.get("about", "No bio available."),
+                            id="about-input",
+                            style={"height": "100px"}
+                        ),
+                        dbc.Button("Update About", id="update-about-btn", color="danger", className="mt-2")
                     ])
                 ], className="mb-3"),
 
                 dbc.Card([
                     dbc.CardHeader("Basic Information"),
                     dbc.CardBody([
-                        dbc.Row([
-                            dbc.Col(dbc.Input(placeholder="First name", value=first_name, disabled=True), width=6),
-                            dbc.Col(dbc.Input(placeholder="Last name", value=last_name, disabled=True), width=6),
-                        ], className="mb-2"),
-                        dbc.Row([
-                            dbc.Col(dbc.Input(placeholder="Username", value=user_data["username"], disabled=True), width=6),
-                            dbc.Col(dbc.Input(placeholder="Phone number", value=user_data.get("contact", ""), disabled=True), width=6),
-                        ], className="mb-2"),
+
                         dbc.Row([
                             dbc.Col([
-                                dbc.Input(placeholder="Email", value=user_data.get("Email", "")),
+                                dbc.Label("First Name"),
+                                dbc.Input(placeholder="First name", value=first_name, disabled=True)
+                            ], width=6),
+                            dbc.Col([
+                                dbc.Label("Last Name"),
+                                dbc.Input(placeholder="Last name", value=last_name, disabled=True)
+                            ], width=6),
+                        ], className="mb-2"),
+
+                        dbc.Row([
+                            dbc.Col([
+                                dbc.Label("Username"),
+                                dbc.Input(placeholder="Username", value=user_data["username"], disabled=True)
+                            ], width=6),
+                            dbc.Col([
+                                dbc.Label("Contact Number"),
+                                dbc.Input(placeholder="Phone number", value=user_data.get("contact", ""), disabled=True)
+                            ], width=6),
+                        ], className="mb-2"),
+
+                        dbc.Row([
+                            dbc.Col([
+                                dbc.Label("Email"),
+                                dbc.Input(placeholder="Email", value=user_data.get("Email", ""), id="email-input")
                             ], width=9),
                             dbc.Col([
-                                dbc.Button("Update",id="update-email-btn", color="danger", className="w-100")
+                                dbc.Button("Update", id="update-email-btn", color="danger", className="w-100 mt-4")
                             ], width=3)
                         ], className="mb-2"),
+
                         dbc.Row([
                             dbc.Col([
-                                dbc.Input(placeholder="Password", type="password", value=user_data.get("Password","")),
+                                dbc.Label("Password"),
+                                dbc.Input(placeholder="Password", type="password", value=user_data.get("Password", ""), id="password-input")
                             ], width=9),
                             dbc.Col([
-                                dbc.Button("Update", id="update-password-btn",color="danger", className="w-100")
+                                dbc.Button("Update", id="update-password-btn", color="danger", className="w-100 mt-4")
                             ], width=3)
                         ])
                     ])
