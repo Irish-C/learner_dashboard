@@ -159,9 +159,10 @@ def verify_login(n_clicks, first_name, last_name, email, password):
     Input("btn-3", "n_clicks"),
     Input("btn-4", "n_clicks"),
     State("sidebar-toggle-state", "data"),
-    State("current-page", "data")
+    State("current-page", "data"),
+    State("login-state", "data")
 )
-def handle_interaction(toggle_clicks, b1, b2, b3, b4, is_collapsed, current_page):
+def handle_interaction(toggle_clicks, b1, b2, b3, b4, is_collapsed, current_page, login_state):
     ctx = callback_context
 
     new_collapsed = is_collapsed
@@ -185,7 +186,8 @@ def handle_interaction(toggle_clicks, b1, b2, b3, b4, is_collapsed, current_page
     sidebar = create_sidebar(is_collapsed=new_collapsed, current_page=new_page)
 
     if new_page == "settings":
-        content = settings_content()
+        current_user = login_state["user"] if login_state and "user" in login_state else ""
+        content = settings_content(current_user)
     else:
         content = create_content(new_page, data, grade_options, region_options, school_year_options)
 
@@ -2105,3 +2107,23 @@ def toggle_upload_modal(open_click, close_click, is_open):
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+@app.callback(
+    Output("user-avatar-img", "src"),
+    Input("upload-photo", "contents"),
+    State("upload-photo", "filename"),
+    prevent_initial_call=True
+)
+def save_uploaded_avatar(contents, filename):
+    if contents and filename:
+        content_type, content_string = contents.split(',')
+        decoded = base64.b64decode(content_string)
+        save_path = os.path.join("assets", "avatars", filename)
+
+        # Save the file to the avatars directory
+        with open(save_path, "wb") as f:
+            f.write(decoded)
+
+        return f"/assets/avatars/{filename}"
+
+    raise dash.exceptions.PreventUpdate
