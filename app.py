@@ -951,9 +951,17 @@ def update_shs_track_chart(selected_year, selected_regions, selected_gender):
     Output('top_schools_chart', 'figure'),
     Input('region_filter', 'value'),
     Input('grade_filter', 'value'),
-    Input('gender_filter', 'value')
+    Input('gender_filter', 'value'),
+    Input('school_year_filter', 'value')
 )
-def update_top_schools_chart(selected_regions, selected_grades, selected_gender):
+def update_top_schools_chart(selected_regions, selected_grades, selected_gender, selected_school_year):
+    if not selected_school_year:
+        raise dash.exceptions.PreventUpdate
+    try:
+        data, grade_columns, _, _ = load_data_for_year(selected_school_year)
+    except FileNotFoundError:
+        raise dash.exceptions.PreventUpdate
+     
     filtered_data = data.copy()
     if selected_regions:
         filtered_data = filtered_data[filtered_data['Region'].isin(selected_regions)]
