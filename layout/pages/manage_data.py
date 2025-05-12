@@ -6,15 +6,25 @@ available_years = get_available_school_years()
 def manage_data_content(region_options, grade_options, school_year_options):
         # ➡️ Add this inside the function
     def extend_grade_options_with_strands(original_grade_options):
-        shs_strands = ['ABM', 'HUMSS', 'STEM', 'GAS', 'PBM', 'TVL', 'SPORTS', 'ARTS & DESIGN']
+        # map friendly name → actual dataset base
+        shs_map = {
+            'ABM': 'ACAD - ABM',
+            'HUMSS': 'ACAD - HUMSS',
+            'STEM': 'ACAD STEM',
+            'GAS': 'ACAD GAS',
+            'PBM': 'ACAD PBM',
+            'TVL': 'TVL',
+            'SPORTS': 'SPORTS',
+            'ARTS & DESIGN': 'ARTS'
+        }
         new_options = []
         for option in original_grade_options:
             value = option['value']
             if value in ['G11', 'G12']:
-                for strand in shs_strands:
+                for strand, dataset_str in shs_map.items():
                     new_options.append({
-                        'label': f"{option['label']} - {strand}",
-                        'value': f"{value}_{strand}"
+                        'label': f"Grade {value[1:]} - {strand}",
+                        'value': f"{value} {dataset_str}"  # this matches your column format
                     })
             else:
                 new_options.append(option)
