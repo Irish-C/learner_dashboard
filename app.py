@@ -1068,11 +1068,14 @@ def update_top_schools_chart(selected_regions, selected_grades, selected_gender,
     Input('region_filter', 'value'),
     Input('gender_filter', 'value')
 )
-def update_sned_sector_chart(selected_year, selected_regions, selected_gender):
+def update_sned_sector_chart(selected_school_year, selected_regions, selected_gender):
+    if not selected_school_year:
+        raise dash.exceptions.PreventUpdate
+    try:
+        data, grade_columns, _, _ = load_data_for_year(selected_school_year)
+    except FileNotFoundError:
+        raise dash.exceptions.PreventUpdate
     filtered_df = data.copy()
-
-    if selected_year:
-        filtered_df = filtered_df[filtered_df['School Year'] == selected_year]
     if selected_regions:
         filtered_df = filtered_df[filtered_df['Region'].isin(selected_regions)]
 
@@ -1519,13 +1522,16 @@ def update_enrollment_choropleth(selected_school_year, selected_regions, selecte
     Input('grade_filter', 'value'),
     Input('gender_filter', 'value')
 )
-def update_coc_sector_chart(selected_sy, selected_regions, selected_grades, selected_gender):
+def update_coc_sector_chart(selected_school_year, selected_regions, selected_grades, selected_gender):
+    if not selected_school_year:
+        raise dash.exceptions.PreventUpdate
+    try:
+        data, grade_columns, _, _ = load_data_for_year(selected_school_year)
+    except FileNotFoundError:
+        raise dash.exceptions.PreventUpdate
+    
     # Make a copy of the full dataset
     df = data.copy()
-
-    # Filter Dataset by selected school year
-    df = df[df['School Year'] == selected_sy]
-
     # Filter Dataset to inlcude only those regions
     if selected_regions:
         df = df[df['Region'].isin(selected_regions)]
