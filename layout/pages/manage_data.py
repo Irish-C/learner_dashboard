@@ -3,8 +3,25 @@ from dash import html, dcc, dash_table
 from app_data import get_available_school_years
 
 available_years = get_available_school_years()
-
 def manage_data_content(region_options, grade_options, school_year_options):
+        # ➡️ Add this inside the function
+    def extend_grade_options_with_strands(original_grade_options):
+        shs_strands = ['ABM', 'HUMSS', 'STEM', 'GAS', 'PBM', 'TVL', 'SPORTS', 'ARTS & DESIGN']
+        new_options = []
+        for option in original_grade_options:
+            value = option['value']
+            if value in ['G11', 'G12']:
+                for strand in shs_strands:
+                    new_options.append({
+                        'label': f"{option['label']} - {strand}",
+                        'value': f"{value}_{strand}"
+                    })
+            else:
+                new_options.append(option)
+        return new_options
+
+    # ➡️ Call the extender immediately
+    grade_options = extend_grade_options_with_strands(grade_options)
     return dbc.Container([
         html.H1("Manage Data", className="page-title mb-4"),
         html.H3("Add New Enrollment Record", className="mb-4"),
