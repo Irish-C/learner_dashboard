@@ -1115,8 +1115,6 @@ def update_sned_sector_chart(selected_year, selected_regions, selected_gender):
     fig.update_traces(texttemplate='%{text:,}', textposition='inside')
     return fig
 
-from plotly.subplots import make_subplots
-
 @app.callback(
     Output('transition_rate_chart', 'figure'),
     Input('school_year_filter', 'value'),
@@ -1124,20 +1122,20 @@ from plotly.subplots import make_subplots
     Input('gender_filter', 'value')
 )
 def update_transition_rate_chart(selected_sy, selected_regions, selected_gender):
-    df_sy_n = data[data['School Year'] == selected_sy]
-
-    # Previous year setup (mocked)
     try:
-        previous_sy = str(int(selected_sy.split('-')[0]) - 1) + '-' + str(int(selected_sy.split('-')[1]) - 1)
-    except:
-        previous_sy = "N/A"
-    df_sy_n1 = data[data['School Year'] == previous_sy]
+        data_curr, _, _, _ = load_data_for_year(selected_sy)
+        previous_sy = f"{int(selected_sy.split('-')[0]) - 1}-{int(selected_sy.split('-')[1]) - 1}"
+        data_prev, _, _, _ = load_data_for_year(previous_sy)
+    except Exception:
+        return go.Figure().update_layout(title="No data available", title_font=PLOT_TITLE)
+
+    df_sy_n = data_curr.copy()
+    df_sy_n1 = data_prev.copy()
 
     if selected_regions:
         df_sy_n = df_sy_n[df_sy_n['Region'].isin(selected_regions)]
         df_sy_n1 = df_sy_n1[df_sy_n1['Region'].isin(selected_regions)]
 
-    # Helper function
     def gender_filter(df, grade_base):
         if selected_gender == 'Male':
             cols = [f"{grade_base} Male"]
@@ -1145,9 +1143,8 @@ def update_transition_rate_chart(selected_sy, selected_regions, selected_gender)
             cols = [f"{grade_base} Female"]
         else:
             cols = [f"{grade_base} Male", f"{grade_base} Female"]
-        return df[cols].sum().sum()
+        return df[cols].sum().sum() if all(col in df.columns for col in cols) else 0
 
-    # Placeholder logic if no prev year exists
     if df_sy_n1.empty:
         tr_elem_jhs = 0
         tr_jhs_shs = 0
@@ -1158,19 +1155,17 @@ def update_transition_rate_chart(selected_sy, selected_regions, selected_gender)
 
         g10 = gender_filter(df_sy_n1, "G10")
         g11_cols = [col for col in df_sy_n.columns if "G11" in col and (selected_gender in col or selected_gender == 'All')]
-        g11 = df_sy_n[g11_cols].sum().sum()
+        g11 = df_sy_n[g11_cols].sum().sum() if g11_cols else 0
         tr_jhs_shs = (g11 / g10) * 100 if g10 else 0
 
     fig = go.Figure()
 
-    # build a 1×2 grid of indicators
     fig = make_subplots(
         rows=1, cols=2,
         specs=[[{"type":"indicator"}, {"type":"indicator"}]],
-        horizontal_spacing=0.15  # increase gap between gauges
+        horizontal_spacing=0.15
     )
 
-    # left gauge
     fig.add_trace(
         go.Indicator(
             mode="gauge+number+delta",
@@ -1180,7 +1175,6 @@ def update_transition_rate_chart(selected_sy, selected_regions, selected_gender)
         row=1, col=1
     )
 
-    # right gauge
     fig.add_trace(
         go.Indicator(
             mode="gauge+number+delta",
@@ -1194,7 +1188,7 @@ def update_transition_rate_chart(selected_sy, selected_regions, selected_gender)
         annotations=[
             dict(
                 text="Elementary<br>to High School",
-                x=0.07, y=0.12,           # 25% across, just above bottom
+                x=0.07, y=0.12,
                 xref="paper", yref="paper",
                 showarrow=False,
                 font={"size": 14}
@@ -1207,7 +1201,6 @@ def update_transition_rate_chart(selected_sy, selected_regions, selected_gender)
                 font={"size": 14}
             ),
         ],
-        # pull the main title closer, center it
         title={
             "text": "Transition Rate",
             "x": 0.5,
@@ -1222,6 +1215,7 @@ def update_transition_rate_chart(selected_sy, selected_regions, selected_gender)
     )
 
     return fig
+
 
 @app.callback(
     Output('k_to_12_distribution_chart', 'figure'),
