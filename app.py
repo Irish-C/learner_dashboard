@@ -872,13 +872,14 @@ def toggle_modal(school_id, close_click, is_open):
     Input('region_filter', 'value'),
     Input('gender_filter', 'value')
 )
-def update_shs_track_chart(selected_year, selected_regions, selected_gender):
+def update_shs_track_chart(selected_school_year, selected_regions, selected_gender):
+    if not selected_school_year:
+        raise dash.exceptions.PreventUpdate
+    try:
+        data, grade_columns, _, _ = load_data_for_year(selected_school_year)
+    except FileNotFoundError:
+        raise dash.exceptions.PreventUpdate
     df_filtered = combined_shs_track_df.copy()
-
-    # 🧠 Filter by school year
-    if selected_year:
-        df_filtered = df_filtered[df_filtered['School Year'] == selected_year]
-
     # 🧠 Filter by region
     if selected_regions:
         df_filtered = df_filtered[df_filtered['Region'].isin(selected_regions)]
