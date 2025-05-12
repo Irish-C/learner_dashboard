@@ -1609,38 +1609,55 @@ def update_coc_sector_chart(selected_sy, selected_regions, selected_grades, sele
 
 @app.callback(
     Output('enrollment_trend_line_chart', 'figure'),
-    Input('school_year_filter', 'value')  # Only the school year filter is used now
+    Input('school_year_filter', 'value'),
+    Input('stored_school_year', 'data')
 )
-def update_enrollment_trend_chart(selected_year):
-    df_filtered = data.copy()  # Replace with your actual DataFrame
+def update_enrollment_trend_chart(selected_year, stored_year):
+    if not selected_year:
+        selected_year = stored_year
 
-    # 🧠 Filter by school year
-    if selected_year:
-        df_filtered = df_filtered[df_filtered['School Year'] == selected_year]
+    available_years = get_available_school_years()
+    if not available_years:
+        return go.Figure().update_layout(title="No data available", title_font=PLOT_TITLE)
 
-    # ✅ Final protection: prevent plotly from erroring on empty or malformed data
-    if df_filtered.empty:
+    if not selected_year:
+        selected_year = "2023-2024" if "2023-2024" in available_years else available_years[-1]
+
+
+    idx = available_years.index(selected_year)
+    start = max(idx - 2, 0)
+    end = min(idx + 3, len(available_years))
+    years_to_load = available_years[start:end]
+
+    frames = []
+    for year in years_to_load:
+        try:
+            df, _, _, _ = load_data_for_year(year)
+            frames.append(df[['School Year', 'Total Enrollment']])
+        except Exception:
+            continue
+
+    if not frames:
         return go.Figure().update_layout(
-            title="No data available for the selected school year",
+            title="No data available for selected range",
             xaxis_title='School Year',
             yaxis_title='Total Enrollment'
         )
 
-    # 🧾 Group the data by 'School Year' and calculate total enrollment
-    grouped = df_filtered.groupby(['School Year'], as_index=False)['Total Enrollment'].sum()
+    df_combined = pd.concat(frames)
+    grouped = df_combined.groupby(['School Year'], as_index=False)['Total Enrollment'].sum()
+    grouped = grouped.sort_values(by='School Year')
 
-    # 🔐 Defensive: check again if grouped is empty
     if grouped.empty:
         return px.line(title="No data to display")
-    
-    # 📊 Plot the line chart safely
+
     try:
         fig = px.line(
             grouped,
             x='School Year',
             y='Total Enrollment',
             title='Total Enrollment Trend<br>Over the Years',
-            markers=True  # Show markers at each data point on the line
+            markers=True
         )
 
         fig.update_layout(
@@ -1652,7 +1669,7 @@ def update_enrollment_trend_chart(selected_year):
             title_font=PLOT_TITLE,
             xaxis_title='School Year',
             yaxis_title='Total Enrollment',
-            xaxis=dict(tickmode='linear'),  # Ensure proper linear ticks on x-axis
+            xaxis=dict(tickmode='linear'),
             yaxis=dict(title='Total Enrollment')
         )
         return fig
