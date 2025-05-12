@@ -1126,7 +1126,6 @@ def update_sned_sector_chart(selected_school_year, selected_regions, selected_ge
     )
     fig.update_traces(texttemplate='%{text:,}', textposition='inside')
     return fig
-
 @app.callback(
     Output('transition_rate_chart', 'figure'),
     Input('school_year_filter', 'value'),
@@ -1136,13 +1135,17 @@ def update_sned_sector_chart(selected_school_year, selected_regions, selected_ge
 def update_transition_rate_chart(selected_sy, selected_regions, selected_gender):
     try:
         data_curr, _, _, _ = load_data_for_year(selected_sy)
-        previous_sy = f"{int(selected_sy.split('-')[0]) - 1}-{int(selected_sy.split('-')[1]) - 1}"
-        data_prev, _, _, _ = load_data_for_year(previous_sy)
     except Exception:
         return go.Figure().update_layout(title="No data available", title_font=PLOT_TITLE)
 
+    previous_sy = f"{int(selected_sy.split('-')[0]) - 1}-{int(selected_sy.split('-')[1]) - 1}"
+    try:
+        data_prev, _, _, _ = load_data_for_year(previous_sy)
+    except Exception:
+        data_prev = None
+
     df_sy_n = data_curr.copy()
-    df_sy_n1 = data_prev.copy()
+    df_sy_n1 = data_prev.copy() if data_prev is not None else pd.DataFrame()
 
     if selected_regions:
         df_sy_n = df_sy_n[df_sy_n['Region'].isin(selected_regions)]
@@ -1160,6 +1163,7 @@ def update_transition_rate_chart(selected_sy, selected_regions, selected_gender)
     if df_sy_n1.empty:
         tr_elem_jhs = 0
         tr_jhs_shs = 0
+        no_prev = True
     else:
         g6 = gender_filter(df_sy_n1, "G6")
         g7 = gender_filter(df_sy_n, "G7")
@@ -1169,6 +1173,7 @@ def update_transition_rate_chart(selected_sy, selected_regions, selected_gender)
         g11_cols = [col for col in df_sy_n.columns if "G11" in col and (selected_gender in col or selected_gender == 'All')]
         g11 = df_sy_n[g11_cols].sum().sum() if g11_cols else 0
         tr_jhs_shs = (g11 / g10) * 100 if g10 else 0
+        no_prev = False
 
     fig = go.Figure()
 
@@ -1214,7 +1219,7 @@ def update_transition_rate_chart(selected_sy, selected_regions, selected_gender)
             ),
         ],
         title={
-            "text": "Transition Rate",
+            "text": "Transition Rate" if not no_prev else "Transition Rate - No previous year available",
             "x": 0.5,
             "xanchor": "center",
             "y": 0.98,
@@ -1227,7 +1232,6 @@ def update_transition_rate_chart(selected_sy, selected_regions, selected_gender)
     )
 
     return fig
-
 
 @app.callback(
     Output('k_to_12_distribution_chart', 'figure'),
@@ -1697,11 +1701,14 @@ def update_enrollment_trend_chart(selected_year, stored_year):
     Input('school_year_filter', 'value'),
     Input('region_filter', 'value')
 )
-def update_sned_sector_chart(selected_year, selected_regions):
+def update_sned_sector_chart(selected_school_year, selected_regions):
+    if not selected_school_year:
+        raise dash.exceptions.PreventUpdate
+    try:
+        data, grade_columns, _, _ = load_data_for_year(selected_school_year)
+    except FileNotFoundError:
+        raise dash.exceptions.PreventUpdate
     filtered_df = data.copy()
-
-    if selected_year:
-        filtered_df = filtered_df[filtered_df['School Year'] == selected_year]
     if selected_regions:
         filtered_df = filtered_df[filtered_df['Region'].isin(selected_regions)]
 
