@@ -1691,6 +1691,10 @@ def update_enrollment_trend_chart(selected_year, stored_year):
             xaxis=dict(tickmode='linear'),
             yaxis=dict(title='Total Enrollment')
         )
+
+        fig.update_traces(
+            hovertemplate='School Year: %{x}<br>Total Enrollment: %{y:,.0f}'
+        )
         return fig
     except Exception as e:
         print("Error rendering Enrollment Trend chart:", e)
