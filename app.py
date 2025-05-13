@@ -1758,18 +1758,39 @@ def update_sned_sector_chart(selected_school_year, selected_regions):
     # Get the top 5 schools by total enrollment per region
     top_5_sped_centers = top_5_sped_centers.groupby('Region').apply(lambda x: x.nlargest(5, 'Total_Enrollment')).reset_index(drop=True)
 
-    # Create the bar chart showing the top 5 schools per region
-    fig = px.bar(
-        top_5_sped_centers,
-        x='Region',
-        y='Total_Enrollment',
-        color='Region',
-        text='School Name',
-        title='Top 5 SPED Centers per Region by Total Enrollment'
+    top_5_sped_centers['Display_Enrollment'] = top_5_sped_centers['Total_Enrollment'].apply(
+        lambda x: x + 300 if x < 1000 else x
     )
+
+    # Create the bar chart showing the top 5 schools per region
+    fig = go.Figure()
+
+    from plotly.colors import sample_colorscale, sequential
+
+    # Generate Viridis colors based on number of schools
+    num_bars = len(top_5_sped_centers)
+    viridis_colors = sample_colorscale(sequential.Viridis, [i / max(num_bars - 1, 1) for i in range(num_bars)])
+
+    # Loop over regions and plot top 5 schools per region
+    for i, row in top_5_sped_centers.iterrows():
+        fig.add_trace(go.Bar(
+            x=[row['Region']],
+            y=[row['Display_Enrollment']],
+            name=row['School Name'],
+            marker_color=viridis_colors[i],
+            text=row['School Name'],
+            textposition='none',
+            customdata=[[row['Region'], row['School Name'], row['Total_Enrollment']]],
+            hovertemplate=(
+                "Region: %{customdata[0]}<br>" +
+                "School Name: %{customdata[1]}<br>" +
+                "Total Enrollment: %{customdata[2]:,} students<extra></extra>"
+            )
+        ))
 
     # Customizing layout for better clarity
     fig.update_layout(
+        barmode='stack',
         xaxis_title='Region',
         yaxis_title='Total Enrollment',
         plot_bgcolor='white',
@@ -1777,11 +1798,10 @@ def update_sned_sector_chart(selected_school_year, selected_regions):
         font=dict(size=13),
         height=600,
         margin=dict(l=20, r=20, t=80, b=40),
+        title='Top 5 SPED Centers per Region by Total Enrollment',
         title_font=PLOT_TITLE,
+        showlegend=False  # Optional: hide legend since Region is already on x-axis
     )
-    
-    # Show the school names inside the bars
-    fig.update_traces(texttemplate='%{text}', textposition='inside')
 
     return fig
 
