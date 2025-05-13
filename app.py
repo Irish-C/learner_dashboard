@@ -1584,25 +1584,37 @@ def update_coc_sector_chart(selected_school_year, selected_regions, selected_gra
     df_counts['Modified COC'] = pd.Categorical(df_counts['Modified COC'], categories=coc_order, ordered=True)
     df_counts = df_counts.sort_values('Modified COC')
 
-    # Create stacked bar
-    fig = px.bar(
-        df_counts,
-        x='Modified COC',
-        y='Count',
-        color='Sector',
-        category_orders={
-            'Modified COC': coc_order, 
-            'Sector': ['Public', 'Private', 'SUCsLUCs'] # Order Sectors
-            },
-        labels={
-            'Count': 'Number of Schools', 
-            'Modified COC': 'COC Offering', 
-            'Sector': 'Sector'},
-        barmode='stack'
-    )
+    # Create Visual Count for boosted visibility
+    df_counts['Visual Count'] = df_counts['Count'].apply(lambda x: x + 2000 if x < 10000 else x)
+
+    # Define sector order and color mapping
+    sector_order = ['Public', 'Private', 'SUCsLUCs']
+    colors = {'Public': '#0a4485', 'Private': '#BFDBFE', 'SUCsLUCs': '#DE082C'}
+
+    # Create figure manually
+    fig = go.Figure()
+
+    # Add one trace per sector
+    for sector in sector_order:
+        df_sector = df_counts[df_counts['Sector'] == sector].copy()
+        fig.add_trace(go.Bar(
+            x=df_sector['Modified COC'],
+            y=df_sector['Visual Count'],
+            name=sector,
+            marker_color=colors[sector],
+            customdata=df_sector[['Sector', 'Modified COC', 'Count']],
+            hovertemplate=(
+                "Sector: %{customdata[0]}<br>" +
+                "COC Offering: %{customdata[1]}<br>" +
+                "Number of Schools: %{customdata[2]:,} <extra></extra>"
+            ),
+            texttemplate='%{customdata[2]:,}',
+            textposition='none'  # Or 'auto' if you want to show values on bars
+        ))
 
     # Update the chart layout 
     fig.update_layout(
+        barmode='stack',
         title='School Offerings by Certificate of Completion (COC)<br>Type and Sector',
         xaxis_title='Type',
         yaxis_title='Number of Schools',
@@ -1614,15 +1626,6 @@ def update_coc_sector_chart(selected_school_year, selected_regions, selected_gra
         height=350,
         title_font=PLOT_TITLE,
     )
-
-    # Add custom colors for each sector
-    for trace in fig.data:
-        if trace.name == 'Public':
-            trace.marker.color = '#0a4485'
-        elif trace.name == 'Private':
-            trace.marker.color = '#BFDBFE'
-        elif trace.name == 'SUCsLUCs':
-            trace.marker.color = '#DE082C'
 
     return fig
 
