@@ -1102,18 +1102,29 @@ def update_sned_sector_chart(selected_school_year, selected_regions, selected_ge
     melted = pd.melt(grouped, id_vars='Sector', var_name='Gender', value_name='Enrollment')
     melted['Gender'] = melted['Gender'].map(stack_name_map)
 
-    fig = px.bar(
-        melted,
-        x='Sector',
-        y='Enrollment',
-        color='Gender',
-        barmode='stack',
-        text='Enrollment',
-        title='Special Needs Education Enrollment by<br>School Sector and Gender',
-        color_discrete_map={'Male': '#0a4485', 'Female': '#DE082C'}
-    )
+    melted['Enrollment_boosted'] = melted['Enrollment'].apply(lambda x: x + 1000 if x > 0 else x)
+
+    fig = go.Figure()
+
+    # Create a bar trace for each gender
+    for gender in ['Male', 'Female']:
+        gender_df = melted[melted['Gender'] == gender]
+        fig.add_trace(go.Bar(
+            x=gender_df['Sector'],
+            y=gender_df['Enrollment_boosted'],
+            name=gender,
+            marker_color='#0a4485' if gender == 'Male' else '#DE082C',
+            customdata=gender_df[['Sector', 'Gender', 'Enrollment']],
+            hovertemplate=(
+                "Sector: %{customdata[0]}<br>" +
+                "Gender: %{customdata[1]}<br>" +
+                "Enrollment: %{customdata[2]:,} students<extra></extra>"
+            ),
+            textposition='none'
+        ))
 
     fig.update_layout(
+        title='Special Needs Education Enrollment by<br>School Sector and Gender',
         xaxis_title='School Sector',
         yaxis_title='Total Enrollment',
         plot_bgcolor='white',
@@ -1124,8 +1135,9 @@ def update_sned_sector_chart(selected_school_year, selected_regions, selected_ge
         margin=dict(l=20, r=20, t=80, b=40),
         title_font=PLOT_TITLE,
     )
-    fig.update_traces(texttemplate='%{text:,}', textposition='inside')
+
     return fig
+
 @app.callback(
     Output('transition_rate_chart', 'figure'),
     Input('school_year_filter', 'value'),
