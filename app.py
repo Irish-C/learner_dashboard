@@ -1708,8 +1708,11 @@ def update_enrollment_trend_chart(selected_year, stored_year):
         )
 
         fig.update_traces(
+            line=dict(color="#0a4485", width=3),   # line color and width
+            marker=dict(color="#0a4485"),          # marker color
             hovertemplate='School Year: %{x}<br>Total Enrollment: %{y:,.0f}'
         )
+
         return fig
     except Exception as e:
         print("Error rendering Enrollment Trend chart:", e)
