@@ -1,10 +1,15 @@
 from dash import html, dcc, Input, Output, State, ctx
 import dash_bootstrap_components as dbc
 import pandas as pd
+import dash
 import os
+import hashlib
 
 # Load user data CSV
 user_df = pd.read_csv("data_files/user-info.csv")
+
+def hash_password(pw):
+    return hashlib.sha256(pw.encode()).hexdigest()
 
 def settings_content(current_user):
     try:
@@ -76,13 +81,42 @@ def settings_content(current_user):
                     dbc.Row([dbc.Col([dbc.Label("Username"), dbc.Input(placeholder="Username", value=user_data["username"], disabled=True)], width=6),
                             dbc.Col([dbc.Label("Contact Number"), dbc.Input(placeholder="Phone number", value=user_data.get("contact", ""), disabled=True)], width=6)], className="mb-2"),
 
-                    dbc.Row([dbc.Col([dbc.Label("Email"), dbc.Input(placeholder="Email", value=user_data.get("Email", ""), id="email-input")], width=9),
-                            dbc.Col([dbc.Button("Update", id="update-email-btn", color="danger", className="w-100 mt-4")], width=3)], className="mb-2"),
+                        dbc.Row([
+                            dbc.Col([
+                                dbc.Label("Email"),
+                                dbc.Input(placeholder="Email", value=user_data.get("Email", ""), disabled=True)
+                            ], width=12),
+                        ], className="mb-2"),
 
-                    dbc.Row([dbc.Col([dbc.Label("Password"), dbc.Input(placeholder="Password", type="password", value=user_data.get("Password", ""), id="password-input")], width=9),
-                            dbc.Col([dbc.Button("Update", id="update-password-btn", color="danger", className="w-100 mt-4")], width=3)])
+                        dbc.Row([
+                            dbc.Col([
+                                dbc.Label("Password"),
+                                html.Div([
+                                    dbc.Input(
+                                        id={"type": "password-field", "index": "settings-current"},
+                                        placeholder="Current Password",
+                                        type="password",
+                                        disabled=True,
+                                        value=user_data.get("Password", "")
+                                    ),
+                                    html.I(
+                                        className="fas fa-eye",
+                                        id={"type": "password-toggle", "index": "settings-current"},
+                                        n_clicks=0,
+                                        style={
+                                            "position": "absolute",
+                                            "right": "15px",
+                                            "top": "50%",
+                                            "transform": "translateY(-50%)",
+                                            "cursor": "pointer",
+                                            "color": "#6c757d"
+                                        }
+                                    )
+                                ], style={"position": "relative"})
+                            ], width=12),
+                        ], className="mb-2"),
+                    ])
                 ])
-            ])
             ], width=9)
         ])
     ], className="p-4")

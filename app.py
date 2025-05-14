@@ -12,6 +12,7 @@ import hashlib
 from datetime import datetime
 import time
 
+from dash import callback_context as ctx, Input, Output, State, MATCH
 from layout.pages.settings import settings_content
 from layout.sidebar import create_sidebar
 from layout.header import create_header
@@ -106,7 +107,7 @@ data, grade_columns, grade_options, region_options = load_data_for_year(default_
 combined_shs_track_df = build_combined_shs_track_df(data)
 
 app.layout = html.Div([
-    dcc.Location(id="url"),
+    dcc.Location(id="url", refresh=False),
     dcc.Store(id="login-state", storage_type="session", data={"logged_in": False}),
     dcc.Store(id="stored_data", data=data.to_dict("records")),
     dcc.Store(id="stored_grades", data=grade_columns),
@@ -115,9 +116,11 @@ app.layout = html.Div([
     dcc.Store(id="stored_school_year", data=default_school_year),
     dcc.Store(id='trigger_enrollment_table_reload'),
     dcc.Store(id='refresh_school_year_trigger', data='initial-load'),
+    dcc.Store(id="update-status", data="John Doe"),  # Stores current user full name
+    dcc.Store(id="user-email"),
+    dcc.Store(id="user-info"),
     html.Div(id="page-content")
 ])
-
 # Callback for login
 @app.callback(
     Output("login-state", "data"),
@@ -149,7 +152,6 @@ def verify_login(n_clicks, first_name, last_name, email, password):
             return {"logged_in": True, "user": full_name, "avatar": user["avatar"]}, ""
 
     return dash.no_update, "❌ Invalid credentials. Please try again."
-
 
 @app.callback(
     Output("sidebar-container", "children"),
@@ -206,6 +208,7 @@ def handle_interaction(toggle_clicks, b1, b2, b3, b4, is_collapsed, current_page
     Input("login-state", "data")
 )
 def update_user_profile(login_data):
+    
     if login_data and login_data.get("logged_in"):
         avatar_filename = login_data.get("avatar", "")
         avatar_path = (
@@ -221,41 +224,149 @@ def update_user_profile(login_data):
 # Call back for login to dashboard
 @app.callback(
     Output("page-content", "children"),
-    Input("login-state", "data")
+    [Input("url", "pathname"), Input("login-state", "data")]
 )
-def load_protected_page(login_data):
-    input_style = {
-        'width': '100%',
-        'paddingRight': '40px',
-        'padding': '10px',
-        'fontSize': '16px',
-        'borderRadius': '5px',
-        'border': '1px solid #5A5A5A'
-    }
-
-    if login_data["logged_in"]:
-        first_name = login_data.get("user").split()[0]
-        print(f"Stored first name: {first_name}")  # Debug print to ensure the first name is stored
+def route_pages(pathname, login_data):
+    # Show login if explicitly requested or not logged in
+    if pathname == "/login" or not login_data.get("logged_in", False):
         return html.Div(
-    className="body-style",
-    children=[
-        # Welcome Modal
-        dbc.Modal(
-            id="welcome-modal",
-            is_open=True,
-            size="lg",
-            centered=True,
+            style={
+                "height": "100vh",
+                "width": "100%",
+                "backgroundImage": 'url("/assets/icons/class.png")',
+                "backgroundSize": "cover",
+                "backgroundPosition": "center",
+                "display": "flex",
+                "justifyContent": "flex-end",
+                "alignItems": "stretch"
+            },
             children=[
-                dbc.ModalHeader(
-                    html.H2([
-                        "W E L C O M E    ",
-                        html.Span(first_name.upper(), style={"color": "gold", "fontWeight": "bold","letterSpacing": "5px","fontFamily": "Roboto, sans-serif"}),
-                        "!",
-                    ]),
-                    close_button=True,
-                    style={"backgroundColor": "#0d3c74", "color": "white", "borderRadius": "10px 10px 0 0"}
-                ), 
-                dbc.ModalBody([
+                html.Div([
+                    html.Div([
+                        html.Img(src="/assets/icons/LIST.png", style={"height": "140px", "marginBottom": "10px"}),
+                        html.H4("LEARNER INFORMATION SYSTEM", style={
+                            "fontWeight": "bold",
+                            "letterSpacing": "2px",
+                            "fontSize":"16px",
+                            "letterSpacing":"0.30em",
+                            "fontFamily": "Roboto, sans-serif",
+                            "marginTop": "20px",
+                            "marginBottom": "20px"
+                        })
+                    ], style={"textAlign": "center", "marginBottom": "20px"}),
+
+                    #  Input fields
+                    dcc.Store(id="user-first-name"),
+                    dbc.Input(id="input-firstname", placeholder="F I R S T   N A M E", type="text", className="mb-3", style={
+                        "fontFamily": "Roboto, sans-serif",
+                        "boxShadow": "4px 4px 8px rgba(30,144,255,0.4)",
+                        "border": "none",
+                        "borderRadius": "10px",
+                        "fontSize": "15px",
+                        "lineHeight": "2.5",
+                        "paddingLeft": "2rem"
+                    }),
+                    dbc.Input(id="input-lastname", placeholder="L A S T   N A M E", type="text", className="mb-3", style={
+                        "fontFamily": "Roboto, sans-serif",
+                        "boxShadow": "4px 4px 8px rgba(30,144,255,0.4)",
+                        "border": "none",
+                        "borderRadius": "10px",
+                        "fontSize": "15px",
+                        "lineHeight": "2.5",
+                        "paddingLeft": "2rem"
+                    }),
+                    dbc.Input(id="input-email", placeholder="E M A I L   A D D R E S S", type="email", className="mb-3", style={
+                        "fontFamily": "Roboto, sans-serif",
+                        "boxShadow": "4px 4px 8px rgba(30,144,255,0.4)",
+                        "border": "none",
+                        "borderRadius": "10px",
+                        "fontSize": "15px",
+                        "lineHeight": "2.5",
+                        "paddingLeft": "2rem"
+                    }),
+
+                    html.Div([
+                        dbc.Input(id="input-password", type="password", placeholder="P A S S W O R D", className="w-100", style={
+                            "fontFamily": "Roboto, sans-serif",
+                            "boxShadow": "4px 4px 8px rgba(30,144,255,0.4)",
+                            "border": "none",
+                            "borderRadius": "10px",
+                            "fontSize": "15px",
+                            "lineHeight": "2.5",
+                            "paddingLeft": "2rem"
+                        }),
+                        html.I(
+                            id="toggle-password-visibility",
+                            className="fas fa-eye",
+                            n_clicks=0,
+                            style={
+                                "position": "absolute",
+                                "right": "20px",
+                                "top": "50%",
+                                "transform": "translateY(-50%)",
+                                "cursor": "pointer",
+                                "color": "#5A5A5A"
+                            }
+                        )
+                    ], style={"position": "relative", "marginBottom": "1rem"}),
+
+                    # Login button
+                    dbc.Button("SIGN-IN", id="login-button", color="danger", className="w-100 mb-3", style={
+                        "fontWeight": "bold",
+                        "letterSpacing": "2px",
+                        "backgroundColor": "#DE082C",
+                        "border": "none"
+                    }),
+
+                    html.Div(id="login-message", className="text-left", style={
+                        "color": "red", "fontWeight": "bold", "fontSize": "16px"
+                    }),
+
+                    html.Div("© 2025 LISTahan. All Right Reserved.", className="text-left mt-7", style={
+                        "fontSize": "12px", "color": "#888", "textAlign": "center", "marginTop": "40px"
+                    })
+                ], style={
+                    "width": "100%",
+                    "maxWidth": "500px",
+                    "height": "100vh",
+                    "padding": "40px",
+                    "paddingTop": "60px",
+                    "backgroundColor": "rgba(255,255,255,0.75)",
+                    "borderLeft": "none",
+                    "display": "flex",
+                    "flexDirection": "column",
+                    "justifyContent": "flex-start",
+                    "backgroundImage": "url('/assets/your-bg.jpg')",
+                    "backgroundSize": "cover",
+                    "backgroundPosition": "center",
+                    "backdropFilter": "blur(8px)",
+                    "WebkitBackdropFilter": "blur(8px)"
+                })
+            ]
+        )
+
+    #If logged in: show dashboard
+    first_name = login_data.get("user", "User").split()[0]
+
+    return html.Div(
+        className="body-style",
+        children=[
+            dbc.Modal(
+                id="welcome-modal",
+                is_open=True,
+                size="lg",
+                centered=True,
+                children=[
+                    dbc.ModalHeader(
+                        html.H2([
+                            "W E L C O M E ",
+                            html.Span(first_name.upper(), style={"color": "gold", "fontWeight": "bold", "letterSpacing": "5px","fontFamily": "Roboto, sans-serif"}),
+                            "!"
+                        ]),
+                        close_button=True,
+                        style={"backgroundColor": "#0d3c74", "color": "white","borderRadius": "10px 10px 0 0"}
+                    ),
+                    dbc.ModalBody([
                     html.P([
                         "This is ",
                         html.Span("LIS", style={"color": "#0d3c74","fontweight":"bold","fontFamily": "Roboto, sans-serif","letterSpacing": "2.5px","fontSize": "16px"}),
@@ -289,124 +400,7 @@ def load_protected_page(login_data):
     ]
 )
 
-    return html.Div(
-    style={
-        "height": "100vh",
-        "width": "100%",
-        "backgroundImage": 'url("/assets/icons/class.png")',
-        "backgroundSize": "cover",
-        "backgroundPosition": "center",
-        "display": "flex",
-        "justifyContent": "flex-end",
-        "alignItems": "stretch"
-    },
-    children=[
-        html.Div([
-            # Logo and Title - CENTERED
-            html.Div([
-                html.Img(src="/assets/icons/LIST.png", style={"height": "140px", "marginBottom": "10px"}),
-                html.H4("LEARNER INFORMATION SYSTEM", style={
-                    "fontWeight": "bold",
-                    "letterSpacing": "2px",
-                    "fontSize": "16px",
-                    "letterSpacing": "0.30em",
-                    "fontFamily": "Roboto, sans-serif",
-                    "marginTop": "20px",
-                    "marginBottom": "20px"
-                })
-            ], style={"textAlign": "center",
-                      "marginBottom": "20px"}),
 
-            # Input Fields
-            dcc.Store(id="user-first-name"),
-            dbc.Input(id="input-firstname", placeholder="F I R S T   N A M E", type="text", className="mb-3", style={"fontFamily": "Roboto, sans-serif",
-            "boxShadow": "4px 4px 8px rgba(30,144,255,0.4)",
-            "border": "none",
-            "borderRadius": "10px",
-            "fontSize": "15px",
-            "lineHeight": "2.5",
-            "paddingLeft": "2rem"}),
-            
-            dbc.Input(id="input-lastname", placeholder="L A S T   N A M E", type="text", className="mb-3", style={"fontFamily": "Roboto, sans-serif",
-            "boxShadow": "4px 4px 8px rgba(30,144,255,0.4)",
-            "border": "none",
-            "borderRadius": "10px",
-            "fontSize": "15px",
-            "lineHeight": "2.5",
-            "paddingLeft": "2rem"}),
-            dbc.Input(id="input-email", placeholder="E M A I L   A D D R E S S", type="email", className="mb-3", style={"fontFamily": "Roboto, sans-serif",
-            "boxShadow": "4px 4px 8px rgba(30,144,255,0.4)",
-            "border": "none",
-            "borderRadius": "10px",
-            "fontSize": "15px",
-            "lineHeight": "2.5",
-            "paddingLeft": "2rem"}),
-            html.Div([dbc.Input(id="input-password", type="password", placeholder="P A S S W O R D", className="w-100", style={
-                "fontFamily": "Roboto, sans-serif",
-                "boxShadow": "4px 4px 8px rgba(30,144,255,0.4)",
-                "border": "none",
-                "borderRadius": "10px",
-                "fontSize": "15px",
-                "lineHeight": "2.5",
-                "paddingLeft": "2rem"
-            }),
-                html.I(
-                    id="toggle-password-visibility",
-                    className="fas fa-eye",  # starts as eye
-                    n_clicks=0,
-                    style={
-                        "position": "absolute",
-                        "right": "20px",
-                        "top": "50%",
-                        "transform": "translateY(-50%)",
-                        "cursor": "pointer",
-                        "color": "#5A5A5A"
-                    }
-                )
-            ], style={"position": "relative", "marginBottom": "1rem"}),
-            # Sign-In Button
-            dbc.Button("SIGN-IN", id="login-button", color="danger", className="w-100 mb-3", style={
-                "fontWeight": "bold",
-                "letterSpacing": "2px",
-                "backgroundColor": "#DE082C",
-                "border": "none"
-            }),
-
-            # Message Display
-            html.Div(id="login-message", className="text-left", style={
-                "color": "red",
-                "fontWeight": "bold",
-                "fontSize": "16px"
-            }),
-
-            # Footer Text
-            html.Div("© 2025 LISTahan. All Right Reserved.", className="text-left mt-7", style={
-                "fontSize": "12px", "color": "#888", "textAlign": "center", "marginTop": "40px"
-            })
-        ], style={
-            "width": "100%",
-            "maxWidth": "500px",  # ← Adjust width here
-            "height": "100vh",
-            "padding": "40px",
-            "paddingTop": "60px",
-            "backgroundColor": "rgba(255, 255, 255, 0.85)",
-            "borderLeft": "5px solid #DE082C",
-            "boxShadow": "0 0 15px rgba(0, 0, 0, 0.25)",
-            "borderLeft": "none",
-            "display": "flex",
-            "flexDirection": "column",
-            "justifyContent": "flex-start",
-            "backgroundImage": "url('/assets/your-bg.jpg')",
-            "backgroundSize": "cover",
-            "backgroundPosition": "center",
-            "backdropFilter": "blur(8px)",
-            "WebkitBackdropFilter": "blur(8px)", 
-            "width": "100%",
-            "minHeight": "100vh",
-            "backgroundColor": "rgba(255,255,255,0.75)",   
-        })
-    ]
-)
 @app.callback(
     Output("welcome-modal", "is_open"),
     Output("welcome-modal-body", "children"),
@@ -430,10 +424,10 @@ def toggle_welcome_modal(login_data, close_clicks, is_open):
 
 
 @app.callback(
-    Output('input-password', 'type'),
-    Output('toggle-password-visibility', 'className'),
-    Input('toggle-password-visibility', 'n_clicks'),
-    State('input-password', 'type'),
+    Output({'type': 'password-field', 'index': MATCH}, 'type'),
+    Output({'type': 'password-toggle', 'index': MATCH}, 'className'),
+    Input({'type': 'password-toggle', 'index': MATCH}, 'n_clicks'),
+    State({'type': 'password-field', 'index': MATCH}, 'type'),
     prevent_initial_call=True
 )
 def toggle_password_visibility(n_clicks, current_type):
@@ -442,23 +436,35 @@ def toggle_password_visibility(n_clicks, current_type):
     return 'password', 'fas fa-eye'
 
 
+# Store user first name (login callback)
 @app.callback(
-    Output('user-first-name', 'data'),  # Store the first name in `data`
+    Output('user-first-name', 'data'),
     Input('login-button', 'n_clicks'),
     State('input-firstname', 'value'),
+    State('input-lastname', 'value'),
     prevent_initial_call=True
 )
-
-def store_user_first_name(n_clicks, firstname):
-    if n_clicks > 0:  # Check if the button has been clicked
-        print(f"Storing first name: {firstname}")
-        return {"firstname": firstname}
+def store_user_full_name(n_clicks, firstname, lastname):
+    if n_clicks > 0 and firstname and lastname:
+        print(f"Storing full name: {firstname} {lastname}")
+        return {"firstname": firstname.strip(), "lastname": lastname.strip()}
+    return dash.no_update
+def login_user(n_clicks, firstname, lastname):
+    if n_clicks:
+        return {"name": f"{firstname} {lastname}"}
     return dash.no_update
 
-def toggle_password_visibility(n_clicks, current_type):
-    if current_type == 'password':
-        return 'text', 'fas fa-eye-slash'
-    return 'password', 'fas fa-eye'
+#signout
+@app.callback(
+    Output("url", "pathname"),
+    Input("signout-btn", "n_clicks"),
+    prevent_initial_call=True
+)
+def signout(n_clicks):
+    if n_clicks:
+        print("🔒 User signed out.")
+        return "/login"
+    raise dash.exceptions.PreventUpdate
 
 # Dashboard Page
 
