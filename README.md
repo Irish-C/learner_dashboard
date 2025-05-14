@@ -1,9 +1,10 @@
 # Learner Information System Dashboard
 
-README-Updated: **2025-05-15**
+README-Updated: **2025-05-15**  
+A Group Project for Big Data Analytics with Dash.
 
 ## Project Overview
-The Learner Information System Dashboard is a web-based application built using Python and the Dash framework. It provides a user-friendly interface for managing and visualizing learner information, offering features like dashboards, analytics, and customizable settings.
+The **Learner Information System Dashboard** is a web-based application built using Python and the Dash framework. It provides a user-friendly interface for managing and visualizing learner information, offering features like dashboards, analytics, and customizable settings.
 
 ---
 ![Login Preview](assets/app_preview/login_prev.png)
@@ -102,6 +103,18 @@ learner_dashboard/
 
 ---
 
+## Special Thanks
+
+Thank you to all our colleagues for the shared effort, ideas, and collaboration that made this project possible. The Learner Information System Dashboard is a product of our collective work and dedication.
+
+- **Project Lead**: [Dale Menciro](https://github.com/DaleMenciro)
+- **Data Scientists**: [Andrei Cruz](https://github.com/CruzAndrei), [Christian Dating](https://github.com/christian-dating12)
+- **Data Engineers**: [Jerome Hontiveros](https://github.com/hontiverome), [Ezrhael Sicat](https://github.com/Ezrhael21)
+- **Data Analyst**: [Christian Luces](https://github.com/ChristianJamesLuces)
+- **UI/UX Design**: [Mary Cammagay](https://github.com/Irish-C), [Regine Dahan](https://github.com/rgndhn12)
+
+---
+
 ## Contributing
 
 Contributions to this project are welcome. Please follow these steps:
@@ -120,20 +133,15 @@ This project is currently not licensed. Please contact the repository owner(or c
 
 ---
 
-## Acknowledgements
-
-* Built using the Dash framework by Plotly.
-* Utilizes Bootstrap styling through Dash Bootstrap Components.
-
----
-
 ## Further Development
 
-Future enhancements could include:
+Future enhancements could include (but are not limited to):
 
-* Implementing the analytics page with actual data visualization.
-* Adding functionality to the help and settings pages.
-* Completing the dark mode theme implementation.
+* Implementing the analytics page with actual data visualization..
 * Implementing user authentication and authorization.
 * Connecting to a real database to fetch and manage learner information.
-* Improving the responsiveness and overall UI/UX.
+* Implementing a caching mechanism to improve performance.
+* Implementing a notification system for important updates or alerts.
+* Adding unit tests and documentation for better maintainability.
+
+---
