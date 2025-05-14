@@ -1199,7 +1199,8 @@ def update_transition_rate_chart(selected_sy, selected_regions, selected_gender)
         go.Indicator(
             mode="gauge+number+delta",
             value=tr_elem_jhs,
-            gauge={"axis": {"range": [0, 100]}, "bar": {"color": "#0a4485"} },
+            number={"suffix": "%"},           
+            gauge={"axis": {"range": [0, 110]}, "bar": {"color": "#0a4485"} },
         ),
         row=1, col=1
     )
@@ -1208,7 +1209,8 @@ def update_transition_rate_chart(selected_sy, selected_regions, selected_gender)
         go.Indicator(
             mode="gauge+number+delta",
             value=tr_jhs_shs,
-            gauge={"axis": {"range": [0, 100]}, "bar": {"color": "#DE082C"}},
+            number={"suffix": "%"},          
+            gauge={"axis": {"range": [0, 110]}, "bar": {"color": "#DE082C"}},
         ),
         row=1, col=2
     )
@@ -1217,14 +1219,14 @@ def update_transition_rate_chart(selected_sy, selected_regions, selected_gender)
         annotations=[
             dict(
                 text="Elementary<br>to High School",
-                x=0.07, y=0.12,
+                x=0.08, y=0.16,
                 xref="paper", yref="paper",
                 showarrow=False,
                 font={"size": 14}
             ),
             dict(
                 text="High School<br>to Senior High",
-                x=0.95, y=0.12,
+                x=0.93, y=0.16,
                 xref="paper", yref="paper",
                 showarrow=False,
                 font={"size": 14}
@@ -1815,8 +1817,6 @@ def update_sned_sector_chart(selected_school_year, selected_regions, selected_gr
         categories=correct_region_order,
         ordered=True
     )
-    top_5_sped_centers = top_5_sped_centers.sort_values('Region')
-
     fig = go.Figure()
     from plotly.colors import sample_colorscale, sequential
 
