@@ -818,10 +818,7 @@ def update_school_options(search_value, current_value):
             row = match.iloc[0]
             top_option = {'label': f"{row['BEIS School ID']} - {row['School Name']}", 'value': row['BEIS School ID']}
             options.insert(0, top_option)
-
-
     return options
-
 
 @app.callback(
     Output('school_modal', 'is_open'),

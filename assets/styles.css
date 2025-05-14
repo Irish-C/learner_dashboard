@@ -316,6 +316,10 @@ h4.chart-title { /* For card title */
   cursor: default !important;
 }
 
+/* Center the placeholder text only */
+.centered-placeholder .Select-placeholder {
+    text-align: center !important;
+}
 
 /* Responsive Design */
 @media (max-width: 768px) {

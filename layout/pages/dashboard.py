@@ -78,7 +78,20 @@ def dashboard_content(data, grade_options, region_options):
 
                         dbc.Col([
                             html.Label("Search School:"),
-                            dcc.Dropdown(id='school_search', options=[], placeholder='Search'),
+                            dcc.Dropdown(
+                            id='school_search',
+                            options=[],
+                            placeholder='Search...',
+                            className='multiline-dropdown centered-placeholder',
+                            optionHeight=50,
+                            style={
+                                'width': '100%',
+                                'minWidth': '300px',
+                                'whiteSpace': 'normal',
+                                'overflowWrap': 'break-word',
+                                'textAlign': 'justify'
+                            }
+                            ),
                             html.Br(),
                             dbc.Modal(
                                 id='school_modal',
