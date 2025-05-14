@@ -142,8 +142,11 @@ def verify_login(n_clicks, first_name, last_name, email, password):
             user["Last_Name"].lower() == last_name.lower() and
             user["Email"].lower() == email.lower() and
             user["Password"] == pw_hash):
-            return {"logged_in": True, "user": f"{first_name} {last_name}","avatar": user["avatar"]
-                    },""
+            formatted_first = first_name.strip().title()
+            formatted_last = last_name.strip().title()
+            full_name = f"{formatted_first} {formatted_last}"
+
+            return {"logged_in": True, "user": full_name, "avatar": user["avatar"]}, ""
 
     return dash.no_update, "❌ Invalid credentials. Please try again."
 
