@@ -1,14 +1,32 @@
 from dash import dcc, html, Dash
 import dash_bootstrap_components as dbc
-from dash.dependencies import Input, Output
-from flask_login import current_user
+from dash import html
+import datetime
 from app_data import get_available_school_years
 available_years=get_available_school_years()
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 dcc.Store(id="stored_school_years", data=get_available_school_years())  # Store available years
 
+def get_greeting():
+    today = datetime.datetime.today()
+    day_of_week = today.strftime('%A')  # Get the current day
+    formatted_date = today.strftime('%B %d, %Y')  # Format the date as Month Day, Year
+    
+    # Determine the time of day and create a corresponding greeting
+    hour = today.hour
+    if 5 <= hour < 12:
+        time_of_day = "Morning"
+    elif 12 <= hour < 17:
+        time_of_day = "Afternoon"
+    else:
+        time_of_day = "Evening"
+    
+    return html.Div([
+        html.P(f" {formatted_date} ({day_of_week})", style={'fontWeight': 'bold', 'color': '#5c7dad'}),
+        html.P(f" Good {time_of_day}, Admin! Stay updated with the latest data and trends.", style={'color': '#0a4485'}),
+    ])
+
 def dashboard_content(data, grade_options, region_options):
-    first_name = data.get('user-first-name', '') 
     no_border_style = {
         "border": "none",
         "boxShadow": "0 4px 6px rgba(0, 0, 0, 0.1)",
@@ -27,9 +45,7 @@ def dashboard_content(data, grade_options, region_options):
         fluid=True,
         children=[
             html.H1("Dashboard", className="page-title"),
-            html.P(id='greeting-text', style={"fontSize": "1.1rem", "color": "#6c757d"}),
-            html.Br(),
-
+            get_greeting(), 
             html.Div(id='kpi_card_row', className='mb-4'),
 
             html.Div("Filter Control Panel", style={
@@ -226,15 +242,3 @@ def dashboard_content(data, grade_options, region_options):
             ], className="mb-4"),
         ]
     )
-
-# Callback function to update the greeting text
-@app.callback(
-    Output('greeting-text', 'children'),  # The component we want to update
-    Input('user-first-name', 'data')  # Listening to the 'data' in the store component
-)
-def update_greeting(user_data):
-    print(f"Callback triggered with data: {user_data}")  # Debugging line to check the data received
-    if user_data:
-        first_name = user_data.get('firstname')  # Access the first name stored in the 'data' of dcc.Store
-        return f"Welcome Back, {first_name}."  # Update greeting text
-    return "Welcome Back, Guest."  # Default message

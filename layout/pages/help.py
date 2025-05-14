@@ -2,8 +2,7 @@ from dash import html
 
 def help_content():
     return html.Div(children=[
-        html.H1(
-            "WE ARE HERE TO SUPPORT YOU!",
+        html.H1("WE ARE HERE TO SUPPORT YOU!",
             className="page-title",
             style={"textAlign": "center"}
         ),
