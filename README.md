@@ -1,7 +1,7 @@
 # Learner Information System Dashboard
 
 README-Updated: **2025-05-15**  
-A Group Project for Big Data Analytics with Dash.
+*A Group Project for Big Data Analytics with Dash.*
 
 ## Project Overview
 The **Learner Information System Dashboard** is a web-based application built using Python and the Dash framework. It provides a user-friendly interface for managing and visualizing learner information, offering features like dashboards, analytics, and customizable settings.
