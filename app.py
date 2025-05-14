@@ -1001,7 +1001,7 @@ def update_top_schools_chart(selected_regions, selected_grades, selected_gender,
     # Color scheme
     colors = {
         'Public': '#0a4485',
-        'Private': 'BFDBFE',
+        'Private': '#BFDBFE',
         'SUCsLUCs': '#007BFF'
     }
 
@@ -1747,64 +1747,82 @@ def update_enrollment_trend_chart(selected_year, stored_year, selected_regions, 
         print("Error rendering Enrollment Trend chart:", e)
         return px.line(title="Error rendering Enrollment Trend chart")
 
-    
 @app.callback(
     Output('up_sned_sector_chart', 'figure'),
     Input('school_year_filter', 'value'),
-    Input('region_filter', 'value')
+    Input('region_filter', 'value'),
+    Input('grade_filter', 'value'),
+    Input('gender_filter', 'value')
 )
-def update_sned_sector_chart(selected_school_year, selected_regions):
+def update_sned_sector_chart(selected_school_year, selected_regions, selected_grades, selected_gender):
     if not selected_school_year:
         raise dash.exceptions.PreventUpdate
+
     try:
         data, grade_columns, _, _ = load_data_for_year(selected_school_year)
     except FileNotFoundError:
         raise dash.exceptions.PreventUpdate
+
     filtered_df = data.copy()
+
     if selected_regions:
         filtered_df = filtered_df[filtered_df['Region'].isin(selected_regions)]
+
+    # Apply grade and gender filters
+    selected_cols_male = []
+    selected_cols_female = []
+
+    if selected_grades:
+        for grade in selected_grades:
+            base_grade = grade.split('_')[0]
+            if base_grade in ['G11', 'G12']:
+                selected_cols_male += [col for col in data.columns if col.startswith(base_grade) and 'Male' in col]
+                selected_cols_female += [col for col in data.columns if col.startswith(base_grade) and 'Female' in col]
+            else:
+                selected_cols_male += [f"{base_grade} Male"]
+                selected_cols_female += [f"{base_grade} Female"]
+    else:
+        selected_cols_male = [col for col in grade_columns if 'Male' in col]
+        selected_cols_female = [col for col in grade_columns if 'Female' in col]
+
+    if selected_gender == 'Male':
+        filtered_df['Filtered Enrollment'] = filtered_df[selected_cols_male].sum(axis=1)
+    elif selected_gender == 'Female':
+        filtered_df['Filtered Enrollment'] = filtered_df[selected_cols_female].sum(axis=1)
+    else:
+        filtered_df['Filtered Enrollment'] = filtered_df[selected_cols_male + selected_cols_female].sum(axis=1)
 
     # Ensure 'School Name' column does not contain NaN before applying string methods
     filtered_df = filtered_df.dropna(subset=['School Name'])
 
-    # Filter the DataFrame for schools with "SPED Center" in the name
+    # Filter for SPED Centers
     sped_centers = filtered_df[filtered_df['School Name'].str.lower().str.contains('sped center')]
 
-    # Select the relevant columns for male and female enrollments
-    male_cols = [col for col in sped_centers.columns if 'Male' in col]
-    female_cols = [col for col in sped_centers.columns if 'Female' in col]
-
-    # Fill NaN values with 0 for the male and female enrollment columns before summing
-    sped_centers[male_cols] = sped_centers[male_cols].fillna(0)
-    sped_centers[female_cols] = sped_centers[female_cols].fillna(0)
-
-    # Calculate SNed_Male and SNed_Female by summing the relevant columns
-    sped_centers['SNed_Male'] = sped_centers[male_cols].sum(axis=1)
-    sped_centers['SNed_Female'] = sped_centers[female_cols].sum(axis=1)
-
     # Calculate total enrollment by school
-    sped_centers['Total_Enrollment'] = sped_centers[['SNed_Male', 'SNed_Female']].sum(axis=1)
+    sped_centers['Total_Enrollment'] = sped_centers['Filtered Enrollment']
 
-    # Group by region and school name and get the top 5 schools with SPED Center in their name
+    # Group by region and school name and get top 5 per region
     top_5_sped_centers = sped_centers.groupby(['Region', 'School Name'])['Total_Enrollment'].sum().reset_index()
-
-    # Get the top 5 schools by total enrollment per region
     top_5_sped_centers = top_5_sped_centers.groupby('Region').apply(lambda x: x.nlargest(5, 'Total_Enrollment')).reset_index(drop=True)
 
     top_5_sped_centers['Display_Enrollment'] = top_5_sped_centers['Total_Enrollment'].apply(
         lambda x: x + 300 if x < 1000 else x
     )
 
-    # Create the bar chart showing the top 5 schools per region
-    fig = go.Figure()
+    from app_data import correct_region_order
+    top_5_sped_centers['Region'] = pd.Categorical(
+        top_5_sped_centers['Region'],
+        categories=correct_region_order,
+        ordered=True
+    )
+    top_5_sped_centers = top_5_sped_centers.sort_values('Region')
 
+    fig = go.Figure()
     from plotly.colors import sample_colorscale, sequential
 
-    # Generate Viridis colors based on number of schools
     num_bars = len(top_5_sped_centers)
     viridis_colors = sample_colorscale(sequential.Viridis, [i / max(num_bars - 1, 1) for i in range(num_bars)])
 
-    # Loop over regions and plot top 5 schools per region
     for i, row in top_5_sped_centers.iterrows():
         fig.add_trace(go.Bar(
             x=[row['Region']],
@@ -1821,7 +1839,6 @@ def update_sned_sector_chart(selected_school_year, selected_regions):
             )
         ))
 
-    # Customizing layout for better clarity
     fig.update_layout(
         barmode='stack',
         xaxis_title='Region',
@@ -1833,7 +1850,7 @@ def update_sned_sector_chart(selected_school_year, selected_regions):
         margin=dict(l=20, r=20, t=80, b=40),
         title='Top 5 SPED Centers per Region by Total Enrollment',
         title_font=PLOT_TITLE,
-        showlegend=False  # Optional: hide legend since Region is already on x-axis
+        showlegend=False
     )
 
     return fig
