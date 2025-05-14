@@ -22,8 +22,8 @@ def get_greeting():
         time_of_day = "Evening"
     
     return html.Div([
-        html.P(f" {formatted_date} ({day_of_week})", style={'fontWeight': 'bold', 'color': '#0a4485'}),
-        html.P(f" tGood {time_of_day}, Admin! Stay updated with the latest data and trends.", style={'color': '#0a4485'}),
+        html.P(f" {formatted_date} ({day_of_week})", style={'fontWeight': 'bold', 'color': '#5c7dad'}),
+        html.P(f" Good {time_of_day}, Admin! Stay updated with the latest data and trends.", style={'color': '#0a4485'}),
     ])
 
 def dashboard_content(data, grade_options, region_options):
