@@ -1817,18 +1817,27 @@ def update_sned_sector_chart(selected_school_year, selected_regions, selected_gr
         categories=correct_region_order,
         ordered=True
     )
-    fig = go.Figure()
-    from plotly.colors import sample_colorscale, sequential
+    top_5_sped_centers = top_5_sped_centers.sort_values('Region')
 
-    num_bars = len(top_5_sped_centers)
-    viridis_colors = sample_colorscale(sequential.Viridis, [i / max(num_bars - 1, 1) for i in range(num_bars)])
+    fig = go.Figure()
+    from plotly.colors import sequential, sample_colorscale
+    from app_data import correct_region_order
+
+    num_regions = len(correct_region_order)
+    viridis_colors = sample_colorscale(
+        sequential.Viridis,
+        [i / (num_regions - 1) for i in range(num_regions)]
+    )
+
+    region_color_map = dict(zip(correct_region_order, viridis_colors))
+
 
     for i, row in top_5_sped_centers.iterrows():
         fig.add_trace(go.Bar(
             x=[row['Region']],
             y=[row['Display_Enrollment']],
             name=row['School Name'],
-            marker_color=viridis_colors[i],
+            marker_color=region_color_map[row['Region']],
             text=row['School Name'],
             textposition='none',
             customdata=[[row['Region'], row['School Name'], row['Total_Enrollment']]],
