@@ -1644,9 +1644,12 @@ def update_coc_sector_chart(selected_school_year, selected_regions, selected_gra
 @app.callback(
     Output('enrollment_trend_line_chart', 'figure'),
     Input('school_year_filter', 'value'),
-    Input('stored_school_year', 'data')
+    Input('stored_school_year', 'data'),
+    Input('region_filter', 'value'),
+    Input('grade_filter', 'value'),
+    Input('gender_filter', 'value')
 )
-def update_enrollment_trend_chart(selected_year, stored_year):
+def update_enrollment_trend_chart(selected_year, stored_year, selected_regions, selected_grades, selected_gender):
     if not selected_year:
         selected_year = stored_year
 
@@ -1657,30 +1660,56 @@ def update_enrollment_trend_chart(selected_year, stored_year):
     if not selected_year:
         selected_year = "2023-2024" if "2023-2024" in available_years else available_years[-1]
 
-
     idx = available_years.index(selected_year)
     start = max(idx - 2, 0)
     end = min(idx + 3, len(available_years))
     years_to_load = available_years[start:end]
 
-    frames = []
+    data_points = []
+
     for year in years_to_load:
         try:
-            df, _, _, _ = load_data_for_year(year)
-            frames.append(df[['School Year', 'Total Enrollment']])
+            df, grade_columns, _, _ = load_data_for_year(year)
+
+            if selected_regions:
+                df = df[df['Region'].isin(selected_regions)]
+
+            selected_cols_male = []
+            selected_cols_female = []
+
+            if selected_grades:
+                for grade in selected_grades:
+                    base_grade = grade.split('_')[0]
+                    if base_grade in ['G11', 'G12']:
+                        selected_cols_male += [col for col in df.columns if col.startswith(base_grade) and 'Male' in col]
+                        selected_cols_female += [col for col in df.columns if col.startswith(base_grade) and 'Female' in col]
+                    else:
+                        selected_cols_male += [f"{base_grade} Male"]
+                        selected_cols_female += [f"{base_grade} Female"]
+            else:
+                selected_cols_male = [col for col in grade_columns if 'Male' in col]
+                selected_cols_female = [col for col in grade_columns if 'Female' in col]
+
+            if selected_gender == 'Male':
+                enrollment = df[selected_cols_male].sum().sum()
+            elif selected_gender == 'Female':
+                enrollment = df[selected_cols_female].sum().sum()
+            else:
+                enrollment = df[selected_cols_male + selected_cols_female].sum().sum()
+
+            data_points.append({'School Year': year, 'Total Enrollment': enrollment})
+
         except Exception:
             continue
 
-    if not frames:
+    if not data_points:
         return go.Figure().update_layout(
             title="No data available for selected range",
             xaxis_title='School Year',
             yaxis_title='Total Enrollment'
         )
 
-    df_combined = pd.concat(frames)
-    grouped = df_combined.groupby(['School Year'], as_index=False)['Total Enrollment'].sum()
-    grouped = grouped.sort_values(by='School Year')
+    grouped = pd.DataFrame(data_points).sort_values(by='School Year')
 
     if grouped.empty:
         return px.line(title="No data to display")
@@ -1708,8 +1737,8 @@ def update_enrollment_trend_chart(selected_year, stored_year):
         )
 
         fig.update_traces(
-            line=dict(color="#0a4485", width=3),   # line color and width
-            marker=dict(color="#0a4485"),          # marker color
+            line=dict(color="#0a4485", width=3),
+            marker=dict(color="#0a4485"),
             hovertemplate='School Year: %{x}<br>Total Enrollment: %{y:,.0f}'
         )
 
@@ -1717,6 +1746,7 @@ def update_enrollment_trend_chart(selected_year, stored_year):
     except Exception as e:
         print("Error rendering Enrollment Trend chart:", e)
         return px.line(title="Error rendering Enrollment Trend chart")
+
     
 @app.callback(
     Output('up_sned_sector_chart', 'figure'),
