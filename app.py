@@ -1199,7 +1199,7 @@ def update_transition_rate_chart(selected_sy, selected_regions, selected_gender)
         go.Indicator(
             mode="gauge+number+delta",
             value=tr_elem_jhs,
-            gauge={"axis": {"range": [0, 100]}, "bar": {"color": "var(--primary-color)"}},
+            gauge={"axis": {"range": [0, 100]}, "bar": {"color": "#0a4485"} },
         ),
         row=1, col=1
     )
@@ -1208,7 +1208,7 @@ def update_transition_rate_chart(selected_sy, selected_regions, selected_gender)
         go.Indicator(
             mode="gauge+number+delta",
             value=tr_jhs_shs,
-            gauge={"axis": {"range": [0, 100]}, "bar": {"color": "var(--secondary-color)"}},
+            gauge={"axis": {"range": [0, 100]}, "bar": {"color": "#DE082C"}},
         ),
         row=1, col=2
     )
