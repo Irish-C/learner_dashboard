@@ -92,7 +92,7 @@ def help_content():
                         ),
 
                         html.Iframe(
-                            src="https://youtu.be/hgTncLW3mV4",
+                            src="https://www.youtube.com/embed/J04VwYS5GWk",
                             style={
                                 "position": "absolute",
                                 "top": "50%",
