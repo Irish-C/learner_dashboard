@@ -129,7 +129,7 @@ app.layout = html.Div([
     State("input-firstname", "value"),
     State("input-lastname", "value"),
     State("input-email", "value"),
-    State("input-password", "value"),
+    State({"type": "password-field", "index": "login"}, "value"),
     prevent_initial_call=True
 )
 def verify_login(n_clicks, first_name, last_name, email, password):
@@ -286,7 +286,7 @@ def route_pages(pathname, login_data):
                     }),
 
                     html.Div([
-                        dbc.Input(id="input-password", type="password", placeholder="P A S S W O R D", className="w-100", style={
+                        dbc.Input(id={"type": "password-field", "index": "login"}, type="password", placeholder="P A S S W O R D", className="w-100", style={
                             "fontFamily": "Roboto, sans-serif",
                             "boxShadow": "4px 4px 8px rgba(30,144,255,0.4)",
                             "border": "none",
@@ -296,7 +296,7 @@ def route_pages(pathname, login_data):
                             "paddingLeft": "2rem"
                         }),
                         html.I(
-                            id="toggle-password-visibility",
+                            id={"type": "password-toggle", "index": "login"},
                             className="fas fa-eye",
                             n_clicks=0,
                             style={
