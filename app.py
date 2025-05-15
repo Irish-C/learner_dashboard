@@ -741,7 +741,7 @@ def update_charts(selected_regions, selected_grades, selected_school_year, selec
                     html.Div([
                         html.I(className="fas fa-map-marked-alt", style={"fontSize": "35px", "color": "var(--success-color)", "marginBottom": "10px"}),
                         html.H5(f"Most Enrolled Region as of {selected_school_year}", style={"color": "var(--gray-color)", "margin": "0", "fontWeight": "bold"}),
-                        html.H3(f"{most_enrolled_region}: {region_total/1000:.2f}k", style={"color": "var(--success-color)", "margin": "0", "fontSize": "24px"})
+                        html.H3(f"{most_enrolled_region}: {region_total:,.0f}", style={"color": "var(--success-color)", "margin": "0", "fontSize": "24px"})
                     ], style=text_style)
                 ]),
                 style={**card_style, "borderBottom": "5px solid var(--success-color)"}
