@@ -53,34 +53,21 @@ def create_header():
 
                         #Dynamic Profile section
                         dbc.Col(
-                            dbc.DropdownMenu(
-                                label=html.Span([
-                                    html.Img(
-                                        src="/assets/avatars/default.jpg",
-                                        id="user-avatar",
-                                        style={
-                                            "height": "35px",
-                                            "width": "35px",
-                                            "borderRadius": "50%",
-                                        }
-                                    ),
-                                    html.Span("username", id="user-name", style={
-                                        "color": "white",
-                                        "fontWeight": "bold",
-                                    })
-                                ], style={"display": "flex", "alignItems": "center", "gap": "8px"}),
-                                children=[
-                                    dbc.DropdownMenuItem("Settings", id="dropdown-settings"),
-                                    dbc.DropdownMenuItem("Sign out", id="dropdown-logout")
-                                ],
-                                toggle_style={"backgroundColor": "transparent", "border": "none"}
+                            html.Div(
+                                id="user-profile-display",
+                                className="header-profile",
+                                style={
+                                    "display": "flex",
+                                    "alignItems": "center",
+                                    "cursor": "pointer"
+                                }
                             ),
                             width="auto",
-                            className="d-flex align-items-center justify-content-end pe-3 pt-4"
-                        )
+                            className="d-flex align-items-center justify-content-end"
+                        ),
                     ],
                     align="center",
-                    className="g-2"
+                    className="g-0"
                 ),
                 fluid=True
             )
