@@ -377,8 +377,8 @@ def route_pages(pathname, login_data):
                 children=[
                     dbc.ModalHeader(
                         html.H2([
-                            "W E L C O M E ",
-                            html.Span(first_name.upper(), style={"color": "gold", "fontWeight": "bold", "letterSpacing": "5px","fontFamily": "Roboto, sans-serif"}),
+                            "WELCOME ",
+                            html.Span(first_name.upper(), style={"color": "gold", "fontWeight": "bold","fontFamily": "Roboto, sans-serif"}),
                             "!"
                         ]),
                         close_button=True,
